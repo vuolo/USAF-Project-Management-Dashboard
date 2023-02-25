@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type {
   GetServerSidePropsContext,
   InferGetServerSidePropsType,
@@ -11,8 +12,14 @@ import { authOptions } from "~/server/auth";
 function SignIn({
   providers,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
+  // Store the NextAuth.js error code if in the URL query string
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+  useEffect(() => {
+    setErrorCode(new URLSearchParams(window.location.search).get("error"));
+  }, []);
+
   return (
-    <main className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-white pb-[20vh]">
+    <main className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-white px-2 pb-[20vh] text-center">
       <Image src="/images/brand/AirForce.jpg" width={200} height={200} alt="" />
       <h1 className="text-3xl font-medium">
         Welcome to the USAF Project Management Dashboard
@@ -21,12 +28,20 @@ function SignIn({
         <div key={provider.name}>
           <button
             onClick={() => void signIn(provider.id)}
-            className="rounded-full bg-black/10 px-10 py-3 font-semibold no-underline transition hover:bg-black/20"
+            className="rounded-full bg-black/10 px-10 py-3 font-medium no-underline transition hover:bg-black/20"
           >
             Sign in with {provider.name}
           </button>
         </div>
       ))}
+
+      {/* Display Error Code (if present) */}
+      {errorCode && (
+        <p className="text-red-500">
+          <span className="font-medium">Error: </span>
+          <span>{errorCode}</span>
+        </p>
+      )}
     </main>
   );
 }

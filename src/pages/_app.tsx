@@ -49,7 +49,7 @@ function Auth({ children }: AuthProps) {
 
   // Show loading indicator while loading session status
   return status === "loading" && router.pathname !== "/auth/sign-in" ? (
-    <div className="flex h-screen w-screen items-center justify-center bg-[#dce5f0]">
+    <div className="flex h-screen w-screen items-center justify-center">
       Loading...
     </div>
   ) : (
