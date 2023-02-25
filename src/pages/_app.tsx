@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider, useSession } from "next-auth/react";
@@ -7,7 +8,7 @@ import DynamicHead from "~/components/dynamic-head";
 import { api } from "~/utils/api";
 
 import "~/styles/globals.css";
-import { useRouter } from "next/router";
+import "react-tooltip/dist/react-tooltip.css";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -48,7 +49,7 @@ function Auth({ children }: AuthProps) {
 
   // Show loading indicator while loading session status
   return status === "loading" && router.pathname !== "/auth/sign-in" ? (
-    <div className="flex h-screen w-screen items-center justify-center">
+    <div className="flex h-screen w-screen items-center justify-center bg-[#dce5f0]">
       Loading...
     </div>
   ) : (
