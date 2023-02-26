@@ -5,7 +5,7 @@ import { Cog, Home, LogOut } from "lucide-react";
 
 function NavBar() {
   return (
-    <nav className="flex h-[70px] w-full justify-around bg-[#0033a0] px-2">
+    <nav className="flex h-[70px] w-full justify-between bg-brand-dark px-8 sm:px-16">
       <Link href="/" className="flex items-center gap-2 hover:opacity-80">
         <Image
           src="/images/brand/AirForceLogoWhite.png"
