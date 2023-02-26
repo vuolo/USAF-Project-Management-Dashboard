@@ -10,5 +10,5 @@ main {
   height: calc(100vh - 70px);
   width: 100vw;
   background-color: theme("colors.brand.light");
-  overflow: hidden;
+  overflow: auto;
 }
