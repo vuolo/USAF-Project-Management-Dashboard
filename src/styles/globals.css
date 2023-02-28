@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  background-color: theme("colors.brand.light");
+}
+
 * {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
