@@ -1,24 +1,10 @@
 import Link from "next/link";
 import StatusIcon from "./icons/status-icon";
 
+import { api } from "~/utils/api";
+
 function ProjectsOverview() {
-  const projects = [
-    {
-      id: 1,
-      name: "Design-a-Box",
-      contract_num: "FA8620-22-Z-1111",
-      contract_status: "Closed",
-      branch: "Modernization",
-      contract_value: 4300,
-      dependency_status: "ONTRACK",
-      financial_status: "BEHIND",
-      schedule_status: "REALLY-BEHIND",
-      ccar_num: "1300",
-      contractor_name: "RTX",
-      requirement_type: "CDD",
-      summary: "Designing a box to put things in.",
-    },
-  ]; // TODO: fetch projects from database
+  const { data: projects } = api.project.list.useQuery();
 
   return (
     <>
@@ -96,44 +82,45 @@ function ProjectsOverview() {
                   </tr>
                 </thead>
                 <tbody className="bg-white">
-                  {projects.map((project, projectIdx) => (
-                    <tr
-                      key={project.id}
-                      className={
-                        projectIdx % 2 === 0 ? undefined : "bg-gray-50"
-                      }
-                    >
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-brand-dark underline sm:pl-6">
-                        <Link
-                          href={`/projects/${project.id}`}
-                          className="hover:text-brand-dark/80"
-                        >
-                          {project.name}
-                        </Link>
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {project.contract_num}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {project.contract_status}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {project.branch}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {formatCurrency(project.contract_value)}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <StatusIcon status={project.dependency_status} />
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <StatusIcon status={project.financial_status} />
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <StatusIcon status={project.schedule_status} />
-                      </td>
-                    </tr>
-                  ))}
+                  {projects &&
+                    projects.map((project, projectIdx) => (
+                      <tr
+                        key={project.id}
+                        className={
+                          projectIdx % 2 === 0 ? undefined : "bg-gray-50"
+                        }
+                      >
+                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-brand-dark underline sm:pl-6">
+                          <Link
+                            href={`/projects/${project.id}`}
+                            className="hover:text-brand-dark/80"
+                          >
+                            {project.project_name}
+                          </Link>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {project.contract_num}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {project.contract_status}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {project.branch}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {formatCurrency(project.contract_value)}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <StatusIcon status={project.dependency_status} />
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <StatusIcon status={project.financial_status} />
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <StatusIcon status={project.schedule_status} />
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>

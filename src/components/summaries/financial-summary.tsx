@@ -111,7 +111,6 @@ const getPieColor = (
   if (actual / planned > 2) return "black";
   const red_coefficent = rCoefficent / 100;
   const yellow_coefficent = yCoefficent / 100;
-  console.log(planned * (1 - red_coefficent));
   if (
     actual >= planned * (1 + red_coefficent) ||
     actual <= planned * (1 - red_coefficent)

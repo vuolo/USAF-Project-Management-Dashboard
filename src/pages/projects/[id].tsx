@@ -8,7 +8,7 @@ function Project() {
   const { id: projectID } = router.query;
   const project = {
     id: 1,
-    name: "Design-a-Box",
+    project_name: "Design-a-Box",
     contract_num: "FA8620-22-Z-1111",
     contract_status: "Closed",
     branch: "Modernization",

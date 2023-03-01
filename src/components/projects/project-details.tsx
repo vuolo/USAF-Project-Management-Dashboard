@@ -10,7 +10,7 @@ function ProjectDetails({ project }: { project: any }) {
 
       <div className="flex flex-col gap-2 px-4 pt-4 pb-2 text-left sm:px-6 sm:pt-6">
         <p>
-          <b>Project Name:</b> {project.name ?? "N/A"}
+          <b>Project Name:</b> {project.project_name ?? "N/A"}
         </p>
         <p>
           <b>Contract Number:</b> {project.contract_num ?? "N/A"}

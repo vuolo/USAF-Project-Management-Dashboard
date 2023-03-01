@@ -1,17 +1,351 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
     provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "sqlite"
-    // NOTE: When using postgresql, mysql or sqlserver, uncomment the @db.Text annotations in model Account below
-    // Further reading:
-    // https://next-auth.js.org/adapters/prisma#create-the-prisma-schema
-    // https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference#string
+    provider = "mysql"
     url      = env("DATABASE_URL")
+}
+
+model approved_funding {
+    id                 Int      @id @default(autoincrement())
+    project_id         Int?
+    appro_funding_type Int?     @db.UnsignedInt
+    appro_fiscal_year  Int?
+    approved_amount    Decimal? @db.Decimal(13, 2)
+    project            project? @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "approved_funding_ibfk_1")
+
+    @@index([appro_funding_type], map: "appro_funding_type")
+    @@index([project_id], map: "project_id")
+}
+
+model branches {
+    id          Int       @id @default(autoincrement()) @db.UnsignedInt
+    branch_name String    @db.VarChar(60)
+    project     project[]
+}
+
+model clin_data {
+    id                  Int                   @id @default(autoincrement())
+    clin_num            Int?
+    project_id          Int?
+    clin_type           clin_data_clin_type
+    clin_scope          String?               @db.VarChar(80)
+    ind_gov_est         Decimal?              @db.Decimal(13, 2)
+    project             project?              @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "clin_data_ibfk_1")
+    task_resource_table task_resource_table[]
+
+    @@index([project_id], map: "project_id")
+}
+
+model contract_award {
+    id                      Int                            @id @default(autoincrement())
+    project_id              Int?
+    contract_num            String                         @db.VarChar(80)
+    contract_status         contract_award_contract_status @default(Pre_Award)
+    contract_value          Decimal?                       @db.Decimal(13, 2)
+    indep_cost_est          Decimal?                       @db.Decimal(13, 2)
+    project                 project?                       @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "contract_award_ibfk_1")
+    contract_award_timeline contract_award_timeline[]
+
+    @@index([project_id], map: "project_id")
+}
+
+model contract_award_timeline {
+    id                 Int                                      @id @default(autoincrement())
+    contract_award_id  Int
+    timeline_status    contract_award_timeline_timeline_status?
+    requirement_plan   DateTime?                                @db.Date
+    draft_rfp_released DateTime?                                @db.Date
+    approved_by_acb    DateTime?                                @db.Date
+    rfp_released       DateTime?                                @db.Date
+    proposal_received  DateTime?                                @db.Date
+    tech_eval_comp     DateTime?                                @db.Date
+    negotiation_comp   DateTime?                                @db.Date
+    awarded            DateTime?                                @db.Date
+    contract_award     contract_award                           @relation(fields: [contract_award_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "contract_award_timeline_ibfk_2")
+
+    @@index([contract_award_id], map: "contract_award_id")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model contract_days_added {
+    draft_rfp_released Int
+    approved_by_acb    Int
+    rfp_released       Int
+    proposal_received  Int
+    tech_eval_comp     Int
+    negotiation_comp   Int
+    awarded            Int
+
+    @@ignore
+}
+
+model contractor {
+    id              Int       @id @default(autoincrement()) @db.UnsignedInt
+    contractor_name String?   @db.VarChar(50)
+    summary         String?   @db.VarChar(120)
+    project         project[]
+    users           users[]
+}
+
+model expenditure_funding_data {
+    id                 Int      @id @default(autoincrement())
+    project_id         Int
+    expen_funding_date DateTime @db.Date
+    expen_projected    Decimal  @db.Decimal(13, 2)
+    expen_actual       Decimal? @db.Decimal(13, 2)
+    project            project  @relation(fields: [project_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "expenditure_funding_data_ibfk_1")
+
+    @@index([project_id], map: "project_id")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model financial_summary_breakpoints {
+    obli_yellow_breakpoint  Int
+    obli_red_breakpoint     Int
+    expen_yellow_breakpoint Int
+    expen_red_breakpoint    Int
+
+    @@ignore
+}
+
+model funding_types {
+    id                      Int                       @id @default(autoincrement()) @db.UnsignedInt
+    funding_type            String?                   @db.VarChar(40)
+    status                  Boolean?                  @default(true)
+    obligation_funding_data obligation_funding_data[]
+}
+
+model military_job_titles {
+    id                Int                 @id @default(autoincrement()) @db.UnsignedInt
+    mil_job_title     String?             @db.VarChar(80)
+    user_project_link user_project_link[] @ignore
+}
+
+model mipr_contracts {
+    id                   Int                                 @id @default(autoincrement())
+    mipr_contract_num    Int?
+    project_id           Int?
+    mipr_contract_status mipr_contracts_mipr_contract_status
+    project              project?                            @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "mipr_contracts_ibfk_1")
+
+    @@index([project_id], map: "project_id")
+}
+
+model obligation_funding_data {
+    id                   Int            @id @default(autoincrement())
+    project_id           Int?
+    obli_funding_date    DateTime       @db.Date
+    obli_funding_type_id Int?           @db.UnsignedInt
+    obli_funding_type    String?        @db.VarChar(40)
+    obli_fiscal_year     String         @db.VarChar(20)
+    obli_projected       Decimal        @db.Decimal(13, 2)
+    obli_actual          Decimal        @db.Decimal(13, 2)
+    project              project?       @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "obligation_funding_data_ibfk_2")
+    funding_types        funding_types? @relation(fields: [obli_funding_type_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "obligation_funding_data_ibfk_3")
+
+    @@index([obli_funding_type_id], map: "obli_funding_type_id")
+    @@index([project_id], map: "project_id")
+}
+
+model project {
+    id                                                                                     Int                            @id @default(autoincrement())
+    project_name                                                                           String?                        @db.VarChar(80)
+    project_type                                                                           project_project_type           @default(Contract)
+    contractor_id                                                                          Int?                           @db.UnsignedInt
+    branch_id                                                                              Int?                           @db.UnsignedInt
+    requirement_type_id                                                                    Int?                           @db.UnsignedInt
+    summary                                                                                String?                        @db.Text
+    ccar_num                                                                               String                         @db.VarChar(60)
+    dependency_status                                                                      project_dependency_status?
+    financial_status                                                                       project_financial_status?
+    schedule_status                                                                        project_schedule_status?
+    approved_funding                                                                       approved_funding[]
+    clin_data                                                                              clin_data[]
+    contract_award                                                                         contract_award[]
+    expenditure_funding_data                                                               expenditure_funding_data[]
+    mipr_contracts                                                                         mipr_contracts[]
+    obligation_funding_data                                                                obligation_funding_data[]
+    contractor                                                                             contractor?                    @relation(fields: [contractor_id], references: [id], onUpdate: NoAction, map: "project_ibfk_4")
+    branches                                                                               branches?                      @relation(fields: [branch_id], references: [id], onUpdate: NoAction, map: "project_ibfk_5")
+    requirement_types                                                                      requirement_types?             @relation(fields: [requirement_type_id], references: [id], onUpdate: NoAction, map: "project_ibfk_6")
+    project_funding_data                                                                   project_funding_data[]
+    project_milestone_dependency_project_milestone_dependency_predecessor_projectToproject project_milestone_dependency[] @relation("project_milestone_dependency_predecessor_projectToproject") @ignore
+    project_milestone_dependency_project_milestone_dependency_successor_projectToproject   project_milestone_dependency[] @relation("project_milestone_dependency_successor_projectToproject") @ignore
+    project_milestones                                                                     project_milestones[]
+    task_resource_table                                                                    task_resource_table[]
+    user_project_link                                                                      user_project_link[]            @ignore
+
+    @@index([branch_id], map: "branch_id")
+    @@index([contractor_id], map: "contractor_id")
+    @@index([requirement_type_id], map: "requirement_type_id")
+}
+
+model project_funding_data {
+    id                        Int      @id @default(autoincrement())
+    project_id                Int?
+    proj_funding_type         String   @db.VarChar(60)
+    proj_current_date         DateTime @db.Date
+    curr_obli_planned         Decimal? @db.Decimal(13, 2)
+    curr_obli_actual          Decimal? @db.Decimal(13, 2)
+    curr_exp_planned          Decimal? @db.Decimal(13, 2)
+    curr_exp_actual           Decimal? @db.Decimal(13, 2)
+    project_funding_startDate DateTime @db.Date
+    project_funding_endDate   DateTime @db.Date
+    project                   project? @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_funding_data_ibfk_1")
+
+    @@index([project_id], map: "project_id")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model project_milestone_dependency {
+    predecessor_project                                                                       Int?
+    predecessor_milestone                                                                     Int?
+    successor_project                                                                         Int?
+    successor_milestone                                                                       Int?
+    project_project_milestone_dependency_predecessor_projectToproject                         project?            @relation("project_milestone_dependency_predecessor_projectToproject", fields: [predecessor_project], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_milestone_dependency_ibfk_5")
+    project_project_milestone_dependency_successor_projectToproject                           project?            @relation("project_milestone_dependency_successor_projectToproject", fields: [successor_project], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_milestone_dependency_ibfk_6")
+    project_milestones_project_milestone_dependency_predecessor_milestoneToproject_milestones project_milestones? @relation("project_milestone_dependency_predecessor_milestoneToproject_milestones", fields: [predecessor_milestone], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_milestone_dependency_ibfk_7")
+    project_milestones_project_milestone_dependency_successor_milestoneToproject_milestones   project_milestones? @relation("project_milestone_dependency_successor_milestoneToproject_milestones", fields: [successor_milestone], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_milestone_dependency_ibfk_8")
+
+    @@index([predecessor_milestone], map: "predecessor_milestone")
+    @@index([predecessor_project], map: "predecessor_project")
+    @@index([successor_milestone], map: "successor_milestone")
+    @@index([successor_project], map: "successor_project")
+    @@ignore
+}
+
+model project_milestones {
+    id                                                                                                  Int                            @id @default(autoincrement())
+    project_id                                                                                          Int?
+    task_name                                                                                           String                         @db.VarChar(80)
+    start_date                                                                                          DateTime                       @db.Date
+    end_date                                                                                            DateTime                       @db.Date
+    actual_start                                                                                        DateTime?                      @db.Date
+    actual_end                                                                                          DateTime?                      @db.Date
+    project_milestone_dependency_project_milestone_dependency_predecessor_milestoneToproject_milestones project_milestone_dependency[] @relation("project_milestone_dependency_predecessor_milestoneToproject_milestones") @ignore
+    project_milestone_dependency_project_milestone_dependency_successor_milestoneToproject_milestones   project_milestone_dependency[] @relation("project_milestone_dependency_successor_milestoneToproject_milestones") @ignore
+    project                                                                                             project?                       @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "project_milestones_ibfk_2")
+
+    @@index([project_id], map: "project_id")
+}
+
+model requirement_types {
+    id               Int       @id @default(autoincrement()) @db.UnsignedInt
+    requirement_type String?   @db.VarChar(50)
+    project          project[]
+}
+
+model task_resource_table {
+    id                   Int        @id @default(autoincrement())
+    project_id           Int?
+    clin_id              Int?
+    task_id              String     @db.VarChar(20)
+    task_description     String     @db.VarChar(80)
+    month                DateTime?  @db.Date
+    wbs                  String?    @db.VarChar(20)
+    clin_num             Int?
+    source_type          String?    @db.VarChar(40)
+    resource_code        String?    @db.VarChar(20)
+    resource_description String?    @db.VarChar(40)
+    resource_type        String?    @db.VarChar(20)
+    rate                 Decimal?   @db.Decimal(13, 2)
+    hours_worked         Int?
+    units                Decimal?   @db.Decimal(13, 2)
+    cost                 Decimal?   @db.Decimal(13, 2)
+    base_cost            Decimal?   @db.Decimal(13, 2)
+    direct_cost          Decimal?   @db.Decimal(13, 2)
+    total_price          Decimal?   @db.Decimal(13, 2)
+    clin_data            clin_data? @relation(fields: [clin_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_resource_table_ibfk_3")
+    project              project?   @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "task_resource_table_ibfk_4")
+
+    @@index([clin_id], map: "clin_id")
+    @@index([project_id], map: "project_id")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model user_project_link {
+    user_id             Int?
+    project_id          Int?
+    mil_job_title_id    Int?                 @db.UnsignedInt
+    users               users?               @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_project_link_ibfk_3")
+    project             project?             @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "user_project_link_ibfk_4")
+    military_job_titles military_job_titles? @relation(fields: [mil_job_title_id], references: [id], onUpdate: NoAction, map: "user_project_link_ibfk_5")
+
+    @@index([mil_job_title_id], map: "mil_job_title_id")
+    @@index([project_id], map: "project_id")
+    @@index([user_id], map: "user_id")
+    @@ignore
+}
+
+model users {
+    id                Int                 @id @default(autoincrement())
+    contractor_id     Int?                @db.UnsignedInt
+    user_name         String?             @db.VarChar(80)
+    user_role         users_user_role
+    user_email        String?             @db.VarChar(80)
+    user_project_link user_project_link[] @ignore
+    contractor        contractor?         @relation(fields: [contractor_id], references: [id], onUpdate: NoAction, map: "users_ibfk_3")
+
+    @@index([contractor_id], map: "contractor_id")
+}
+
+enum contract_award_timeline_timeline_status {
+    Planned
+    Projected
+    Actual
+}
+
+enum project_project_type {
+    Contract
+    MIPR
+}
+
+enum clin_data_clin_type {
+    FFP
+    FFIF
+    FF_EPA @map("FF-EPA")
+    CPFF
+    CPIF
+    CPAF
+    T_M    @map("T&M")
+}
+
+enum contract_award_contract_status {
+    Pre_Award @map("Pre-Award")
+    Awarded
+    Closed
+}
+
+enum mipr_contracts_mipr_contract_status {
+    Pre_Award @map("Pre-Award")
+    Awarded
+    Closed
+}
+
+enum users_user_role {
+    Contractor
+    IPT_Member @map("IPT Member")
+    Admin
+}
+
+enum project_dependency_status {
+    REALLY_BEHIND @map("REALLY-BEHIND")
+    BEHIND
+    ONTRACK
+}
+
+enum project_financial_status {
+    UNDER
+    ON_BUDGET @map("ON-BUDGET")
+    OVER
+}
+
+enum project_schedule_status {
+    REALLY_BEHIND @map("REALLY-BEHIND")
+    BEHIND
+    ONTRACK
 }
 
 // Necessary for NextAuth.js
@@ -21,13 +355,13 @@ model Account {
     type              String
     provider          String
     providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
     expires_at        Int?
     ext_expires_in    Int?
     token_type        String?
     scope             String?
-    id_token          String? // @db.Text
+    id_token          String? @db.Text
     session_state     String?
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
