@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Chart } from "react-google-charts";
 
 function FinancialSummary() {
+  // TODO: Get data from API
   // Obligation
   const [obligationPlanned, setObligationPlanned] = useState(200);
   const [obligationActual, setObligationActual] = useState(210);

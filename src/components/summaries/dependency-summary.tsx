@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 function DependencySummary() {
+  // TODO: Get data from API
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
       <div className="rounded-t-md bg-brand-dark px-8 py-2 text-center font-medium text-white">
