@@ -1,19 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { Chart } from "react-google-charts";
 
+import { api } from "~/utils/api";
+
 function FinancialSummary() {
-  // TODO: Get data from API
   // Obligation
-  const [obligationPlanned, setObligationPlanned] = useState(200);
-  const [obligationActual, setObligationActual] = useState(210);
-  const [obli_red_coefficent, setObliRedCoefficent] = useState(20);
-  const [obli_yellow_coefficent, setObliYellowCoefficent] = useState(10);
+  const [obli_red_coefficent, setObliRedCoefficent] = useState<number>(20);
+  const [obli_yellow_coefficent, setObliYellowCoefficent] =
+    useState<number>(10);
 
   // Expenditure
-  const [expenditurePlanned, setExpenditurePlanned] = useState(100);
-  const [expenditureActual, setExpenditureActual] = useState(80);
-  const [expen_red_coefficent, setExpenRedCoefficent] = useState(20);
-  const [expen_yellow_coefficent, setExpenYellowCoefficent] = useState(10);
+  const [expen_red_coefficent, setExpenRedCoefficent] = useState<number>(20);
+  const [expen_yellow_coefficent, setExpenYellowCoefficent] =
+    useState<number>(10);
+
+  const { data: obligation } = api.obligation.getTotalObligation.useQuery();
+  const { data: expenditure } = api.expenditure.getTotalExpenditure.useQuery();
 
   return (
     <div className="rounded-md bg-white text-center shadow-md">
@@ -22,69 +25,104 @@ function FinancialSummary() {
       </div>
 
       <div className="flex h-[26.5rem] justify-evenly gap-6 px-8 pt-4 pb-6">
-        {/* Obligation Status to Date */}
-        <div className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium underline">
-            Obligation Status to Date
-          </h3>
+        {obligation && expenditure && (
+          <>
+            {/* Obligation Status to Date */}
+            <div className="flex flex-col gap-2">
+              <h3 className="text-sm font-medium underline">
+                Obligation Status to Date
+              </h3>
 
-          <Chart
-            chartType="PieChart"
-            data={dataPie(obligationActual, obligationPlanned)}
-            options={expendOptionsPie(
-              obligationActual,
-              obligationPlanned,
-              obli_red_coefficent,
-              obli_yellow_coefficent
-            )}
-          />
+              {obligation.obli_actual / obligation.obli_projected > 2 ? (
+                <h3 className="py-16 text-sm italic">
+                  The chart cannot be displayed.
+                </h3>
+              ) : (
+                <Chart
+                  chartType="PieChart"
+                  data={dataPie(
+                    obligation.obli_actual,
+                    obligation.obli_projected
+                  )}
+                  options={expendOptionsPie(
+                    obligation.obli_actual,
+                    obligation.obli_projected,
+                    obli_red_coefficent,
+                    obli_yellow_coefficent
+                  )}
+                />
+              )}
 
-          {/* Summary */}
-          <div>
-            <h2>Obligation %:</h2>
-            <h2 className="font-bold">
-              {((obligationActual / obligationPlanned) * 100).toFixed(2)}%
-            </h2>
-            <p className="text-sm">
-              Actual Obligation: <b>{obligationActual}</b>
-            </p>
-            <p className="text-sm">
-              Planned Obligation: <b>{obligationPlanned}</b>
-            </p>
-          </div>
-        </div>
+              {/* Summary */}
+              <div>
+                <h2>Obligation %:</h2>
+                <h2 className="font-bold">
+                  {!obligation.obli_actual || !obligation.obli_projected
+                    ? "N/A"
+                    : `${(
+                        (obligation.obli_actual / obligation.obli_projected) *
+                        100
+                      ).toFixed(2)}%`}
+                </h2>
+                <p className="text-sm">
+                  Actual Obligation: <b>{obligation.obli_actual ?? "N/A"}</b>
+                </p>
+                <p className="text-sm">
+                  Planned Obligation:{" "}
+                  <b>{obligation.obli_projected ?? "N/A"}</b>
+                </p>
+              </div>
+            </div>
 
-        {/* Expenditure Status to Date */}
-        <div className="flex flex-col gap-2">
-          <h3 className="text-sm font-medium underline">
-            Expenditure Status to Date
-          </h3>
+            {/* Expenditure Status to Date */}
+            <div className="flex flex-col gap-2">
+              <h3 className="text-sm font-medium underline">
+                Expenditure Status to Date
+              </h3>
 
-          <Chart
-            chartType="PieChart"
-            data={dataPie(expenditureActual, expenditurePlanned)}
-            options={expendOptionsPie(
-              expenditureActual,
-              expenditurePlanned,
-              expen_red_coefficent,
-              expen_yellow_coefficent
-            )}
-          />
+              {expenditure.expen_actual / expenditure.expen_projected > 2 ? (
+                <h3 className="py-16 text-sm italic">
+                  The chart cannot be displayed.
+                </h3>
+              ) : (
+                <Chart
+                  chartType="PieChart"
+                  data={dataPie(
+                    expenditure.expen_actual,
+                    expenditure.expen_projected
+                  )}
+                  options={expendOptionsPie(
+                    expenditure.expen_actual,
+                    expenditure.expen_projected,
+                    expen_red_coefficent,
+                    expen_yellow_coefficent
+                  )}
+                />
+              )}
 
-          {/* Summary */}
-          <div>
-            <h2>Expenditure %:</h2>
-            <h2 className="font-bold">
-              {((expenditureActual / expenditurePlanned) * 100).toFixed(2)}%
-            </h2>
-            <p className="text-sm">
-              Actual Expenditure: <b>{expenditureActual}</b>
-            </p>
-            <p className="text-sm">
-              Planned Expenditure: <b>{expenditurePlanned}</b>
-            </p>
-          </div>
-        </div>
+              {/* Summary */}
+              <div>
+                <h2>Expenditure %:</h2>
+                <h2 className="font-bold">
+                  {!expenditure.expen_actual || !expenditure.expen_projected
+                    ? "N/A"
+                    : `${(
+                        (expenditure.expen_actual /
+                          expenditure.expen_projected) *
+                        100
+                      ).toFixed(2)}%`}
+                </h2>
+                <p className="text-sm">
+                  Actual Expenditure: <b>{expenditure.expen_actual ?? "N/A"}</b>
+                </p>
+                <p className="text-sm">
+                  Planned Expenditure:{" "}
+                  <b>{expenditure.expen_projected ?? "N/A"}</b>
+                </p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
