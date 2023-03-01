@@ -1,21 +1,11 @@
-import { useState } from "react";
 import { Chart } from "react-google-charts";
 
 import { api } from "~/utils/api";
 
 function FinancialSummary() {
-  // Obligation
-  const [obli_red_coefficent, setObliRedCoefficent] = useState<number>(20);
-  const [obli_yellow_coefficent, setObliYellowCoefficent] =
-    useState<number>(10);
-
-  // Expenditure
-  const [expen_red_coefficent, setExpenRedCoefficent] = useState<number>(20);
-  const [expen_yellow_coefficent, setExpenYellowCoefficent] =
-    useState<number>(10);
-
   const { data: obligation } = api.obligation.getTotalObligation.useQuery();
   const { data: expenditure } = api.expenditure.getTotalExpenditure.useQuery();
+  const { data: breakpoints } = api.financial_summary.getBreakpoints.useQuery();
 
   return (
     <div className="rounded-md bg-white text-center shadow-md">
@@ -24,7 +14,7 @@ function FinancialSummary() {
       </div>
 
       <div className="flex h-[26.5rem] justify-evenly gap-6 px-8 pt-4 pb-6">
-        {obligation && expenditure && (
+        {obligation && expenditure && breakpoints ? (
           <>
             {/* Obligation Status to Date */}
             <div className="flex flex-col gap-2">
@@ -46,8 +36,8 @@ function FinancialSummary() {
                   options={expendOptionsPie(
                     obligation.obli_actual,
                     obligation.obli_projected,
-                    obli_red_coefficent,
-                    obli_yellow_coefficent
+                    breakpoints.obli_red_breakpoint,
+                    breakpoints.obli_yellow_breakpoint
                   )}
                 />
               )}
@@ -93,8 +83,8 @@ function FinancialSummary() {
                   options={expendOptionsPie(
                     expenditure.expen_actual,
                     expenditure.expen_projected,
-                    expen_red_coefficent,
-                    expen_yellow_coefficent
+                    breakpoints.expen_red_breakpoint,
+                    breakpoints.expen_yellow_breakpoint
                   )}
                 />
               )}
@@ -121,6 +111,8 @@ function FinancialSummary() {
               </div>
             </div>
           </>
+        ) : (
+          <h3 className="py-8 text-sm italic">Loading...</h3>
         )}
       </div>
     </div>
