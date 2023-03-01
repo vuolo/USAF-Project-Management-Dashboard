@@ -35,7 +35,7 @@ function DependencySummary() {
 
       <Link
         href="/dependency"
-        className="rounded-md bg-brand-dark px-4 py-2 text-center text-white shadow-sm hover:bg-brand-dark/90"
+        className="mt-2 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
       >
         See Dependencies
       </Link>

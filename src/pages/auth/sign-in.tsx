@@ -24,6 +24,8 @@ function SignIn({
       <h1 className="text-3xl font-medium">
         Welcome to the USAF Project Management Dashboard
       </h1>
+
+      {/* Sign In Button(s) */}
       {Object.values(providers).map((provider) => (
         <div key={provider.name}>
           <button
