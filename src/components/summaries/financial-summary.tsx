@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useState } from "react";
 import { Chart } from "react-google-charts";
 
 import { api } from "~/utils/api";
@@ -34,8 +33,8 @@ function FinancialSummary() {
               </h3>
 
               {obligation.obli_actual / obligation.obli_projected > 2 ? (
-                <h3 className="py-16 text-sm italic">
-                  The chart cannot be displayed.
+                <h3 className="py-8 text-sm italic">
+                  This chart cannot be displayed.
                 </h3>
               ) : (
                 <Chart
@@ -81,8 +80,8 @@ function FinancialSummary() {
               </h3>
 
               {expenditure.expen_actual / expenditure.expen_projected > 2 ? (
-                <h3 className="py-16 text-sm italic">
-                  The chart cannot be displayed.
+                <h3 className="py-8 text-sm italic">
+                  This chart cannot be displayed.
                 </h3>
               ) : (
                 <Chart
