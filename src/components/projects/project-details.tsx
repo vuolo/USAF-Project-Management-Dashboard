@@ -1,7 +1,7 @@
 import Link from "next/link";
-import type { project } from "@prisma/client";
+import type { view_project } from "~/types/view_project";
 
-function ProjectDetails({ project }: { project: project }) {
+function ProjectDetails({ project }: { project: view_project }) {
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
       <div className="rounded-t-md bg-brand-dark px-8 py-2 text-center font-medium text-white">

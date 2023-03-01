@@ -9,18 +9,20 @@ import { api } from "~/utils/api";
 function Project() {
   const router = useRouter();
   const id = parseInt(router.query.id as string);
-  const { data: project } = api.project.get.useQuery({ id });
+  const { data: project_view } = api.project.get_view.useQuery({ id });
+
+  console.log(project_view);
 
   return (
     <>
       <NavBar />
       <main>
-        {project && (
+        {project_view && (
           <>
             {/* Top Section */}
             <div className="flex flex-col gap-6 px-2 pt-2 pb-2 sm:justify-around sm:pt-6 lg:flex-row">
               {/* Left */}
-              <ProjectDetails project={project} />
+              <ProjectDetails project={project_view} />
 
               {/* Right */}
               <ProjectIPT project_id={id} />

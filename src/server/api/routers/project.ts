@@ -7,12 +7,13 @@ export const projectRouter = createTRPCRouter({
   list_view: protectedProcedure.query(async () => {
     return await prisma.$queryRaw<view_project[]>`SELECT * FROM view_project`;
   }),
-  get: protectedProcedure
+  get_view: protectedProcedure
     // TODO: select using userId if not admin
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
-      return await prisma.project.findUnique({
-        where: { id: input.id },
-      });
+      return (
+        await prisma.$queryRaw<view_project[]>`
+      SELECT * FROM view_project WHERE id = ${input.id} LIMIT 1`
+      )[0];
     }),
 });
