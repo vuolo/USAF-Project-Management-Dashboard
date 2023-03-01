@@ -1,11 +1,7 @@
-// TODO: set type for project using db schema
-function ProjectIPT({ project }: { project: any }) {
-  const ipt = {
-    id: 1,
-    project_id: 1,
-    user_name: "Kat",
-    mil_job_title: "Primary Logistics",
-  }; // TODO: fetch IPT data from database using project.id
+import { api } from "~/utils/api";
+
+function ProjectIPT({ project_id }: { project_id: number }) {
+  const { data: ipts } = api.user.getIptMembers.useQuery({ project_id });
 
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
@@ -14,9 +10,12 @@ function ProjectIPT({ project }: { project: any }) {
       </div>
 
       <div className="flex flex-col gap-2 px-4 pt-4 pb-2 text-left sm:px-6 sm:pt-6">
-        <p>
-          <b>{ipt.mil_job_title}:</b> {ipt.user_name ?? "N/A"}
-        </p>
+        {ipts &&
+          ipts.map((ipt) => (
+            <p key={ipt.id}>
+              <b>{ipt.mil_job_title}:</b> {ipt.user_name ?? "N/A"}
+            </p>
+          ))}
       </div>
     </div>
   );

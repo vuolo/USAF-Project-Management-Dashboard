@@ -1,7 +1,7 @@
 import Link from "next/link";
+import type { project } from "@prisma/client";
 
-// TODO: set type for project using db schema
-function ProjectDetails({ project }: { project: any }) {
+function ProjectDetails({ project }: { project: project }) {
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
       <div className="rounded-t-md bg-brand-dark px-8 py-2 text-center font-medium text-white">

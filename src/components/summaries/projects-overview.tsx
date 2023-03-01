@@ -4,7 +4,7 @@ import StatusIcon from "./icons/status-icon";
 import { api } from "~/utils/api";
 
 function ProjectsOverview() {
-  const { data: projects } = api.project.list.useQuery();
+  const { data: projects } = api.project.list_view.useQuery();
 
   return (
     <>
