@@ -6,6 +6,7 @@ import { toastMessage } from "~/utils/toast";
 
 function AdminFinancialSummaryBreakpoints() {
   const { data: breakpoints } = api.financial_summary.getBreakpoints.useQuery();
+
   const [redObligationBreakpoint, setRedObligationBreakpoint] =
     useState<number>();
   const [yellowObligationBreakpoint, setYellowObligationBreakpoint] =
