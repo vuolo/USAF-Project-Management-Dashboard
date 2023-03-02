@@ -11,6 +11,7 @@ import { api } from "~/utils/api";
 import "react-toastify/dist/ReactToastify.css";
 import "~/styles/globals.css";
 import "react-tooltip/dist/react-tooltip.css";
+import "rc-slider/assets/index.css";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,

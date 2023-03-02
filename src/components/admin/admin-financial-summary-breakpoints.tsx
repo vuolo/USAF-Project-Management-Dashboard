@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import Slider from "rc-slider";
 import { api } from "~/utils/api";
 import { toastMessage } from "~/utils/toast";
 
@@ -45,12 +46,19 @@ function AdminFinancialSummaryBreakpoints() {
 
   const submitBreakpoints = () => {
     if (
-      !redObligationBreakpoint ||
-      !yellowObligationBreakpoint ||
-      !redExpenditureBreakpoint ||
-      !yellowExpenditureBreakpoint
-    )
+      typeof redObligationBreakpoint !== "number" ||
+      typeof yellowObligationBreakpoint !== "number" ||
+      typeof redExpenditureBreakpoint !== "number" ||
+      typeof yellowExpenditureBreakpoint !== "number"
+    ) {
+      toast.error(
+        toastMessage(
+          "Error Updating Breakpoints",
+          "Please make sure all fields are filled out."
+        )
+      );
       return;
+    }
 
     void updateBreakpoints.mutateAsync({
       obli_red_breakpoint: redObligationBreakpoint,
@@ -71,10 +79,10 @@ function AdminFinancialSummaryBreakpoints() {
           Update Financial Breakpoints
         </h1>
 
-        {!redObligationBreakpoint ||
-        !yellowObligationBreakpoint ||
-        !redExpenditureBreakpoint ||
-        !yellowExpenditureBreakpoint ? (
+        {typeof redObligationBreakpoint !== "number" ||
+        typeof yellowObligationBreakpoint !== "number" ||
+        typeof redExpenditureBreakpoint !== "number" ||
+        typeof yellowExpenditureBreakpoint !== "number" ? (
           <p className="italic">Loading...</p>
         ) : (
           <>
@@ -93,7 +101,18 @@ function AdminFinancialSummaryBreakpoints() {
                     id="obligation-breakpoint-red"
                     name="obligation-breakpoint-red"
                     value={redObligationBreakpoint}
+                    min={0}
+                    max={100}
                     className="w-32 rounded-md bg-gray-200 px-4 py-2 text-black"
+                  />
+                  <Slider
+                    onChange={(value) =>
+                      setRedObligationBreakpoint(value as number)
+                    }
+                    value={redObligationBreakpoint}
+                    min={0}
+                    max={100}
+                    step={0.5}
                   />
                 </div>
                 <div className="mt-2 flex flex-col items-center justify-center gap-2">
@@ -108,7 +127,18 @@ function AdminFinancialSummaryBreakpoints() {
                     id="obligation-breakpoint-yellow"
                     name="obligation-breakpoint-yellow"
                     value={yellowObligationBreakpoint}
+                    min={0}
+                    max={100}
                     className="w-32 rounded-md bg-gray-200 px-4 py-2 text-black"
+                  />
+                  <Slider
+                    onChange={(value) =>
+                      setYellowObligationBreakpoint(value as number)
+                    }
+                    value={yellowObligationBreakpoint}
+                    min={0}
+                    max={100}
+                    step={0.5}
                   />
                 </div>
               </div>
@@ -128,7 +158,18 @@ function AdminFinancialSummaryBreakpoints() {
                     id="expenditure-breakpoint-red"
                     name="expenditure-breakpoint-red"
                     value={redExpenditureBreakpoint}
+                    min={0}
+                    max={100}
                     className="w-32 rounded-md bg-gray-200 px-4 py-2 text-black"
+                  />
+                  <Slider
+                    onChange={(value) =>
+                      setRedExpenditureBreakpoint(value as number)
+                    }
+                    value={redExpenditureBreakpoint}
+                    min={0}
+                    max={100}
+                    step={0.5}
                   />
                 </div>
                 <div className="mt-2 flex flex-col items-center justify-center gap-2">
@@ -145,7 +186,18 @@ function AdminFinancialSummaryBreakpoints() {
                     id="expenditure-breakpoint-yellow"
                     name="expenditure-breakpoint-yellow"
                     value={yellowExpenditureBreakpoint}
+                    min={0}
+                    max={100}
                     className="w-32 rounded-md bg-gray-200 px-4 py-2 text-black"
+                  />
+                  <Slider
+                    onChange={(value) =>
+                      setYellowExpenditureBreakpoint(value as number)
+                    }
+                    value={yellowExpenditureBreakpoint}
+                    min={0}
+                    max={100}
+                    step={0.5}
                   />
                 </div>
               </div>
