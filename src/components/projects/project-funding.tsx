@@ -3,6 +3,13 @@ import { api } from "~/utils/api";
 import type { view_project } from "~/types/view_project";
 
 function ProjectFunding({ project }: { project: view_project }) {
+  const { data: obligationPlan } = api.obligation.getObligationPlan.useQuery({
+    project_id: project.id,
+  });
+  const { data: approvedFunding } = api.approved.getApprovedFunding.useQuery({
+    project_id: project.id,
+  });
+
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
       <div className="flex items-center justify-between rounded-t-md bg-brand-dark px-8 py-2 font-medium text-white">
