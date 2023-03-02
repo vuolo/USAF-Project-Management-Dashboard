@@ -9,6 +9,9 @@ function ProjectFunding({ project }: { project: view_project }) {
   const { data: approvedFunding } = api.approved.getApprovedFunding.useQuery({
     project_id: project.id,
   });
+  const { data: approvedEstimates } = api.approved.getEstimates.useQuery({
+    project_id: project.id,
+  });
 
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
