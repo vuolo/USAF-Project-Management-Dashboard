@@ -9,7 +9,7 @@ export const expenditureRouter = createTRPCRouter({
     if (!user) return null;
 
     return (
-      user.user_role === "Admin"
+      (user.user_role === "Admin"
         ? await prisma.$queryRaw<expenditure[]>`
             SELECT 
               SUM(expen_projected) as expen_projected,
@@ -26,12 +26,13 @@ export const expenditureRouter = createTRPCRouter({
             JOIN contract_award ca on upl.project_id = ca.project_id
             JOIN users u on upl.user_id = u.id
             WHERE u.id = ${user.id} AND ca.contract_status = 2 AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0`
-    ).map((expen) => {
-      // Map the query result to numbers (for some reason, the query result is a string)
-      return {
-        expen_actual: Number(expen.expen_actual || 0),
-        expen_projected: Number(expen.expen_projected || 0),
-      };
-    })[0];
+      ).map((expen) => {
+        // Map the query result to numbers (for some reason, the query result is a string)
+        return {
+          expen_actual: Number(expen.expen_actual || 0),
+          expen_projected: Number(expen.expen_projected || 0),
+        };
+      })[0] || null
+    );
   }),
 });

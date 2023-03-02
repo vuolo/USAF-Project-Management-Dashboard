@@ -9,7 +9,7 @@ export const milestoneRouter = createTRPCRouter({
     if (!user) return null;
 
     return (
-      user.user_role === "Admin"
+      (user.user_role === "Admin"
         ? await prisma.$queryRaw<schedule_summary[]>`
             SELECT
               (SELECT COUNT(schedule_status) 
@@ -34,7 +34,8 @@ export const milestoneRouter = createTRPCRouter({
               (SELECT COUNT(schedule_status) 
                 FROM view_project vp
                 INNER JOIN user_project_link upl on vp.id = upl.project_id
-                WHERE schedule_status= 'REALLY-BEHIND' AND upl.user_id = ${user.id}) as red_sch`
-    )[0];
+                WHERE schedule_status= 'REALLY-BEHIND' AND upl.user_id = ${user.id}) as red_sch`)[0] ||
+      null
+    );
   }),
 });

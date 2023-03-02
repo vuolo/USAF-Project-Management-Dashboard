@@ -16,12 +16,13 @@ function ProjectsOverview() {
           </p>
         </div>
         <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <button
+          <Link
+            href="/add-project"
             type="button"
             className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand-dark px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-dark/80 focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
           >
             Add Project
-          </button>
+          </Link>
         </div>
       </div>
       <div className="mt-8 flex flex-col">

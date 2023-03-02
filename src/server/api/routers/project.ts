@@ -12,8 +12,10 @@ export const projectRouter = createTRPCRouter({
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       return (
-        await prisma.$queryRaw<view_project[]>`
+        (
+          await prisma.$queryRaw<view_project[]>`
       SELECT * FROM view_project WHERE id = ${input.id} LIMIT 1`
-      )[0];
+        )[0] || null
+      );
     }),
 });
