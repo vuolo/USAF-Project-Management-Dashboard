@@ -40,12 +40,19 @@ function ProjectDetails({ project }: { project: view_project }) {
         </p>
       </div>
 
-      <Link
-        href={`/projects/${project.id}/clin`}
-        className="mt-2 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
-      >
-        See CLIN Data
-      </Link>
+      <div className="mt-2 flex justify-evenly gap-4">
+        <Link
+          href={`/projects/${project.id}/clin`}
+          className="mt-2 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+        >
+          See CLIN Data
+        </Link>
+        {project.contract_status !== "Closed" && (
+          <button className="mt-2 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto">
+            Upload ProPricer
+          </button>
+        )}
+      </div>
     </div>
   );
 }

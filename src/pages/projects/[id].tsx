@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 
 import NavBar from "~/components/nav-bar";
+import ProjectContractStatus from "~/components/projects/project-contract-status";
 import ProjectDependencies from "~/components/projects/project-dependencies";
 import ProjectDetails from "~/components/projects/project-details";
 import ProjectIPT from "~/components/projects/project-ipt";
@@ -30,6 +31,7 @@ function Project() {
             {/* Underneath Top Section */}
             <div className="flex flex-col gap-6 px-2 pt-2 pb-2 sm:px-6 sm:pt-6">
               <ProjectDependencies project={project_view} />
+              <ProjectContractStatus project={project_view} />
             </div>
           </>
         )}
