@@ -23,9 +23,9 @@ function FinancialSummary() {
               </h3>
 
               {obligation.obli_actual / obligation.obli_projected > 2 ? (
-                <h3 className="py-8 text-sm italic">
+                <h4 className="py-8 text-sm italic">
                   This chart cannot be displayed.
-                </h3>
+                </h4>
               ) : (
                 <Chart
                   chartType="PieChart"
@@ -70,9 +70,9 @@ function FinancialSummary() {
               </h3>
 
               {expenditure.expen_actual / expenditure.expen_projected > 2 ? (
-                <h3 className="py-8 text-sm italic">
+                <h4 className="py-8 text-sm italic">
                   This chart cannot be displayed.
-                </h3>
+                </h4>
               ) : (
                 <Chart
                   chartType="PieChart"
@@ -131,7 +131,6 @@ const dataPie = (actual: number, planned: number) => {
   ];
 };
 
-//Add red AND yellow coeff to parameters
 const getPieColor = (
   actual: number,
   planned: number,

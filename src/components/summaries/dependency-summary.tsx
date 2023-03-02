@@ -1,7 +1,11 @@
 import Link from "next/link";
+import { api } from "~/utils/api";
 
 function DependencySummary() {
-  // TODO: Get data from API
+  const { data: greenDependency } = api.dependency.getGreen.useQuery();
+  const { data: yellowDependency } = api.dependency.getYellow.useQuery();
+  const { data: redDependency } = api.dependency.getRed.useQuery();
+
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
       <div className="rounded-t-md bg-brand-dark px-8 py-2 text-center font-medium text-white">
@@ -14,7 +18,9 @@ function DependencySummary() {
           <h3 className="h-16 text-xs sm:h-12">
             Tracked Dependencies With &gt;5 Days Schedule Margin
           </h3>
-          <h1 className="pt-4 text-2xl font-medium">2</h1>
+          <h1 className="pt-4 text-2xl font-medium">
+            {greenDependency?.count?.toString() ?? "N/A"}
+          </h1>
         </div>
 
         {/* Yellow */}
@@ -22,7 +28,9 @@ function DependencySummary() {
           <h3 className="h-16 text-xs sm:h-12">
             Tracked Dependencies With &lt;5 Days Schedule Margin
           </h3>
-          <h1 className="pt-4 text-2xl font-medium">1</h1>
+          <h1 className="pt-4 text-2xl font-medium">
+            {yellowDependency?.count?.toString() ?? "N/A"}
+          </h1>
         </div>
 
         {/* Red */}
@@ -30,7 +38,9 @@ function DependencySummary() {
           <h3 className="h-16 text-xs sm:h-12">
             Tracked Dependencies With Tracked Impacts
           </h3>
-          <h1 className="pt-4 text-2xl font-medium">1</h1>
+          <h1 className="pt-4 text-2xl font-medium">
+            {redDependency?.count?.toString() ?? "N/A"}
+          </h1>
         </div>
       </div>
 
