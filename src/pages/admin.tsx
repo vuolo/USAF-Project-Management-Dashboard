@@ -5,6 +5,7 @@ import NavBar from "~/components/nav-bar";
 import AdminFinancialSummaryBreakpoints from "~/components/admin/admin-financial-summary-breakpoints";
 import AdminContractAwardDays from "~/components/admin/admin-contract-award-days";
 import AdminContractors from "~/components/admin/admin-contractors";
+import AdminFundingTypes from "~/components/admin/admin-funding-types";
 
 const Admin: NextPage = () => {
   const [selectedOption, setSelectedOption] = useState(
@@ -124,8 +125,8 @@ const renderSettingsDetails = (selectedOption: string) => {
       return <AdminContractAwardDays />;
     case "contractors":
       return <AdminContractors />;
-    // case "funding-types":
-    //   return <AdminFundingTypes />;
+    case "funding-types":
+      return <AdminFundingTypes />;
     // case "organizations-branches":
     //   return <AdminOrganizationsBranches />;
     // case "military-job-titles":
