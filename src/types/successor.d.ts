@@ -1,4 +1,4 @@
-export type predecessor = {
+export type successor = {
   predecessor_project: number;
   predecessor_name: string;
   predecessor_milestone: number;
@@ -6,7 +6,7 @@ export type predecessor = {
   predecessor_task_end_date: Date;
 
   successor_project: number;
-  dep_proj_name: string;
+  succ_proj_name: string;
   successor_milestone: number;
   successor_task_name: string;
   successor_task_start_date: Date;
@@ -19,7 +19,7 @@ export type predecessor = {
 // pm1.end_date as predecessor_task_end_date,
 
 // pmd.successor_project,
-// p2.project_name as dep_proj_name,
+// p2.project_name as succ_proj_name,
 // pmd.successor_milestone,
 // pm2.task_name as successor_task_name,
 // pm2.start_date as successor_task_start_date

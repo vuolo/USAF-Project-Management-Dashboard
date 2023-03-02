@@ -6,6 +6,12 @@ function ProjectDependencies({ project }: { project: view_project }) {
   const { data: predecessors } = api.dependency.getPredecessors.useQuery({
     project_id: project.id,
   });
+  const { data: successors } = api.dependency.getSuccessors.useQuery({
+    project_id: project.id,
+  });
+  const { data: milestones } = api.milestone.getSchedules.useQuery({
+    project_id: project.id,
+  });
 
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
@@ -26,11 +32,16 @@ function ProjectDependencies({ project }: { project: view_project }) {
               There are no predecessors for this project.
             </p>
           ) : (
-            <>{/* TODO: display a table visualizing the predecessors */}</>
+            <>TODO: display a table visualizing the predecessors</>
           )}
         </div>
-        <div>
+        <div className="flex flex-col gap-4 text-center">
           <h1 className="font-bold">Successors</h1>
+          {!successors || successors.length == 0 ? (
+            <p className="italic">There are no successors for this project.</p>
+          ) : (
+            <>TODO: display a table visualizing the successors</>
+          )}
         </div>
       </div>
     </div>
