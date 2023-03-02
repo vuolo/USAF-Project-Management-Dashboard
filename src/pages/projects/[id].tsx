@@ -4,6 +4,7 @@ import NavBar from "~/components/nav-bar";
 import ProjectContractStatus from "~/components/projects/project-contract-status";
 import ProjectDependencies from "~/components/projects/project-dependencies";
 import ProjectDetails from "~/components/projects/project-details";
+import ProjectFunding from "~/components/projects/project-funding";
 import ProjectIPT from "~/components/projects/project-ipt";
 
 import { api } from "~/utils/api";
@@ -32,6 +33,7 @@ function Project() {
             <div className="flex flex-col gap-6 px-2 pt-2 pb-2 sm:px-6 sm:pt-6">
               <ProjectDependencies project={project_view} />
               <ProjectContractStatus project={project_view} />
+              <ProjectFunding project={project_view} />
             </div>
           </>
         )}
