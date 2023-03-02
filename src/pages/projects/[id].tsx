@@ -13,29 +13,35 @@ import { api } from "~/utils/api";
 function Project() {
   const router = useRouter();
   const id = parseInt(router.query.id as string);
-  const { data: project_view } = api.project.get_view.useQuery({ id });
+  const { data: project } = api.project.get_view.useQuery({ id });
 
   return (
     <>
       <NavBar />
       <main>
-        {project_view && (
+        {project && (
           <>
             {/* Top Section */}
             <div className="flex flex-col gap-6 px-2 pt-2 pb-2 sm:justify-around sm:pt-6 lg:flex-row">
               {/* Left */}
-              <ProjectDetails project={project_view} />
+              <ProjectDetails project={project} />
 
               {/* Right */}
-              <ProjectIPT project={project_view} />
+              <ProjectIPT project={project} />
             </div>
 
             {/* Underneath Top Section */}
             <div className="flex flex-col gap-6 px-2 pt-2 pb-2 sm:px-6 sm:pt-6">
-              <ProjectDependencies project={project_view} />
-              <ProjectContractStatus project={project_view} />
-              <ProjectFunding project={project_view} />
-              <ProjectSchedule project={project_view} />
+              <ProjectDependencies project={project} />
+              <ProjectContractStatus project={project} />
+              <ProjectFunding project={project} />
+              <ProjectSchedule project={project} />
+
+              {project.contract_status !== "Closed" && (
+                <button className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto">
+                  Close Project
+                </button>
+              )}
             </div>
           </>
         )}
