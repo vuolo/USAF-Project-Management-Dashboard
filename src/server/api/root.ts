@@ -5,6 +5,7 @@ import { obligationRouter } from "./routers/obligation";
 import { expenditureRouter } from "./routers/expenditure";
 import { financialSummaryRouter } from "./routers/financial_summary";
 import { dependencyRouter } from "./routers/dependency";
+import { milestoneRouter } from "./routers/milestone";
 
 /**
  * This is the primary router for your server.
@@ -18,6 +19,7 @@ export const appRouter = createTRPCRouter({
   expenditure: expenditureRouter,
   financial_summary: financialSummaryRouter,
   dependency: dependencyRouter,
+  milestone: milestoneRouter,
 });
 
 // export type definition of API

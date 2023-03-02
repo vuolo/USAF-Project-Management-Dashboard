@@ -1,5 +1,8 @@
+import { api } from "~/utils/api";
+
 function ScheduleSummary() {
-  // TODO: Get data from API
+  const { data: scheduleSummary } = api.milestone.getScheduleSummary.useQuery();
+
   return (
     <div className="rounded-md bg-white text-center shadow-md">
       <div className="rounded-t-md bg-brand-dark px-8 py-2 text-center font-medium text-white">
@@ -12,7 +15,9 @@ function ScheduleSummary() {
           <h3 className="h-16 text-xs sm:h-12">
             Tracked Milestones on Schedule
           </h3>
-          <h1 className="pt-2 text-2xl font-medium">2</h1>
+          <h1 className="pt-2 text-2xl font-medium">
+            {scheduleSummary?.green_sch?.toString() ?? "N/A"}
+          </h1>
         </div>
 
         {/* Yellow */}
@@ -20,7 +25,9 @@ function ScheduleSummary() {
           <h3 className="h-16 text-xs sm:h-12">
             Tracked Milestones Within 5 Days
           </h3>
-          <h1 className="pt-2 text-2xl font-medium">0</h1>
+          <h1 className="pt-2 text-2xl font-medium">
+            {scheduleSummary?.yellow_sch?.toString() ?? "N/A"}
+          </h1>
         </div>
 
         {/* Red */}
@@ -28,7 +35,9 @@ function ScheduleSummary() {
           <h3 className="h-16 text-xs sm:h-12">
             Tracked Milestones Behind Schedule
           </h3>
-          <h1 className="pt-2 text-2xl font-medium">2</h1>
+          <h1 className="pt-2 text-2xl font-medium">
+            {scheduleSummary?.red_sch?.toString() ?? "N/A"}
+          </h1>
         </div>
       </div>
     </div>
