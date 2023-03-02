@@ -2,11 +2,13 @@ import { useRouter } from "next/router";
 import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider, useSession } from "next-auth/react";
+import { ToastContainer } from "react-toastify";
 
 import DynamicHead from "~/components/dynamic-head";
 
 import { api } from "~/utils/api";
 
+import "react-toastify/dist/ReactToastify.css";
 import "~/styles/globals.css";
 import "react-tooltip/dist/react-tooltip.css";
 
@@ -18,7 +20,23 @@ const MyApp: AppType<{ session: Session | null }> = ({
     <SessionProvider session={session}>
       <DynamicHead />
       <Auth>
-        <Component {...pageProps} />
+        <>
+          <Component {...pageProps} />
+          <ToastContainer
+            position="bottom-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss={false}
+            draggable
+            pauseOnHover
+            theme="light"
+            bodyClassName="text-gray-500 text-sm"
+            className="w-screen md:w-[375px]"
+          />
+        </>
       </Auth>
     </SessionProvider>
   );

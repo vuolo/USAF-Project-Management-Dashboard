@@ -7,7 +7,8 @@ body {
 }
 
 * {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Helvetica Neue",
+    "Helvetica", sans-serif !important;
 }
 
 main {
@@ -15,4 +16,15 @@ main {
   width: 100vw;
   background-color: theme("colors.brand.light");
   overflow: auto;
+}
+
+/* Toastify */
+.Toastify__toast-body {
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Helvetica Neue",
+    "Helvetica", sans-serif;
+}
+
+.default-font {
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Helvetica Neue",
+    "Helvetica", sans-serif !important;
 }
