@@ -24,7 +24,7 @@ function ProjectDependencies({ project }: { project: view_project }) {
         )}
       </div>
 
-      <div className="flex flex-col justify-around gap-2 px-4 pt-4 pb-2 text-left sm:px-6 sm:pt-6 lg:flex-row">
+      <div className="flex flex-col justify-around gap-4 px-4 pt-4 pb-2 text-left sm:px-6 sm:pt-6 lg:flex-row">
         {(!predecessors && !successors) ||
         (predecessors?.length === 0 && successors?.length === 0) ? (
           <p className="text-center italic">

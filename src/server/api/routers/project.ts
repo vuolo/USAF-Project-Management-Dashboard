@@ -14,7 +14,7 @@ export const projectRouter = createTRPCRouter({
       return (
         (
           await prisma.$queryRaw<view_project[]>`
-      SELECT * FROM view_project WHERE id = ${input.id} LIMIT 1`
+            SELECT * FROM view_project WHERE id = ${input.id} LIMIT 1`
         )[0] || null
       );
     }),
