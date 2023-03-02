@@ -1,23 +1,25 @@
 import { api } from "~/utils/api";
 
-function AdminFundingTypes() {
+function AdminMilitaryJobTitles() {
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
       <div className="rounded-t-md bg-brand-dark px-8 py-2 text-center font-medium text-white">
-        <h1>Funding Types</h1>
+        <h1>Military Job Titles</h1>
       </div>
 
       <div className="flex flex-col justify-center gap-2 px-4 pt-4 pb-2 text-center sm:px-6 sm:pt-6">
-        <h1 className="text-xl font-bold underline">Update Funding Types</h1>
+        <h1 className="text-xl font-bold underline">
+          Update Military Job Titles
+        </h1>
         <div className="mt-2">
-          <h2 className="text-lg font-medium">Add Funding Type</h2>
+          <h2 className="text-lg font-medium">Add Military Job Titles</h2>
           <div className="flex flex-col justify-evenly gap-2">
             <div className="mt-2 flex items-center justify-start gap-4">
-              <label htmlFor="funding-type">Funding Type:</label>
+              <label htmlFor="military-job-title">Job Title:</label>
               <input
                 type="text"
-                id="funding-type"
-                name="funding-type"
+                id="military-job-title"
+                name="military-job-title"
                 className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
               />
             </div>
@@ -29,14 +31,14 @@ function AdminFundingTypes() {
         </div>
 
         <div className="mt-6">
-          <h2 className="text-lg font-medium">Remove Funding Type</h2>
+          <h2 className="text-lg font-medium">Remove Military Job Title</h2>
           <div className="flex flex-col justify-evenly gap-2">
             <div className="mt-2 flex items-center justify-start gap-4">
-              <label htmlFor="remove-funding-type">Select:</label>
+              <label htmlFor="remove-military-job-title">Select:</label>
               <input
                 type="text"
-                id="remove-funding-type"
-                name="remove-funding-type"
+                id="remove-military-job-title"
+                name="remove-military-job-title"
                 className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
               />
 
@@ -51,4 +53,4 @@ function AdminFundingTypes() {
   );
 }
 
-export default AdminFundingTypes;
+export default AdminMilitaryJobTitles;

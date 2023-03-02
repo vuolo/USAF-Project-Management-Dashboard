@@ -6,6 +6,10 @@ import AdminFinancialSummaryBreakpoints from "~/components/admin/admin-financial
 import AdminContractAwardDays from "~/components/admin/admin-contract-award-days";
 import AdminContractors from "~/components/admin/admin-contractors";
 import AdminFundingTypes from "~/components/admin/admin-funding-types";
+import AdminOrganizationsBranches from "~/components/admin/admin-organizations-branches";
+import AdminMilitaryJobTitles from "~/components/admin/admin-military-job-titles";
+import AdminProjects from "~/components/admin/admin-projects";
+import AdminUsers from "~/components/admin/admin-users";
 
 const Admin: NextPage = () => {
   const [selectedOption, setSelectedOption] = useState(
@@ -127,14 +131,14 @@ const renderSettingsDetails = (selectedOption: string) => {
       return <AdminContractors />;
     case "funding-types":
       return <AdminFundingTypes />;
-    // case "organizations-branches":
-    //   return <AdminOrganizationsBranches />;
-    // case "military-job-titles":
-    //   return <AdminMilitaryJobTitles />;
-    // case "users":
-    //   return <AdminUsers />;
-    // case "projects":
-    //   return <AdminProjects />;
+    case "organizations-branches":
+      return <AdminOrganizationsBranches />;
+    case "military-job-titles":
+      return <AdminMilitaryJobTitles />;
+    case "users":
+      return <AdminUsers />;
+    case "projects":
+      return <AdminProjects />;
     default:
       <AdminFinancialSummaryBreakpoints />;
   }
