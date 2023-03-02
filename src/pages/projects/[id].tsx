@@ -6,6 +6,7 @@ import ProjectDependencies from "~/components/projects/project-dependencies";
 import ProjectDetails from "~/components/projects/project-details";
 import ProjectFunding from "~/components/projects/project-funding";
 import ProjectIPT from "~/components/projects/project-ipt";
+import ProjectSchedule from "~/components/projects/project-schedule";
 
 import { api } from "~/utils/api";
 
@@ -34,6 +35,7 @@ function Project() {
               <ProjectDependencies project={project_view} />
               <ProjectContractStatus project={project_view} />
               <ProjectFunding project={project_view} />
+              <ProjectSchedule project={project_view} />
             </div>
           </>
         )}
