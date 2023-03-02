@@ -8,11 +8,11 @@ function AdminFinancialSummaryBreakpoints() {
       </div>
 
       <div className="flex flex-col justify-center gap-2 px-4 pt-4 pb-2 text-center sm:px-6 sm:pt-6">
-        <h1 className="text-xl font-medium underline">
+        <h1 className="text-xl font-bold underline">
           Update Financial Breakpoints
         </h1>
         <div className="mt-2">
-          <h2 className="text-lg font-bold">Obligation Breakpoints</h2>
+          <h2 className="text-lg font-medium">Obligation Breakpoints</h2>
           <div className="flex justify-evenly gap-2">
             <div className="mt-2 flex flex-col items-center justify-center gap-2">
               <label htmlFor="obligation-breakpoint-red">
@@ -39,7 +39,7 @@ function AdminFinancialSummaryBreakpoints() {
           </div>
         </div>
         <div className="mt-2">
-          <h2 className="text-lg font-bold">Expenditure Breakpoints</h2>
+          <h2 className="text-lg font-medium">Expenditure Breakpoints</h2>
           <div className="flex justify-evenly gap-2">
             <div className="mt-2 flex flex-col items-center justify-center gap-2">
               <label htmlFor="expenditure-breakpoint-red">
@@ -65,6 +65,7 @@ function AdminFinancialSummaryBreakpoints() {
             </div>
           </div>
         </div>
+
         <button className="mt-6 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto">
           Update Breakpoints
         </button>

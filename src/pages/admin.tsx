@@ -3,6 +3,7 @@ import { type NextPage } from "next";
 
 import NavBar from "~/components/nav-bar";
 import AdminFinancialSummaryBreakpoints from "~/components/admin/admin-financial-summary-breakpoints";
+import AdminContractAwardDays from "~/components/admin/admin-contract-award-days";
 
 const Admin: NextPage = () => {
   const [selectedOption, setSelectedOption] = useState(
@@ -118,8 +119,8 @@ const renderSettingsDetails = (selectedOption: string) => {
   switch (selectedOption) {
     case "financial-summary-breakpoints":
       return <AdminFinancialSummaryBreakpoints />;
-    // case "contract-award-days":
-    //   return <AdminContractAwardDays />;
+    case "contract-award-days":
+      return <AdminContractAwardDays />;
     // case "contractors":
     //   return <AdminContractors />;
     // case "funding-types":
