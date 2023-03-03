@@ -2,6 +2,7 @@ import Link from "next/link";
 import StatusIcon from "./icons/status-icon";
 
 import { api } from "~/utils/api";
+import { formatCurrency } from "~/utils/currency";
 
 function ProjectsOverview() {
   const { data: projects } = api.project.list_view.useQuery();
@@ -133,10 +134,3 @@ function ProjectsOverview() {
 }
 
 export default ProjectsOverview;
-
-function formatCurrency(amount: number, currency = "USD"): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-  }).format(amount);
-}
