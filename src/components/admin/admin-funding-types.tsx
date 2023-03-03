@@ -51,7 +51,7 @@ function AdminFundingTypes() {
     setFundingTypeName("");
   };
 
-  const removeFundingType = api.funding_type.removeFundingType.useMutation({
+  const removeFundingType = api.funding_type.deactivateFundingType.useMutation({
     onError(error) {
       toast.error(
         toastMessage(
@@ -148,7 +148,7 @@ function AdminFundingTypes() {
                 name="remove-funding-type"
                 className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
               >
-                <option value="">Select Funding Type</option>
+                {/* <option value="">Select Funding Type</option> */}
                 {fundingTypes?.map((fundingType) => (
                   <option key={fundingType.id} value={fundingType.id}>
                     {fundingType.funding_type}

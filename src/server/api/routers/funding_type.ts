@@ -20,13 +20,16 @@ export const fundingTypeRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       return await prisma.funding_types.create({ data: { ...input } });
     }),
-  removeFundingType: protectedProcedure
+  deactivateFundingType: protectedProcedure
     .input(
       z.object({
         id: z.number(),
       })
     )
     .mutation(async ({ input }) => {
-      return await prisma.funding_types.delete({ where: { id: input.id } });
+      return await prisma.funding_types.update({
+        where: { id: input.id },
+        data: { status: false },
+      });
     }),
 });
