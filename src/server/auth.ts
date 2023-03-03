@@ -58,7 +58,6 @@ export const authOptions: NextAuthOptions = {
     signIn: "/auth/sign-in",
   },
   secret: env.NEXTAUTH_SECRET,
-  debug: true,
 };
 
 /**
