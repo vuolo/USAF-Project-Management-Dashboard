@@ -8,6 +8,7 @@ import { dependencyRouter } from "./routers/dependency";
 import { milestoneRouter } from "./routers/milestone";
 import { contractRouter } from "./routers/contract";
 import { approvedRouter } from "./routers/approved";
+import { contractorRouter } from "./routers/contractor";
 
 /**
  * This is the primary router for your server.
@@ -24,6 +25,7 @@ export const appRouter = createTRPCRouter({
   milestone: milestoneRouter,
   contract: contractRouter,
   approved: approvedRouter,
+  contractor: contractorRouter,
 });
 
 // export type definition of API

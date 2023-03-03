@@ -22,7 +22,7 @@ function AdminUsers() {
                 className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
               />
             </div>
-            <div className="mt-2 flex items-center justify-center gap-4">
+            <div className="mt-2 flex items-center justify-center gap-4 pl-1">
               <label htmlFor="admin-email">Email:</label>
               <input
                 type="text"
@@ -50,7 +50,7 @@ function AdminUsers() {
                 className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
               />
             </div>
-            <div className="mt-2 flex items-center justify-center gap-4">
+            <div className="mt-2 flex items-center justify-center gap-4 pl-1">
               <label htmlFor="ipt-email">Email:</label>
               <input
                 type="text"
@@ -69,7 +69,7 @@ function AdminUsers() {
         <div className="mt-4">
           <h2 className="text-lg font-medium">Add Contractor</h2>
           <div className="flex flex-col justify-evenly gap-2">
-            <div className="mt-2 flex items-center justify-start gap-4 pl-8">
+            <div className="mt-2 flex items-center justify-start gap-4 pl-9">
               <label htmlFor="contractor-name">Name:</label>
               <input
                 type="text"
