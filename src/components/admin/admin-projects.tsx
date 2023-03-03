@@ -52,41 +52,48 @@ function AdminProjects() {
 
       <div className="flex flex-col justify-center gap-2 px-4 pt-4 pb-2 text-center sm:px-6 sm:pt-6">
         <h1 className="text-xl font-bold underline">Update Projects</h1>
-        <div className="mt-2">
-          <h2 className="text-lg font-medium">Delete Project</h2>
-          <div className="flex flex-col justify-evenly gap-2">
-            <div className="mt-2 flex items-center justify-start gap-4">
-              <label htmlFor="project-name">Select:</label>
-              <select
-                id="project-name"
-                name="project-name"
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-                value={selectedProject?.id}
-                onChange={(e) => {
-                  setSelectedProject(
-                    projects?.find(
-                      (project) => project.id === Number(e.target.value)
-                    )
-                  );
-                }}
-              >
-                {/* <option value="">Select a project</option> */}
-                {projects?.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.project_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
 
-          <button
-            onClick={submitRemoveProject}
-            className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
-          >
-            Delete
-          </button>
-        </div>
+        {!projects ? (
+          <p className="italic">Loading...</p>
+        ) : (
+          <>
+            <div className="mt-2">
+              <h2 className="text-lg font-medium">Delete Project</h2>
+              <div className="flex flex-col justify-evenly gap-2">
+                <div className="mt-2 flex items-center justify-start gap-4">
+                  <label htmlFor="project-name">Select:</label>
+                  <select
+                    id="project-name"
+                    name="project-name"
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                    value={selectedProject?.id}
+                    onChange={(e) => {
+                      setSelectedProject(
+                        projects?.find(
+                          (project) => project.id === Number(e.target.value)
+                        )
+                      );
+                    }}
+                  >
+                    {/* <option value="">Select a project</option> */}
+                    {projects?.map((project) => (
+                      <option key={project.id} value={project.id}>
+                        {project.project_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <button
+                onClick={submitRemoveProject}
+                className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+              >
+                Delete
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

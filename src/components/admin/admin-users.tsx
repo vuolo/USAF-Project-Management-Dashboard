@@ -186,183 +186,192 @@ function AdminUsers() {
       <div className="flex flex-col justify-center gap-2 px-4 pt-4 pb-2 text-center sm:px-6 sm:pt-6">
         <h1 className="text-xl font-bold underline">Update Users</h1>
 
-        <div className="mt-2">
-          <h2 className="text-lg font-medium">Add Admin</h2>
-          <div className="flex flex-col justify-evenly gap-2">
-            <div className="mt-2 flex items-center justify-start gap-4">
-              <label htmlFor="admin-name">Name:</label>
-              <input
-                onChange={(e) => {
-                  setAdminName(e.target.value);
-                }}
-                type="text"
-                id="admin-name"
-                name="admin-name"
-                placeholder="e.g. 'John Doe'"
-                value={adminName ?? ""}
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-              />
-            </div>
-            <div className="mt-2 flex items-center justify-center gap-4 pl-1">
-              <label htmlFor="admin-email">Email:</label>
-              <input
-                onChange={(e) => {
-                  setAdminEmail(e.target.value);
-                }}
-                type="email"
-                id="admin-email"
-                name="admin-email"
-                placeholder="e.g. 'admin@example.com'"
-                value={adminEmail ?? ""}
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-              />
-            </div>
-          </div>
-
-          <button
-            onClick={submitAddAdmin}
-            className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
-          >
-            Add
-          </button>
-        </div>
-
-        <div className="mt-4">
-          <h2 className="text-lg font-medium">Add IPT</h2>
-          <div className="flex flex-col justify-evenly gap-2">
-            <div className="mt-2 flex items-center justify-start gap-4">
-              <label htmlFor="ipt-name">Name:</label>
-              <input
-                onChange={(e) => {
-                  setIptName(e.target.value);
-                }}
-                type="text"
-                id="ipt-name"
-                name="ipt-name"
-                placeholder="e.g. 'John Doe'"
-                value={iptName ?? ""}
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-              />
-            </div>
-            <div className="mt-2 flex items-center justify-center gap-4 pl-1">
-              <label htmlFor="ipt-email">Email:</label>
-              <input
-                onChange={(e) => {
-                  setIptEmail(e.target.value);
-                }}
-                type="email"
-                id="ipt-email"
-                name="ipt-email"
-                placeholder="e.g. 'ipt@example.com'"
-                value={iptEmail ?? ""}
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-              />
-            </div>
-          </div>
-
-          <button
-            onClick={submitAddIpt}
-            className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
-          >
-            Add
-          </button>
-        </div>
-
-        <div className="mt-4">
-          <h2 className="text-lg font-medium">Add Contractor</h2>
-          <div className="flex flex-col justify-evenly gap-2">
-            <div className="mt-2 flex items-center justify-start gap-4 pl-9">
-              <label htmlFor="contractor-name">Name:</label>
-              <input
-                onChange={(e) => {
-                  setContractorName(e.target.value);
-                }}
-                type="text"
-                id="contractor-name"
-                name="contractor-name"
-                placeholder="e.g. 'John Doe'"
-                value={contractorName ?? ""}
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-              />
-            </div>
-            <div className="mt-2 flex items-center justify-center gap-4 pl-2">
-              <label htmlFor="contractor-email">Summary:</label>
-              <input
-                onChange={(e) => {
-                  setContractorSummary(e.target.value);
-                }}
-                type="text"
-                id="contractor-email"
-                name="contractor-email"
-                placeholder="e.g. 'John Doe is a contractor at the Department of Defense'"
-                value={contractorSummary ?? ""}
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-              />
-            </div>
-            <div className="mt-2 flex items-center justify-center gap-4">
-              <label htmlFor="contractor-select">Contractor:</label>
-              <select
-                onChange={(e) => {
-                  setSelectedContractor(
-                    contractors?.find(
-                      (contractor) => contractor.id === Number(e.target.value)
-                    )
-                  );
-                }}
-                id="contractor-select"
-                name="contractor-select"
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-              >
-                {/* <option value="">Select a contractor</option> */}
-                {contractors?.map((contractor) => (
-                  <option key={contractor.id} value={contractor.id}>
-                    {contractor.contractor_name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <button
-            onClick={submitAddContractor}
-            className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
-          >
-            Add
-          </button>
-        </div>
-
-        <div className="mt-6">
-          <h2 className="text-lg font-medium">Remove User</h2>
-          <div className="flex flex-col justify-evenly gap-2">
-            <div className="mt-2 flex items-center justify-start gap-4">
-              <label htmlFor="remove-user-name">Select:</label>
-              <select
-                onChange={(e) =>
-                  setSelectedUser(
-                    users?.find((user) => user.id === Number(e.target.value))
-                  )
-                }
-                id="remove-user-name"
-                name="remove-user-name"
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-              >
-                {/* <option>Select User</option> */}
-                {users?.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.user_name}
-                  </option>
-                ))}
-              </select>
+        {!users || !contractors ? (
+          <p className="italic">Loading...</p>
+        ) : (
+          <>
+            <div className="mt-2">
+              <h2 className="text-lg font-medium">Add Admin</h2>
+              <div className="flex flex-col justify-evenly gap-2">
+                <div className="mt-2 flex items-center justify-start gap-4">
+                  <label htmlFor="admin-name">Name:</label>
+                  <input
+                    onChange={(e) => {
+                      setAdminName(e.target.value);
+                    }}
+                    type="text"
+                    id="admin-name"
+                    name="admin-name"
+                    placeholder="e.g. 'John Doe'"
+                    value={adminName ?? ""}
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                  />
+                </div>
+                <div className="mt-2 flex items-center justify-center gap-4 pl-1">
+                  <label htmlFor="admin-email">Email:</label>
+                  <input
+                    onChange={(e) => {
+                      setAdminEmail(e.target.value);
+                    }}
+                    type="email"
+                    id="admin-email"
+                    name="admin-email"
+                    placeholder="e.g. 'admin@example.com'"
+                    value={adminEmail ?? ""}
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                  />
+                </div>
+              </div>
 
               <button
-                onClick={submitRemoveUser}
-                className="inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+                onClick={submitAddAdmin}
+                className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
               >
-                Remove
+                Add
               </button>
             </div>
-          </div>
-        </div>
+
+            <div className="mt-4">
+              <h2 className="text-lg font-medium">Add IPT</h2>
+              <div className="flex flex-col justify-evenly gap-2">
+                <div className="mt-2 flex items-center justify-start gap-4">
+                  <label htmlFor="ipt-name">Name:</label>
+                  <input
+                    onChange={(e) => {
+                      setIptName(e.target.value);
+                    }}
+                    type="text"
+                    id="ipt-name"
+                    name="ipt-name"
+                    placeholder="e.g. 'John Doe'"
+                    value={iptName ?? ""}
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                  />
+                </div>
+                <div className="mt-2 flex items-center justify-center gap-4 pl-1">
+                  <label htmlFor="ipt-email">Email:</label>
+                  <input
+                    onChange={(e) => {
+                      setIptEmail(e.target.value);
+                    }}
+                    type="email"
+                    id="ipt-email"
+                    name="ipt-email"
+                    placeholder="e.g. 'ipt@example.com'"
+                    value={iptEmail ?? ""}
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                  />
+                </div>
+              </div>
+
+              <button
+                onClick={submitAddIpt}
+                className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+              >
+                Add
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <h2 className="text-lg font-medium">Add Contractor</h2>
+              <div className="flex flex-col justify-evenly gap-2">
+                <div className="mt-2 flex items-center justify-start gap-4 pl-9">
+                  <label htmlFor="contractor-name">Name:</label>
+                  <input
+                    onChange={(e) => {
+                      setContractorName(e.target.value);
+                    }}
+                    type="text"
+                    id="contractor-name"
+                    name="contractor-name"
+                    placeholder="e.g. 'John Doe'"
+                    value={contractorName ?? ""}
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                  />
+                </div>
+                <div className="mt-2 flex items-center justify-center gap-4 pl-2">
+                  <label htmlFor="contractor-email">Summary:</label>
+                  <input
+                    onChange={(e) => {
+                      setContractorSummary(e.target.value);
+                    }}
+                    type="text"
+                    id="contractor-email"
+                    name="contractor-email"
+                    placeholder="e.g. 'John Doe is a contractor at the Department of Defense'"
+                    value={contractorSummary ?? ""}
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                  />
+                </div>
+                <div className="mt-2 flex items-center justify-center gap-4">
+                  <label htmlFor="contractor-select">Contractor:</label>
+                  <select
+                    onChange={(e) => {
+                      setSelectedContractor(
+                        contractors?.find(
+                          (contractor) =>
+                            contractor.id === Number(e.target.value)
+                        )
+                      );
+                    }}
+                    id="contractor-select"
+                    name="contractor-select"
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                  >
+                    {/* <option value="">Select a contractor</option> */}
+                    {contractors?.map((contractor) => (
+                      <option key={contractor.id} value={contractor.id}>
+                        {contractor.contractor_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <button
+                onClick={submitAddContractor}
+                className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+              >
+                Add
+              </button>
+            </div>
+
+            <div className="mt-6">
+              <h2 className="text-lg font-medium">Remove User</h2>
+              <div className="flex flex-col justify-evenly gap-2">
+                <div className="mt-2 flex items-center justify-start gap-4">
+                  <label htmlFor="remove-user-name">Select:</label>
+                  <select
+                    onChange={(e) =>
+                      setSelectedUser(
+                        users?.find(
+                          (user) => user.id === Number(e.target.value)
+                        )
+                      )
+                    }
+                    id="remove-user-name"
+                    name="remove-user-name"
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                  >
+                    {/* <option>Select User</option> */}
+                    {users?.map((user) => (
+                      <option key={user.id} value={user.id}>
+                        {user.user_name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    onClick={submitRemoveUser}
+                    className="inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

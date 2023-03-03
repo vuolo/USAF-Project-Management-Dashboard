@@ -98,68 +98,78 @@ function AdminMilitaryJobTitles() {
         <h1 className="text-xl font-bold underline">
           Update Military Job Titles
         </h1>
-        <div className="mt-2">
-          <h2 className="text-lg font-medium">Add Military Job Titles</h2>
-          <div className="flex flex-col justify-evenly gap-2">
-            <div className="mt-2 flex items-center justify-start gap-4">
-              <label htmlFor="military-job-title">Job Title:</label>
-              <input
-                onChange={(e) => {
-                  setMilitaryJobTitle(e.target.value);
-                }}
-                type="text"
-                id="military-job-title"
-                name="military-job-title"
-                placeholder="e.g. 'Airman First Class'"
-                value={militaryJobTitle}
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-              />
-            </div>
-          </div>
 
-          <button
-            onClick={submitAddMilitaryJobTitle}
-            className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
-          >
-            Add
-          </button>
-        </div>
-
-        <div className="mt-6">
-          <h2 className="text-lg font-medium">Remove Military Job Title</h2>
-          <div className="flex flex-col justify-evenly gap-2">
-            <div className="mt-2 flex items-center justify-start gap-4">
-              <label htmlFor="remove-military-job-title">Select:</label>
-              <select
-                onChange={(e) => {
-                  setSelectedMilitaryJobTitle(
-                    militaryJobTitles?.find(
-                      (militaryJobTitle) =>
-                        militaryJobTitle.id === parseInt(e.target.value)
-                    )
-                  );
-                }}
-                id="remove-military-job-title"
-                name="remove-military-job-title"
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-              >
-                {/* <option value="">Select a Military Job Title</option> */}
-                {militaryJobTitles?.map((militaryJobTitle) => (
-                  <option key={militaryJobTitle.id} value={militaryJobTitle.id}>
-                    {militaryJobTitle.mil_job_title}
-                  </option>
-                ))}
-              </select>
+        {!militaryJobTitles ? (
+          <p className="italic">Loading...</p>
+        ) : (
+          <>
+            <div className="mt-2">
+              <h2 className="text-lg font-medium">Add Military Job Titles</h2>
+              <div className="flex flex-col justify-evenly gap-2">
+                <div className="mt-2 flex items-center justify-start gap-4">
+                  <label htmlFor="military-job-title">Job Title:</label>
+                  <input
+                    onChange={(e) => {
+                      setMilitaryJobTitle(e.target.value);
+                    }}
+                    type="text"
+                    id="military-job-title"
+                    name="military-job-title"
+                    placeholder="e.g. 'Airman First Class'"
+                    value={militaryJobTitle}
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                  />
+                </div>
+              </div>
 
               <button
-                onClick={submitRemoveMilitaryJobTitle}
-                className="inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+                onClick={submitAddMilitaryJobTitle}
+                className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
               >
-                Remove
+                Add
               </button>
             </div>
-          </div>
-        </div>
+
+            <div className="mt-6">
+              <h2 className="text-lg font-medium">Remove Military Job Title</h2>
+              <div className="flex flex-col justify-evenly gap-2">
+                <div className="mt-2 flex items-center justify-start gap-4">
+                  <label htmlFor="remove-military-job-title">Select:</label>
+                  <select
+                    onChange={(e) => {
+                      setSelectedMilitaryJobTitle(
+                        militaryJobTitles?.find(
+                          (militaryJobTitle) =>
+                            militaryJobTitle.id === parseInt(e.target.value)
+                        )
+                      );
+                    }}
+                    id="remove-military-job-title"
+                    name="remove-military-job-title"
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                  >
+                    {/* <option value="">Select a Military Job Title</option> */}
+                    {militaryJobTitles?.map((militaryJobTitle) => (
+                      <option
+                        key={militaryJobTitle.id}
+                        value={militaryJobTitle.id}
+                      >
+                        {militaryJobTitle.mil_job_title}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    onClick={submitRemoveMilitaryJobTitle}
+                    className="inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

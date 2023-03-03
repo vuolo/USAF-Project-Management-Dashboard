@@ -103,68 +103,75 @@ function AdminFundingTypes() {
 
       <div className="flex flex-col justify-center gap-2 px-4 pt-4 pb-2 text-center sm:px-6 sm:pt-6">
         <h1 className="text-xl font-bold underline">Update Funding Types</h1>
-        <div className="mt-2">
-          <h2 className="text-lg font-medium">Add Funding Type</h2>
-          <div className="flex flex-col justify-evenly gap-2">
-            <div className="mt-2 flex items-center justify-start gap-4">
-              <label htmlFor="funding-type">Funding Type:</label>
-              <input
-                onChange={(e) => {
-                  setFundingTypeName(e.target.value);
-                }}
-                type="text"
-                id="funding-type"
-                name="funding-type"
-                placeholder="Funding Type"
-                value={fundingTypeName ?? ""}
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-              />
-            </div>
-          </div>
 
-          <button
-            onClick={submitAddFundingType}
-            className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
-          >
-            Add
-          </button>
-        </div>
-
-        <div className="mt-6">
-          <h2 className="text-lg font-medium">Remove Funding Type</h2>
-          <div className="flex flex-col justify-evenly gap-2">
-            <div className="mt-2 flex items-center justify-start gap-4">
-              <label htmlFor="remove-funding-type">Select:</label>
-              <select
-                onChange={(e) => {
-                  setSelectedFundingType(
-                    fundingTypes?.find(
-                      (fundingType) =>
-                        fundingType.id === parseInt(e.target.value)
-                    )
-                  );
-                }}
-                id="remove-funding-type"
-                name="remove-funding-type"
-                className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
-              >
-                {/* <option value="">Select Funding Type</option> */}
-                {fundingTypes?.map((fundingType) => (
-                  <option key={fundingType.id} value={fundingType.id}>
-                    {fundingType.funding_type}
-                  </option>
-                ))}
-              </select>
+        {!fundingTypes ? (
+          <p className="italic">Loading...</p>
+        ) : (
+          <>
+            <div className="mt-2">
+              <h2 className="text-lg font-medium">Add Funding Type</h2>
+              <div className="flex flex-col justify-evenly gap-2">
+                <div className="mt-2 flex items-center justify-start gap-4">
+                  <label htmlFor="funding-type">Funding Type:</label>
+                  <input
+                    onChange={(e) => {
+                      setFundingTypeName(e.target.value);
+                    }}
+                    type="text"
+                    id="funding-type"
+                    name="funding-type"
+                    placeholder="Funding Type"
+                    value={fundingTypeName ?? ""}
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                  />
+                </div>
+              </div>
 
               <button
-                onClick={submitRemoveFundingType}
-                className="inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+                onClick={submitAddFundingType}
+                className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
               >
-                Remove
+                Add
               </button>
             </div>
-          </div>
-        </div>
+
+            <div className="mt-6">
+              <h2 className="text-lg font-medium">Remove Funding Type</h2>
+              <div className="flex flex-col justify-evenly gap-2">
+                <div className="mt-2 flex items-center justify-start gap-4">
+                  <label htmlFor="remove-funding-type">Select:</label>
+                  <select
+                    onChange={(e) => {
+                      setSelectedFundingType(
+                        fundingTypes?.find(
+                          (fundingType) =>
+                            fundingType.id === parseInt(e.target.value)
+                        )
+                      );
+                    }}
+                    id="remove-funding-type"
+                    name="remove-funding-type"
+                    className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
+                  >
+                    {/* <option value="">Select Funding Type</option> */}
+                    {fundingTypes?.map((fundingType) => (
+                      <option key={fundingType.id} value={fundingType.id}>
+                        {fundingType.funding_type}
+                      </option>
+                    ))}
+                  </select>
+
+                  <button
+                    onClick={submitRemoveFundingType}
+                    className="inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
