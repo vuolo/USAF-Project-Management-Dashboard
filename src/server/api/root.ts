@@ -9,6 +9,7 @@ import { milestoneRouter } from "./routers/milestone";
 import { contractRouter } from "./routers/contract";
 import { approvedRouter } from "./routers/approved";
 import { contractorRouter } from "./routers/contractor";
+import { fundingTypeRouter } from "./routers/funding_type";
 
 /**
  * This is the primary router for your server.
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   contract: contractRouter,
   approved: approvedRouter,
   contractor: contractorRouter,
+  funding_type: fundingTypeRouter,
 });
 
 // export type definition of API
