@@ -4,6 +4,9 @@ import { prisma } from "~/server/db";
 import type { branches } from "@prisma/client";
 
 export const branchRouter = createTRPCRouter({
+  getAll: protectedProcedure.query(async () => {
+    return await prisma.branches.findMany();
+  }),
   getAllWithNoProjects: protectedProcedure.query(async () => {
     return await prisma.$queryRaw<branches[]>`
       SELECT *

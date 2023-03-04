@@ -18,6 +18,21 @@ export const projectRouter = createTRPCRouter({
         )[0] || null
       );
     }),
+  add: protectedProcedure
+    .input(
+      z.object({
+        project_name: z.string(),
+        project_type: z.enum(["Contract", "MIPR"]),
+        contractor_id: z.number(),
+        branch_id: z.number(),
+        requirement_type_id: z.number(),
+        summary: z.string(),
+        ccar_num: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.project.create({ data: { ...input } });
+    }),
   delete: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
