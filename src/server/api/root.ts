@@ -12,6 +12,7 @@ import { contractorRouter } from "./routers/contractor";
 import { fundingTypeRouter } from "./routers/funding_type";
 import { branchRouter } from "./routers/branch";
 import { mjtRouter } from "./routers/mjt";
+import { requirementTypeRouter } from "./routers/requirement_type";
 
 /**
  * This is the primary router for your server.
@@ -30,6 +31,7 @@ export const appRouter = createTRPCRouter({
   approved: approvedRouter,
   contractor: contractorRouter,
   funding_type: fundingTypeRouter,
+  requirement_type: requirementTypeRouter,
   branch: branchRouter,
   mjt: mjtRouter,
 });
