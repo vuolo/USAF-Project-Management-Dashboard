@@ -13,7 +13,7 @@ function FinancialSummary() {
         <h1>Financial Summary</h1>
       </div>
 
-      <div className="flex h-[26.5rem] justify-evenly gap-6 px-8 pt-4 pb-6">
+      <div className="flex h-[27.35rem] justify-evenly gap-6 px-8 pt-4 pb-6">
         {obligation && expenditure && breakpoints ? (
           <>
             {/* Obligation Status to Date */}
