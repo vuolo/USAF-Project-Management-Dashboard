@@ -13,6 +13,8 @@ import { fundingTypeRouter } from "./routers/funding_type";
 import { branchRouter } from "./routers/branch";
 import { mjtRouter } from "./routers/mjt";
 import { requirementTypeRouter } from "./routers/requirement_type";
+import { clinRouter } from "./routers/clin";
+import { wbsRouter } from "./routers/wbs";
 
 /**
  * This is the primary router for your server.
@@ -34,6 +36,8 @@ export const appRouter = createTRPCRouter({
   requirement_type: requirementTypeRouter,
   branch: branchRouter,
   mjt: mjtRouter,
+  clin: clinRouter,
+  wbs: wbsRouter,
 });
 
 // export type definition of API

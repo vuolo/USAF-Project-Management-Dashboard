@@ -1,12 +1,17 @@
+import type {
+  project_project_type,
+  contract_award_contract_status,
+} from "@prisma/client";
+
 export type view_project = {
   id: number;
   project_name: string;
-  project_type: string;
+  project_type: project_project_type;
   contractor_id: number;
   contractor_name: string;
   contract_award_id: number;
   contract_num: string;
-  contract_status: string;
+  contract_status: contract_award_contract_status;
   contract_value: number;
   ind_gov_est: number;
   branch_id: number;

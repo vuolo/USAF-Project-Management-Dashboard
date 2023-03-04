@@ -15,7 +15,7 @@ function StatusIcon({ status }: { status: string }) {
     case "red":
       return <AlertTriangle style={{ fill: "red", color: "red" }} />;
     default:
-      return <h1>N/A</h1>;
+      return <></>; //<h1>N/A</h1>;
   }
 }
 
