@@ -33,17 +33,46 @@ export const clinRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       return await prisma.$executeRaw`
-        INSERT INTO clin_data 
-          (clin_num, 
-          project_id, 
-          clin_type, 
+        INSERT INTO clin_data (
+          clin_num,
+          project_id,
+          clin_type,
           clin_scope, 
           ind_gov_est) 
         VALUES (
           ${input.clin_num},
           ${input.project_id},
-          "${input.clin_type}",
-          "${input.clin_scope}",
+          ${input.clin_type},
+          ${input.clin_scope},
           ${input.ind_gov_est})`;
+    }),
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        clin_num: z.number(),
+        project_id: z.number(),
+        clin_type: z.string(),
+        clin_scope: z.string(),
+        ind_gov_est: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.$executeRaw`
+        UPDATE clin_data 
+        SET 
+          clin_num = ${input.clin_num},
+          project_id = ${input.project_id},
+          clin_type = ${input.clin_type},
+          clin_scope = ${input.clin_scope},
+          ind_gov_est = ${input.ind_gov_est}
+        WHERE id = ${input.id}`;
+    }),
+  delete: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      return await prisma.$executeRaw`
+        DELETE FROM clin_data 
+        WHERE id = ${input.id}`;
     }),
 });

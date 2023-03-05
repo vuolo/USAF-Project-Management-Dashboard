@@ -1,5 +1,6 @@
 import { Fragment, useCallback, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { Dialog, Transition } from "@headlessui/react";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
@@ -7,11 +8,13 @@ import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
 import { ListPlus } from "lucide-react";
 import type { clin_data_clin_type } from "@prisma/client";
+import type { view_clin } from "~/types/view_clin";
 
 function ProjectClin({ project_id }: { project_id: number }) {
+  const router = useRouter();
   const { data: clin_list } = api.clin.get.useQuery({ project_id });
 
-  // Modal functionality (states)
+  // Add CLIN Modal functionality (states)
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addModalInput_clinNumber, setAddModalInput_clinNumber] =
     useState<number>();
@@ -38,7 +41,8 @@ function ProjectClin({ project_id }: { project_id: number }) {
         )
       );
 
-      // TODO: Add the new clin details to the UI
+      // Add the new clin details to the UI (using reload is a bit hacky, but it works)
+      router.reload();
     },
   });
 
@@ -74,7 +78,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
     project_id,
   ]);
 
-  // Open modal
+  // Open add CLIN modal
   const openAddModal = useCallback(() => {
     setAddModalInput_clinNumber(undefined);
     setAddModalInput_selectedClinType("FFP");
@@ -83,7 +87,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
     setAddModalOpen(true);
   }, []);
 
-  // Close modal
+  // Close add CLIN modal
   const closeAddModal = useCallback(
     (save: boolean) => {
       setAddModalOpen(false);
@@ -97,8 +101,8 @@ function ProjectClin({ project_id }: { project_id: number }) {
         ) {
           toast.error(
             toastMessage(
-              "Error renaming file.",
-              "Please enter a valid file name."
+              "Error adding CLIN.",
+              "Please enter a valid CLIN number, type, scope, and IGCE."
             )
           );
           return;
@@ -123,6 +127,164 @@ function ProjectClin({ project_id }: { project_id: number }) {
       submitAddClin,
     ]
   );
+
+  // Edit CLIN Modal functionality (states)
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editModalInput_clinNumber, setEditModalInput_clinNumber] =
+    useState<number>();
+  const [editModalInput_selectedClinType, setEditModalInput_selectedClinType] =
+    useState<clin_data_clin_type>("FFP");
+  const [editModalInput_clinScope, setEditModalInput_clinScope] = useState("");
+  const [editModalInput_igce, setEditModalInput_igce] = useState<number>();
+  const [editModalInput_clinId, setEditModalInput_clinId] = useState<number>();
+
+  const editClin = api.clin.update.useMutation({
+    onError(error) {
+      toast.error(
+        toastMessage(
+          "Error editing CLIN.",
+          "There was an error editing the CLIN. Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess() {
+      toast.success(
+        toastMessage(
+          "CLIN edited successfully.",
+          "The CLIN was edited successfully."
+        )
+      );
+
+      // Add the new clin details to the UI (using reload is a bit hacky, but it works)
+      router.reload();
+    },
+  });
+
+  const submitEditClin = useCallback(() => {
+    if (
+      typeof editModalInput_clinNumber !== "number" ||
+      typeof editModalInput_selectedClinType !== "string" ||
+      typeof editModalInput_clinScope !== "string" ||
+      typeof editModalInput_igce !== "number" ||
+      typeof editModalInput_clinId !== "number"
+    ) {
+      toast.error(
+        toastMessage(
+          "Error editing CLIN.",
+          "Please enter a valid CLIN number, type, scope, and IGCE."
+        )
+      );
+      return;
+    }
+
+    editClin.mutate({
+      id: editModalInput_clinId,
+      project_id,
+      clin_num: editModalInput_clinNumber,
+      clin_type: editModalInput_selectedClinType,
+      clin_scope: editModalInput_clinScope,
+      ind_gov_est: editModalInput_igce,
+    });
+
+    // Reset the input (use a timeout to wait for the modal close transition to finish)
+    setTimeout(() => {
+      setEditModalInput_clinNumber(undefined);
+      setEditModalInput_selectedClinType("FFP");
+      setEditModalInput_clinScope("");
+      setEditModalInput_igce(undefined);
+      setEditModalInput_clinId(undefined);
+    }, 500);
+  }, [
+    editModalInput_clinNumber,
+    editModalInput_selectedClinType,
+    editModalInput_clinScope,
+    editModalInput_igce,
+    editModalInput_clinId,
+    editClin,
+    project_id,
+  ]);
+
+  // Open edit CLIN modal
+  const openEditModal = useCallback(
+    (clin: view_clin) => {
+      setEditModalInput_clinNumber(clin.clin_num ?? undefined);
+      setEditModalInput_selectedClinType(clin.clin_type);
+      setEditModalInput_clinScope(clin.clin_scope ?? "");
+      setEditModalInput_igce(Number(clin.ind_gov_est));
+      setEditModalInput_clinId(clin.id);
+      setEditModalOpen(true);
+    },
+    [setEditModalOpen]
+  );
+
+  // Close edit CLIN modal
+  const closeEditModal = useCallback(
+    (save: boolean) => {
+      setEditModalOpen(false);
+
+      if (save) {
+        if (
+          typeof editModalInput_clinNumber !== "number" ||
+          typeof editModalInput_selectedClinType !== "string" ||
+          typeof editModalInput_clinScope !== "string" ||
+          typeof editModalInput_igce !== "number" ||
+          typeof editModalInput_clinId !== "number"
+        ) {
+          toast.error(
+            toastMessage(
+              "Error editing CLIN.",
+              "Please enter a valid CLIN number, type, scope, and IGCE."
+            )
+          );
+          return;
+        }
+
+        submitEditClin();
+      }
+
+      // Reset the input (use a timeout to wait for the modal close transition to finish)
+      setTimeout(() => {
+        setEditModalInput_clinNumber(undefined);
+        setEditModalInput_selectedClinType("FFP");
+        setEditModalInput_clinScope("");
+        setEditModalInput_igce(undefined);
+        setEditModalInput_clinId(undefined);
+      }, 500);
+    },
+    [submitEditClin, setEditModalOpen]
+  );
+
+  // Delete CLIN functionality
+  const deleteClin = api.clin.delete.useMutation({
+    onError(error) {
+      toast.error(
+        toastMessage(
+          "Error deleting CLIN.",
+          "There was an error deleting the CLIN. Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess() {
+      toast.success(
+        toastMessage(
+          "CLIN deleted successfully.",
+          "The CLIN was deleted successfully."
+        )
+      );
+
+      // Remove the deleted clin from the UI (using reload is a bit hacky, but it works)
+      router.reload();
+    },
+  });
+
+  const submitDeleteClin = useCallback(() => {
+    if (editModalInput_clinId)
+      deleteClin.mutate({
+        id: editModalInput_clinId,
+      });
+  }, [deleteClin, editModalInput_clinId]);
 
   return (
     <>
@@ -190,7 +352,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
-                        Independent Goverment Cost Estimate
+                        Independent Goverment Cost Estimate ($)
                       </th>
                       <th
                         scope="col"
@@ -231,8 +393,10 @@ function ProjectClin({ project_id }: { project_id: number }) {
                           </td>
                           <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                             <a
-                              href="#"
-                              className="text-blue-600 hover:text-blue-900"
+                              onClick={() => {
+                                openEditModal(clin);
+                              }}
+                              className="cursor-pointer text-blue-600 hover:text-blue-900"
                             >
                               Edit
                               <span className="sr-only">, {clin.clin_num}</span>
@@ -418,6 +582,196 @@ function ProjectClin({ project_id }: { project_id: number }) {
                     type="button"
                     className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                     onClick={() => closeAddModal(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </Transition.Child>
+          </div>
+        </Dialog>
+      </Transition.Root>
+
+      {/* Edit CLIN Modal */}
+      <Transition.Root show={editModalOpen} as={Fragment}>
+        <Dialog
+          as="div"
+          className="fixed inset-0 z-10 overflow-y-auto"
+          onClose={() => {
+            closeEditModal(false);
+          }}
+        >
+          <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
+            >
+              <Dialog.Overlay className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            </Transition.Child>
+
+            {/* This element is to trick the browser into centering the modal contents. */}
+            <span
+              className="hidden sm:inline-block sm:h-screen sm:align-middle"
+              aria-hidden="true"
+            >
+              &#8203;
+            </span>
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              enterTo="opacity-100 translate-y-0 sm:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+              leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+            >
+              <div className="relative inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
+                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div className="sm:flex sm:items-start">
+                    <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                      <ListPlus
+                        className="h-6 w-6 text-blue-600"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <div className="mt-3 mr-2 w-full text-center sm:mt-0 sm:ml-4 sm:text-left">
+                      <Dialog.Title
+                        as="h3"
+                        className="text-lg font-medium leading-6 text-gray-900"
+                      >
+                        Edit CLIN
+                      </Dialog.Title>
+                      <div className="mt-2 flex min-w-full flex-col gap-2">
+                        {/* CLIN Number */}
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            closeEditModal(true);
+                          }}
+                          className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
+                        >
+                          <label htmlFor="clin-number">CLIN Number</label>
+                          <input
+                            type="number"
+                            name="clin-number"
+                            id="clin-number"
+                            className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            placeholder="e.g. '1'"
+                            value={editModalInput_clinNumber}
+                            onChange={(e) => {
+                              setEditModalInput_clinNumber(
+                                Number(e.target.value)
+                              );
+                            }}
+                          />
+                        </form>
+
+                        {/* CLIN Type */}
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            closeEditModal(true);
+                          }}
+                          className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
+                        >
+                          <label htmlFor="clin-type">CLIN Type</label>
+                          <select
+                            id="clin-type"
+                            name="clin-type"
+                            className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            value={editModalInput_selectedClinType}
+                            onChange={(e) => {
+                              setEditModalInput_selectedClinType(
+                                e.target.value as clin_data_clin_type
+                              );
+                            }}
+                          >
+                            <option value="FFP">FFP</option>
+                            <option value="FFIF">FFIF</option>
+                            <option value="FF-EPA">FF-EPA</option>
+                            <option value="CPFF">CPFF</option>
+                            <option value="CPIF">CPIF</option>
+                            <option value="CPAF">CPAF</option>
+                            <option value="T&M">T&M</option>
+                          </select>
+                        </form>
+
+                        {/* CLIN Scope */}
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            closeEditModal(true);
+                          }}
+                          className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
+                        >
+                          <label htmlFor="clin-scope">CLIN Scope</label>
+                          <input
+                            type="text"
+                            name="clin-scope"
+                            id="clin-scope"
+                            className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            placeholder="e.g. 'Development of a new feature'"
+                            value={editModalInput_clinScope}
+                            onChange={(e) => {
+                              setEditModalInput_clinScope(e.target.value);
+                            }}
+                          />
+                        </form>
+
+                        {/* Independent Goverment Cost Estimate */}
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            closeEditModal(true);
+                          }}
+                          className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
+                        >
+                          <label htmlFor="igce">
+                            Independent Goverment Cost Estimate ($)
+                          </label>
+                          <input
+                            type="number"
+                            name="igce"
+                            id="igce"
+                            className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            placeholder="e.g. '100000'"
+                            value={editModalInput_igce}
+                            onChange={(e) => {
+                              setEditModalInput_igce(Number(e.target.value));
+                            }}
+                          />
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                  <button
+                    type="button"
+                    className="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={() => {
+                      submitDeleteClin();
+                      closeEditModal(false);
+                    }}
+                  >
+                    Delete CLIN
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={() => closeEditModal(true)}
+                  >
+                    Submit Changes
+                  </button>
+                  <button
+                    type="button"
+                    className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={() => closeEditModal(false)}
                   >
                     Cancel
                   </button>

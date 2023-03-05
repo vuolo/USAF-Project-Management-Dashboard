@@ -172,8 +172,8 @@ function ProjectDetails({ project }: { project: view_project }) {
         ) {
           toast.error(
             toastMessage(
-              "Error renaming file.",
-              "Please enter a valid file name."
+              "Error updating project.",
+              "Please enter valid project details."
             )
           );
           return;
