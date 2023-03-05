@@ -3,7 +3,12 @@ import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
 import { api } from "~/utils/api";
-import type { branches, contractor, requirement_types } from "@prisma/client";
+import type {
+  branches,
+  contractor,
+  contract_award_contract_status,
+  requirement_types,
+} from "@prisma/client";
 
 function ProjectAdd() {
   const router = useRouter();
@@ -19,6 +24,31 @@ function ProjectAdd() {
     useState<requirement_types>();
   const [projectSummary, setProjectSummary] = useState<string>("");
   const [ccarNumber, setCcarNumber] = useState<string>("");
+
+  const [contractStatus, setContractStatus] =
+    useState<contract_award_contract_status>("Pre_Award");
+  const [contractNumber, setContractNumber] = useState<string>("");
+
+  const addContractAward = api.contract.addContractAward.useMutation({
+    onError(error) {
+      toast.error(
+        toastMessage(
+          "Error Adding Contract Award",
+          "Please try again later. If the problem persists, please contact support."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess(data) {
+      toast.success(
+        toastMessage(
+          "Contract Award Added",
+          "The contract award was added successfully."
+        )
+      );
+      void router.push(`/projects/${data.project_id ?? "0"}`);
+    },
+  });
 
   // Select the first contractor, branch, and requirement type by default
   useEffect(() => {
@@ -45,7 +75,11 @@ function ProjectAdd() {
       toast.success(
         toastMessage("Project Added", "The project was added successfully.")
       );
-      void router.push(`/projects/${data.id}`);
+      addContractAward.mutate({
+        project_id: data.id,
+        contract_status: contractStatus,
+        contract_num: contractNumber,
+      });
     },
   });
 
@@ -83,10 +117,11 @@ function ProjectAdd() {
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
       <div className="rounded-t-md bg-brand-dark px-8 py-2 text-center font-medium text-white">
-        <h1>Add Project</h1>
+        <h1>Add New Project</h1>
       </div>
 
       <div className="flex flex-col justify-center gap-2 px-4 pt-4 pb-2 text-center sm:px-6 sm:pt-6">
+        {/* Project Details */}
         <div className="mt-2">
           <div className="flex flex-col justify-evenly gap-2">
             <div className="mt-2 flex items-center justify-start gap-4 pl-16">
@@ -215,14 +250,54 @@ function ProjectAdd() {
               />
             </div>
           </div>
-
-          <button
-            onClick={submitAddProject}
-            className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
-          >
-            Add
-          </button>
         </div>
+
+        {/* Contract Details */}
+        <div className="mt-2 flex flex-col items-center justify-center">
+          <div className="flex flex-col justify-evenly gap-2">
+            {/* Contract Status */}
+            <div className="mt-2 flex items-center justify-start gap-4">
+              <label htmlFor="contractor-name">Contract Status:</label>
+              <select
+                onChange={(e) => {
+                  setContractStatus(
+                    e.target.value as contract_award_contract_status
+                  );
+                }}
+                id="remove-organization-branch-name"
+                name="remove-organization-branch-name"
+                className="w-64 rounded-md bg-gray-200 px-4 py-2 text-black"
+              >
+                {/* Contract Status is static */}
+                <option value="Pre_Award">Pre-Awarded</option>
+                <option value="Awarded">Awarded</option>
+              </select>
+            </div>
+
+            {/* Contract Number */}
+            <div className="mt-2 flex items-center justify-start gap-4">
+              <label htmlFor="contractor-name">Contract Number:</label>
+              <input
+                onChange={(e) => {
+                  setContractNumber(e.target.value);
+                }}
+                type="text"
+                id="contract-number"
+                name="contract-number"
+                placeholder="e.g. 'FA8620-22-Z-3333'"
+                value={contractNumber}
+                className="w-64 rounded-md bg-gray-200 px-4 py-2 text-black"
+              />
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={submitAddProject}
+          className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+        >
+          Add New Project
+        </button>
       </div>
     </div>
   );

@@ -108,17 +108,17 @@ function ProjectsOverview() {
                               href={`/projects/${project.id}`}
                               className="hover:text-brand-dark/80"
                             >
-                              {project.project_name}
+                              {project.project_name || "Untitled"}
                             </Link>
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {project.contract_num}
+                            {project.contract_num || "..."}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {project.contract_status}
+                            {project.contract_status || "..."}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {project.branch}
+                            {project.branch || "..."}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {formatCurrency(project.contract_value)}

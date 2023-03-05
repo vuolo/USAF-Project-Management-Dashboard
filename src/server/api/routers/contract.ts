@@ -79,4 +79,21 @@ export const contractRouter = createTRPCRouter({
         )[0] || null
       );
     }),
+  addContractAward: protectedProcedure
+    .input(
+      z.object({
+        project_id: z.number(),
+        contract_num: z.string(),
+        contract_status: z.enum(["Pre_Award", "Awarded", "Closed"]),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.contract_award.create({
+        data: {
+          project_id: input.project_id,
+          contract_num: input.contract_num,
+          contract_status: input.contract_status,
+        },
+      });
+    }),
 });
