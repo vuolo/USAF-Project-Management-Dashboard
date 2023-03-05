@@ -284,7 +284,7 @@ function ModalEditProjectDetails({
                           type="text"
                           name="project-name"
                           id="project-name"
-                          className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                          className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                           placeholder="e.g. 'Project 1'"
                           value={projectName}
                           onChange={(e) => {
@@ -308,7 +308,7 @@ function ModalEditProjectDetails({
                           type="text"
                           name="contractor-number"
                           id="contractor-number"
-                          className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                          className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                           placeholder="e.g. 'FA8620-22-Z-3333'"
                           value={contractNumber}
                           onChange={(e) => {
@@ -330,7 +330,7 @@ function ModalEditProjectDetails({
                           type="text"
                           name="ccar-number"
                           id="ccar-number"
-                          className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                          className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                           placeholder="e.g. '1500'"
                           value={ccarNumber}
                           onChange={(e) => {
@@ -351,7 +351,7 @@ function ModalEditProjectDetails({
                         <select
                           id="contractor-select"
                           name="contractor-select"
-                          className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                          className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                           value={Number(selectedContractor?.id)}
                           onChange={(e) => {
                             set_selectedContractor(
@@ -389,7 +389,7 @@ function ModalEditProjectDetails({
                         <select
                           id="organization-select"
                           name="organization-select"
-                          className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                          className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                           value={Number(selectedBranch?.id)}
                           onChange={(e) => {
                             set_selectedBranch(
@@ -423,7 +423,7 @@ function ModalEditProjectDetails({
                         <select
                           id="requirement-type-select"
                           name="requirement-type-select"
-                          className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                          className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                           value={Number(selectedRequirementType?.id)}
                           onChange={(e) => {
                             set_selectedRequirementType(
@@ -462,7 +462,7 @@ function ModalEditProjectDetails({
                           id="capability-summary"
                           name="capability-summary"
                           rows={3}
-                          className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                          className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                           placeholder="This is a summary of the project's capability."
                           value={capabilitySummary}
                           onChange={(e) => {

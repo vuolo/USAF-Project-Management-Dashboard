@@ -55,6 +55,45 @@ export const userRouter = createTRPCRouter({
       WHERE upl.project_id = ${input.project_id} AND upl.mil_job_title_id IS NOT NULL
       ORDER BY upl.mil_job_title_id`;
     }),
+  addToUserProjectLink: protectedProcedure
+    .input(
+      z.object({
+        project_id: z.number(),
+        user_id: z.number(),
+        mil_job_title_id: z.number().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return input.mil_job_title_id !== undefined
+        ? await prisma.$executeRaw`
+            INSERT INTO user_project_link(
+              user_id,
+              project_id,
+              mil_job_title_id
+            ) VALUES (
+              ${input.user_id},
+              ${input.project_id},
+              ${input.mil_job_title_id})`
+        : await prisma.$executeRaw`
+            INSERT INTO user_project_link(
+              user_id,
+              project_id
+            ) VALUES (
+              ${input.user_id},
+              ${input.project_id})`;
+    }),
+  removeFromUserProjectLink: protectedProcedure
+    .input(
+      z.object({
+        project_id: z.number(),
+        user_id: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.$executeRaw`
+        DELETE FROM user_project_link
+        WHERE user_id = ${input.user_id} AND project_id = ${input.project_id}`;
+    }),
   add: protectedProcedure
     .input(
       z.object({

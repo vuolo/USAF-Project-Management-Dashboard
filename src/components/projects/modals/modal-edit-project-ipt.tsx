@@ -38,6 +38,183 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
   const [selectedRemoveContractorUser, set_selectedRemoveContractorUser] =
     useState<users>();
 
+  const addIptMember = api.user.addToUserProjectLink.useMutation({
+    onError: (error) => {
+      toast.error(
+        toastMessage(
+          "Error Adding IPT Member",
+          "There was an error adding the IPT member to the project. Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess: () => {
+      toast.success(
+        toastMessage(
+          "IPT Member Added",
+          "The IPT member was successfully added to the project."
+        )
+      );
+
+      // Refresh the UI data
+      if (selectedAddIptUser)
+        ipt?.push({
+          id: selectedAddIptUser?.id,
+          mil_job_title: selectedAddIptJobTitle?.mil_job_title || "",
+          user_name: selectedAddIptUser?.user_name || "",
+        });
+    },
+  });
+
+  const submitAddIptMember = useCallback(() => {
+    if (!selectedAddIptJobTitle || !selectedAddIptUser) {
+      toast.error(
+        toastMessage(
+          "Error Adding IPT Member",
+          "Please select a job title and user to add to the IPT."
+        )
+      );
+      return;
+    }
+
+    addIptMember.mutate({
+      project_id: project.id,
+      user_id: selectedAddIptUser.id,
+      mil_job_title_id: selectedAddIptJobTitle.id,
+    });
+  }, [addIptMember, project, selectedAddIptJobTitle, selectedAddIptUser]);
+
+  const removeIptMember = api.user.removeFromUserProjectLink.useMutation({
+    onError: (error) => {
+      toast.error(
+        toastMessage(
+          "Error Removing IPT Member",
+          "There was an error removing the IPT member from the project. Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess: () => {
+      toast.success(
+        toastMessage(
+          "IPT Member Removed",
+          "The IPT member was successfully removed from the project."
+        )
+      );
+
+      // Refresh the UI data
+      if (selectedRemoveIptUser)
+        ipt?.splice(
+          ipt.findIndex((user) => user.id === selectedRemoveIptUser.id),
+          1
+        );
+    },
+  });
+
+  const submitRemoveIptMember = useCallback(() => {
+    if (!selectedRemoveIptUser) {
+      toast.error(
+        toastMessage(
+          "Error Removing IPT Member",
+          "Please select a user to remove from the IPT."
+        )
+      );
+      return;
+    }
+
+    removeIptMember.mutate({
+      project_id: project.id,
+      user_id: selectedRemoveIptUser.id,
+    });
+  }, [project, removeIptMember, selectedRemoveIptUser]);
+
+  const addContractorUser = api.user.addToUserProjectLink.useMutation({
+    onError: (error) => {
+      toast.error(
+        toastMessage(
+          "Error Adding Contractor User",
+          "There was an error adding the contractor user to the project. Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess: () => {
+      toast.success(
+        toastMessage(
+          "Contractor User Added",
+          "The contractor user was successfully added to the project."
+        )
+      );
+
+      // Refresh the UI data
+      if (selectedAddContractorUser)
+        projectContractorUsers?.push(selectedAddContractorUser);
+    },
+  });
+
+  const submitAddContractorUser = useCallback(() => {
+    if (!selectedAddContractorUser) {
+      toast.error(
+        toastMessage(
+          "Error Adding Contractor User",
+          "Please select a user to add to the project."
+        )
+      );
+      return;
+    }
+
+    addContractorUser.mutate({
+      project_id: project.id,
+      user_id: selectedAddContractorUser.id,
+    });
+  }, [addContractorUser, project, selectedAddContractorUser]);
+
+  const removeContractorUser = api.user.removeFromUserProjectLink.useMutation({
+    onError: (error) => {
+      toast.error(
+        toastMessage(
+          "Error Removing Contractor User",
+          "There was an error removing the contractor user from the project. Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess: () => {
+      toast.success(
+        toastMessage(
+          "Contractor User Removed",
+          "The contractor user was successfully removed from the project."
+        )
+      );
+
+      // Refresh the UI data
+      if (selectedRemoveContractorUser)
+        projectContractorUsers?.splice(
+          projectContractorUsers.findIndex(
+            (user) => user.id === selectedRemoveContractorUser.id
+          ),
+          1
+        );
+    },
+  });
+
+  const submitRemoveContractorUser = useCallback(() => {
+    if (!selectedRemoveContractorUser) {
+      toast.error(
+        toastMessage(
+          "Error Removing Contractor User",
+          "Please select a user to remove from the project."
+        )
+      );
+      return;
+    }
+
+    removeContractorUser.mutate({
+      project_id: project.id,
+      user_id: selectedRemoveContractorUser.id,
+    });
+  }, [project, removeContractorUser, selectedRemoveContractorUser]);
+
   // Open modal
   const openModal = useCallback(() => {
     set_selectedAddIptJobTitle(militaryJobTitles?.[0] ?? undefined);
@@ -151,10 +328,7 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
 
                         {/* Job Title */}
                         <form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            // TODO: submitAddIptMember();
-                          }}
+                          onSubmit={(e) => e.preventDefault()}
                           className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
                         >
                           <label htmlFor="add-ipt-member-job-title-select">
@@ -184,10 +358,7 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
 
                         {/* User */}
                         <form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            // TODO: submitAddIptMember();
-                          }}
+                          onSubmit={(e) => e.preventDefault()}
                           className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
                         >
                           <label htmlFor="add-ipt-member-user-select">
@@ -216,6 +387,7 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
 
                         {/* Add IPT Member Button */}
                         <button
+                          onClick={submitAddIptMember}
                           type="submit"
                           className="mt-2 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
                         >
@@ -231,10 +403,7 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
 
                         {/* User */}
                         <form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            // TODO: submitRemoveIptMember();
-                          }}
+                          onSubmit={(e) => e.preventDefault()}
                           className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
                         >
                           <label htmlFor="remove-ipt-member-user-select">
@@ -254,9 +423,9 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
                               );
                             }}
                           >
-                            {users?.map((user) => (
-                              <option key={user.id} value={user.id}>
-                                {user.user_name}
+                            {ipt?.map((ipt_member) => (
+                              <option key={ipt_member.id} value={ipt_member.id}>
+                                {ipt_member.user_name}
                               </option>
                             ))}
                           </select>
@@ -264,6 +433,7 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
 
                         {/* Remove IPT Member Button */}
                         <button
+                          onClick={submitRemoveIptMember}
                           type="submit"
                           className="mt-2 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
                         >
@@ -285,10 +455,7 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
 
                         {/* Contractor User */}
                         <form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            // TODO: submitAddContractorUser();
-                          }}
+                          onSubmit={(e) => e.preventDefault()}
                           className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
                         >
                           <label htmlFor="add-contractor-user-select">
@@ -321,6 +488,7 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
 
                         {/* Add Contractor User Button */}
                         <button
+                          onClick={submitAddContractorUser}
                           type="submit"
                           className="mt-2 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
                         >
@@ -336,10 +504,7 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
 
                         {/* User */}
                         <form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            // TODO: submitRemoveContractorUser();
-                          }}
+                          onSubmit={(e) => e.preventDefault()}
                           className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
                         >
                           <label htmlFor="remove-contractor-user-select">
@@ -372,6 +537,7 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
 
                         {/* Remove Contractor User Button */}
                         <button
+                          onClick={submitRemoveContractorUser}
                           type="submit"
                           className="mt-2 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
                         >

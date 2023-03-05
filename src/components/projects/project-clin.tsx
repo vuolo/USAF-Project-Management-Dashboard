@@ -480,7 +480,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
                             type="number"
                             name="clin-number"
                             id="clin-number"
-                            className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                             placeholder="e.g. '1'"
                             value={addModalInput_clinNumber}
                             onChange={(e) => {
@@ -503,7 +503,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
                           <select
                             id="clin-type"
                             name="clin-type"
-                            className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                             value={addModalInput_selectedClinType}
                             onChange={(e) => {
                               setAddModalInput_selectedClinType(
@@ -534,7 +534,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
                             type="text"
                             name="clin-scope"
                             id="clin-scope"
-                            className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                             placeholder="e.g. 'Development of a new feature'"
                             value={addModalInput_clinScope}
                             onChange={(e) => {
@@ -558,7 +558,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
                             type="number"
                             name="igce"
                             id="igce"
-                            className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                             placeholder="e.g. '100000'"
                             value={addModalInput_igce}
                             onChange={(e) => {
@@ -660,7 +660,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
                             type="number"
                             name="clin-number"
                             id="clin-number"
-                            className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                             placeholder="e.g. '1'"
                             value={editModalInput_clinNumber}
                             onChange={(e) => {
@@ -683,7 +683,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
                           <select
                             id="clin-type"
                             name="clin-type"
-                            className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                             value={editModalInput_selectedClinType}
                             onChange={(e) => {
                               setEditModalInput_selectedClinType(
@@ -714,7 +714,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
                             type="text"
                             name="clin-scope"
                             id="clin-scope"
-                            className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                             placeholder="e.g. 'Development of a new feature'"
                             value={editModalInput_clinScope}
                             onChange={(e) => {
@@ -738,7 +738,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
                             type="number"
                             name="igce"
                             id="igce"
-                            className="block w-full min-w-0 flex-1 rounded-none rounded-l-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                             placeholder="e.g. '100000'"
                             value={editModalInput_igce}
                             onChange={(e) => {
