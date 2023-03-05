@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
 import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
-import { ListPlus } from "lucide-react";
+import { List, ListPlus } from "lucide-react";
 import type { clin_data_clin_type } from "@prisma/client";
 import type { view_clin } from "~/types/view_clin";
 
@@ -634,7 +634,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="sm:flex sm:items-start">
                     <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                      <ListPlus
+                      <List
                         className="h-6 w-6 text-blue-600"
                         aria-hidden="true"
                       />
