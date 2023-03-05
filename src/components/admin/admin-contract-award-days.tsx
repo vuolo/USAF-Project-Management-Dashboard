@@ -124,6 +124,7 @@ function AdminContractAwardDays() {
                     value={draftDays}
                     min={0}
                     max={365}
+                    style={{ width: "8rem" }}
                   />
                 </div>
               </div>
@@ -156,6 +157,7 @@ function AdminContractAwardDays() {
                     value={approvedDays}
                     min={0}
                     max={365}
+                    style={{ width: "8rem" }}
                   />
                 </div>
               </div>
@@ -186,6 +188,7 @@ function AdminContractAwardDays() {
                     value={releasedDays}
                     min={0}
                     max={365}
+                    style={{ width: "8rem" }}
                   />
                 </div>
               </div>
@@ -218,6 +221,7 @@ function AdminContractAwardDays() {
                     value={receivedDays}
                     min={0}
                     max={365}
+                    style={{ width: "8rem" }}
                   />
                 </div>
               </div>
@@ -250,6 +254,7 @@ function AdminContractAwardDays() {
                     value={techDays}
                     min={0}
                     max={365}
+                    style={{ width: "8rem" }}
                   />
                 </div>
               </div>
@@ -282,6 +287,7 @@ function AdminContractAwardDays() {
                     value={negotiationDays}
                     min={0}
                     max={365}
+                    style={{ width: "8rem" }}
                   />
                 </div>
               </div>
@@ -314,6 +320,7 @@ function AdminContractAwardDays() {
                     value={awardedDays}
                     min={0}
                     max={365}
+                    style={{ width: "8rem" }}
                   />
                 </div>
               </div>
