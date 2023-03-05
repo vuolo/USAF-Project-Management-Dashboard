@@ -4,6 +4,9 @@ import { prisma } from "~/server/db";
 import type { military_job_titles } from "@prisma/client";
 
 export const mjtRouter = createTRPCRouter({
+  getAll: protectedProcedure.query(async () => {
+    return await prisma.military_job_titles.findMany();
+  }),
   getAllNotInUse: protectedProcedure.query(async () => {
     return await prisma.$queryRaw<military_job_titles[]>`
       SELECT * 

@@ -1,12 +1,45 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
+import type { users } from "@prisma/client";
 import type { ipt_members } from "~/types/ipt_members";
 
 export const userRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async () => {
     return await prisma.users.findMany();
   }),
+  getAllAdminsAndIptMembers: protectedProcedure.query(async () => {
+    return await prisma.users.findMany({
+      // SELECT * FROM users WHERE user_role = 2 OR user_role = 3
+      where: {
+        OR: [
+          { user_role: { equals: "Admin" } },
+          { user_role: { equals: "IPT_Member" } },
+        ],
+      },
+    });
+  }),
+  getProjectContractorUsers: protectedProcedure
+    .input(z.object({ project_id: z.number() }))
+    .query(async ({ input }) => {
+      return await prisma.$queryRaw<users[]>`
+        SELECT 
+            u.*
+        FROM users u
+        INNER JOIN user_project_link upl on u.id = upl.user_id
+        INNER JOIN view_project vp on vp.id = upl.project_id
+        WHERE vp.id = ${input.project_id} AND u.user_role = 1`;
+    }),
+  getContractorUsers: protectedProcedure
+    .input(z.object({ contractor_id: z.number() }))
+    .query(async ({ input }) => {
+      return await prisma.$queryRaw<users[]>`
+        SELECT 
+          u.*
+        FROM users u 
+        INNER JOIN contractor c on c.id = u.contractor_id
+        WHERE u.contractor_id = ${input.contractor_id}`;
+    }),
   getIptMembers: protectedProcedure
     // TODO: select using userId if not admin
     .input(z.object({ project_id: z.number() }))
