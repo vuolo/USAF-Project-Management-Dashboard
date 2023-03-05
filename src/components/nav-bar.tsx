@@ -2,8 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 import { Cog, Home, LogOut } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 function NavBar() {
+  const user = useSession().data?.db_user;
+
   return (
     <nav className="flex h-[70px] w-full justify-between bg-brand-dark px-8 sm:px-16">
       <Link href="/" className="flex items-center gap-2 hover:opacity-80">
@@ -17,15 +20,19 @@ function NavBar() {
       </Link>
       <div className="flex items-center gap-4 text-white">
         {/* Admin Page */}
-        <Link
-          href="/admin"
-          data-tooltip-id="admin-tooltip"
-          data-tooltip-content="Admin Page"
-          className="hover:text-white/80"
-        >
-          <Cog />
-        </Link>
-        <Tooltip id="admin-tooltip" style={{ opacity: 80 }} />
+        {user?.user_role === "Admin" && (
+          <>
+            <Link
+              href="/admin"
+              data-tooltip-id="admin-tooltip"
+              data-tooltip-content="Admin Page"
+              className="hover:text-white/80"
+            >
+              <Cog />
+            </Link>
+            <Tooltip id="admin-tooltip" style={{ opacity: 80 }} />
+          </>
+        )}
 
         {/* Home */}
         <Link

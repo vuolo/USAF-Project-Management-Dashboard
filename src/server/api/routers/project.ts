@@ -4,11 +4,20 @@ import { prisma } from "~/server/db";
 import type { view_project } from "~/types/view_project";
 
 export const projectRouter = createTRPCRouter({
-  list_view: protectedProcedure.query(async () => {
-    return await prisma.$queryRaw<view_project[]>`SELECT * FROM view_project`;
+  list_view: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx.session.db_user;
+    if (!user) return null;
+
+    return user.user_role === "Admin"
+      ? await prisma.$queryRaw<view_project[]>`SELECT * FROM view_project`
+      : await prisma.$queryRaw<view_project[]>`
+          SELECT * 
+          FROM user_project_link upl
+          INNER JOIN view_project vp ON vp.id = upl.project_id
+          WHERE upl.user_id = ${user.id}
+          ORDER BY upl.project_id ASC`;
   }),
   get_view: protectedProcedure
-    // TODO: select using userId if not admin
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       return (

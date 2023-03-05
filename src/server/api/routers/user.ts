@@ -41,7 +41,6 @@ export const userRouter = createTRPCRouter({
         WHERE u.contractor_id = ${input.contractor_id}`;
     }),
   getIptMembers: protectedProcedure
-    // TODO: select using userId if not admin
     .input(z.object({ project_id: z.number() }))
     .query(async ({ input }) => {
       return await prisma.$queryRaw<ipt_members[]>`

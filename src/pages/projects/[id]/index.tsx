@@ -1,4 +1,5 @@
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 
 import NavBar from "~/components/nav-bar";
 import ProjectContractStatus from "~/components/projects/project-contract-status";
@@ -11,6 +12,7 @@ import ProjectSchedule from "~/components/projects/project-schedule";
 import { api } from "~/utils/api";
 
 function Project() {
+  const user = useSession().data?.db_user;
   const router = useRouter();
   const id = parseInt(router.query.id as string);
   const { data: project } = api.project.get_view.useQuery({ id });
@@ -37,12 +39,13 @@ function Project() {
               <ProjectFunding project={project} />
               <ProjectSchedule project={project} />
 
-              {project.contract_status !== "Closed" && (
-                // TODO: open a modal to confirm, before closing the project
-                <button className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto">
-                  Close Project
-                </button>
-              )}
+              {project.contract_status !== "Closed" &&
+                user?.user_role === "Admin" && (
+                  // TODO: open a modal to confirm, before closing the project
+                  <button className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto">
+                    Close Project
+                  </button>
+                )}
             </div>
           </>
         )}
