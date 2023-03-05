@@ -6,12 +6,7 @@ import { toastMessage } from "~/utils/toast";
 import type { view_project } from "~/types/view_project";
 import { List } from "lucide-react";
 import { api } from "~/utils/api";
-import type {
-  branches,
-  contractor,
-  project_project_type,
-  requirement_types,
-} from "@prisma/client";
+import type { branches, contractor, requirement_types } from "@prisma/client";
 
 function ProjectDetails({ project }: { project: view_project }) {
   const { data: contractors } = api.contractor.getAll.useQuery();
@@ -69,6 +64,7 @@ function ProjectDetails({ project }: { project: view_project }) {
       toast.success(
         toastMessage("Project updated.", "The project has been updated.")
       );
+
       // Update the project details in the UI
       project.project_name = modalInput_projectName;
       project.contract_num = modalInput_contractNumber;
@@ -111,7 +107,7 @@ function ProjectDetails({ project }: { project: view_project }) {
     updateProject.mutate({
       id: project.id,
       project_name: modalInput_projectName,
-      project_type: project.project_type as project_project_type,
+      project_type: project.project_type,
       ccar_num: modalInput_ccarNumber,
       contractor_id: modalInput_selectedContractor?.id ?? project.contractor_id,
       branch_id: modalInput_selectedBranch?.id ?? project.branch_id,
