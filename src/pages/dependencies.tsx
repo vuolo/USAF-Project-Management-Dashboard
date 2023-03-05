@@ -2,6 +2,7 @@ import { type NextPage } from "next";
 
 import NavBar from "~/components/nav-bar";
 import DependencyGraph from "~/components/summaries/dependency-graph";
+import DependencyOverview from "~/components/summaries/dependency-overview";
 import DependencySummary from "~/components/summaries/dependency-summary";
 
 const Dependencies: NextPage = () => {
@@ -19,6 +20,7 @@ const Dependencies: NextPage = () => {
         {/* Underneath Top Section */}
         <div className="px-4 pt-2 pb-2 sm:px-6 sm:pt-6">
           <DependencyGraph />
+          <DependencyOverview />
         </div>
       </main>
     </>
