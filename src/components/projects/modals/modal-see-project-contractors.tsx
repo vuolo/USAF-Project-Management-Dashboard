@@ -96,15 +96,20 @@ function ModalSeeProjectContractors({
                     </Dialog.Title>
 
                     {/* Contractors List */}
-                    <div className="mt-2 px-8">
-                      {projectContractorUsers?.map((user) => (
-                        <ul
-                          key={user.id}
-                          className="flex list-disc items-center justify-between gap-2"
-                        >
-                          <li>{user.user_name}</li>
-                        </ul>
-                      ))}
+                    <div className="mt-2">
+                      {projectContractorUsers &&
+                      projectContractorUsers.length > 0 ? (
+                        projectContractorUsers?.map((user) => (
+                          <ul
+                            key={user.id}
+                            className="flex list-disc items-center justify-between gap-2 px-8"
+                          >
+                            <li>{user.user_name}</li>
+                          </ul>
+                        ))
+                      ) : (
+                        <p className="text-gray-500">No contractors found.</p>
+                      )}
                     </div>
                   </div>
                 </div>
