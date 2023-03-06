@@ -10,6 +10,8 @@ import BarGraph from "./graphs/bar-graph";
 import LineGraph from "./graphs/line-graph";
 
 import type { view_project } from "~/types/view_project";
+import { formatCurrency } from "~/utils/currency";
+import TableApprovedFunding from "./tables/table-approved-funding";
 
 function ProjectFunding({ project }: { project: view_project }) {
   const user = useSession().data?.db_user;
@@ -27,6 +29,7 @@ function ProjectFunding({ project }: { project: view_project }) {
   const { data: approvedEstimates } = api.approved.getEstimates.useQuery({
     project_id: project.id,
   });
+
   const [selectedTab, setSelectedTab] = useState<
     | "obligation_bar"
     | "obligation_line"
@@ -57,7 +60,7 @@ function ProjectFunding({ project }: { project: view_project }) {
               obligationPlan &&
               expenditurePlan && (
                 // Graphs visualizing the funding:
-                <div className="h-[22rem] sm:h-[23.5rem]">
+                <>
                   <div className="mb-6 flex flex-col gap-3 sm:flex-row">
                     <button
                       className={`rounded-md px-4 py-2 text-white hover:bg-brand-dark/80 ${
@@ -117,6 +120,7 @@ function ProjectFunding({ project }: { project: view_project }) {
                       dataKey2="Actual"
                     />
                   )}
+
                   {/* Projected Obligation Line Chart */}
                   {selectedTab === "obligation_line" && (
                     <LineGraph
@@ -125,6 +129,7 @@ function ProjectFunding({ project }: { project: view_project }) {
                       dataKey2="Actual Total"
                     />
                   )}
+
                   {/* Projected Expenditure Bar Chart */}
                   {selectedTab === "expenditure_bar" && (
                     <BarGraph
@@ -133,6 +138,7 @@ function ProjectFunding({ project }: { project: view_project }) {
                       dataKey2="Actual"
                     />
                   )}
+
                   {/* Projected Expenditure Line Chart */}
                   {selectedTab === "expenditure_line" && (
                     <LineGraph
@@ -141,9 +147,35 @@ function ProjectFunding({ project }: { project: view_project }) {
                       dataKey2="Actual Total"
                     />
                   )}
-                </div>
+                </>
               )}
-            <span>TODO: display a table visualizing the funding</span>
+
+            {/* Independent Cost Estimate & Projected Contract Value */}
+            <div className="flex justify-around">
+              <div className="text-center">
+                <h2 className="font-medium">Independent Cost Estimate:</h2>
+                <h1 className="font-3xl mt-2 font-bold">
+                  {approvedEstimates ? (
+                    formatCurrency(approvedEstimates.ind_gov_est)
+                  ) : (
+                    <span className="italic">N/A</span>
+                  )}
+                </h1>
+              </div>
+              <div className="text-center">
+                <h2 className="font-medium">Projected Contract Value:</h2>
+                <h1 className="font-3xl mt-2 font-bold">
+                  {approvedEstimates ? (
+                    formatCurrency(approvedEstimates.contract_value)
+                  ) : (
+                    <span className="italic">N/A</span>
+                  )}
+                </h1>
+              </div>
+            </div>
+
+            {/* Tables that visualize the funding: */}
+            <TableApprovedFunding approvedFunding={approvedFunding} />
           </div>
         )}
       </div>

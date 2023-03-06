@@ -26,175 +26,165 @@ function ProjectContractStatus({ project }: { project: view_project }) {
 
       <div className="flex flex-col justify-around gap-2 pt-4 pb-2 text-left sm:px-6 sm:pt-6 md:flex-row">
         <div className="flex flex-col gap-4 overflow-auto p-2 text-center">
-          {!contractAwardTimeline || contractAwardTimeline.length === 0 ? (
-            <p className="italic">
-              This project has no contract award timeline.
-            </p>
-          ) : (
-            <div className="mt-2 flex flex-col">
-              <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                  <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                    {!contractAwardTimeline ? (
-                      <div className="flex h-64 items-center justify-center">
-                        <div className="italic text-gray-500">Loading...</div>
+          <div className="mt-2 flex flex-col">
+            <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+              <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                  {!contractAwardTimeline ? (
+                    <div className="flex h-64 items-center justify-center px-64">
+                      <div className="italic text-gray-500">Loading...</div>
+                    </div>
+                  ) : contractAwardTimeline.length === 0 ? (
+                    <div className="flex h-64 items-center justify-center px-64">
+                      <div className="italic text-gray-500">
+                        This project has no contract award timeline.
                       </div>
-                    ) : contractAwardTimeline.length === 0 ? (
-                      <div className="flex h-64 items-center justify-center">
-                        <div className="italic text-gray-500">
-                          This project has no contract award timeline.
-                        </div>
-                      </div>
-                    ) : (
-                      <table className="min-w-full divide-y divide-gray-300">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th
-                              scope="col"
-                              className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                    </div>
+                  ) : (
+                    <table className="min-w-full divide-y divide-gray-300">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th
+                            scope="col"
+                            className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+                          >
+                            Timeline Status
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          >
+                            Requirements Planning
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          >
+                            Draft RFP Released
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          >
+                            Approved at ABC
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          >
+                            RFP Released
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          >
+                            Proposal Received
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          >
+                            Tech Eval Complete
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          >
+                            Negotiations Complete
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                          >
+                            Awarded
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white">
+                        {contractAwardTimeline &&
+                          contractAwardTimeline.map((timeline, timelineIdx) => (
+                            <tr
+                              key={timeline.id}
+                              className={
+                                timelineIdx % 2 === 0 ? undefined : "bg-gray-50"
+                              }
                             >
-                              Timeline Status
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                            >
-                              Requirements Planning
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                            >
-                              Draft RFP Released
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                            >
-                              Approved at ABC
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                            >
-                              RFP Released
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                            >
-                              Proposal Received
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                            >
-                              Tech Eval Complete
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                            >
-                              Negotiations Complete
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                            >
-                              Awarded
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white">
-                          {contractAwardTimeline &&
-                            contractAwardTimeline.map(
-                              (timeline, timelineIdx) => (
-                                <tr
-                                  key={timeline.id}
-                                  className={
-                                    timelineIdx % 2 === 0
-                                      ? undefined
-                                      : "bg-gray-50"
-                                  }
-                                >
-                                  <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
-                                    {timeline.timeline_status}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {timeline.requirement_plan
-                                      ? format(
-                                          new Date(timeline.requirement_plan),
-                                          "MM/dd/yyyy"
-                                        )
-                                      : "N/A"}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {timeline.draft_rfp_released
-                                      ? format(
-                                          new Date(timeline.draft_rfp_released),
-                                          "MM/dd/yyyy"
-                                        )
-                                      : "N/A"}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {timeline.approved_by_acb
-                                      ? format(
-                                          new Date(timeline.approved_by_acb),
-                                          "MM/dd/yyyy"
-                                        )
-                                      : "N/A"}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {timeline.rfp_released
-                                      ? format(
-                                          new Date(timeline.rfp_released),
-                                          "MM/dd/yyyy"
-                                        )
-                                      : "N/A"}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {timeline.proposal_received
-                                      ? format(
-                                          new Date(timeline.proposal_received),
-                                          "MM/dd/yyyy"
-                                        )
-                                      : "N/A"}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {timeline.tech_eval_comp
-                                      ? format(
-                                          new Date(timeline.tech_eval_comp),
-                                          "MM/dd/yyyy"
-                                        )
-                                      : "N/A"}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {timeline.negotiation_comp
-                                      ? format(
-                                          new Date(timeline.negotiation_comp),
-                                          "MM/dd/yyyy"
-                                        )
-                                      : "N/A"}
-                                  </td>
-                                  <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                    {timeline.awarded
-                                      ? format(
-                                          new Date(timeline.awarded),
-                                          "MM/dd/yyyy"
-                                        )
-                                      : "N/A"}
-                                  </td>
-                                </tr>
-                              )
-                            )}
-                        </tbody>
-                      </table>
-                    )}
-                  </div>
+                              <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
+                                {timeline.timeline_status}
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                {timeline.requirement_plan
+                                  ? format(
+                                      new Date(timeline.requirement_plan),
+                                      "MM/dd/yyyy"
+                                    )
+                                  : "N/A"}
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                {timeline.draft_rfp_released
+                                  ? format(
+                                      new Date(timeline.draft_rfp_released),
+                                      "MM/dd/yyyy"
+                                    )
+                                  : "N/A"}
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                {timeline.approved_by_acb
+                                  ? format(
+                                      new Date(timeline.approved_by_acb),
+                                      "MM/dd/yyyy"
+                                    )
+                                  : "N/A"}
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                {timeline.rfp_released
+                                  ? format(
+                                      new Date(timeline.rfp_released),
+                                      "MM/dd/yyyy"
+                                    )
+                                  : "N/A"}
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                {timeline.proposal_received
+                                  ? format(
+                                      new Date(timeline.proposal_received),
+                                      "MM/dd/yyyy"
+                                    )
+                                  : "N/A"}
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                {timeline.tech_eval_comp
+                                  ? format(
+                                      new Date(timeline.tech_eval_comp),
+                                      "MM/dd/yyyy"
+                                    )
+                                  : "N/A"}
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                {timeline.negotiation_comp
+                                  ? format(
+                                      new Date(timeline.negotiation_comp),
+                                      "MM/dd/yyyy"
+                                    )
+                                  : "N/A"}
+                              </td>
+                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                {timeline.awarded
+                                  ? format(
+                                      new Date(timeline.awarded),
+                                      "MM/dd/yyyy"
+                                    )
+                                  : "N/A"}
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
 

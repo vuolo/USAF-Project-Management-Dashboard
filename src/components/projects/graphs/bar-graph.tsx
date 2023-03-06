@@ -16,7 +16,7 @@ type Props = {
 
 export default function BarGraph({ data, dataKey1, dataKey2 }: Props) {
   return (
-    <ResponsiveContainer width="90%" aspect={4 / 1}>
+    <ResponsiveContainer height="90%" aspect={4 / 1}>
       <BarChart data={data}>
         <XAxis dataKey="date" />
         <YAxis />
