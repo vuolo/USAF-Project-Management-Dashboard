@@ -65,7 +65,11 @@ function Auth({ children }: AuthProps) {
   const user = session?.db_user;
 
   // Prevent the user from accessing the app if their account has not been set up
-  if (user && status === "authenticated" && router.pathname !== "/auth/sign-in")
+  if (
+    !user &&
+    status === "authenticated" &&
+    router.pathname !== "/auth/sign-in"
+  )
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center gap-3 px-12 pb-[50vh]">
         <div className="flex gap-8">
