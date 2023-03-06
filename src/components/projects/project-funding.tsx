@@ -1,5 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { useState } from "react";
 import { useSession } from "next-auth/react";
+import { format } from "date-fns";
 import { api } from "~/utils/api";
+
+import BarGraph from "./graphs/bar-graph";
+import LineGraph from "./graphs/line-graph";
 
 import type { view_project } from "~/types/view_project";
 
@@ -8,12 +16,23 @@ function ProjectFunding({ project }: { project: view_project }) {
   const { data: obligationPlan } = api.obligation.getObligationPlan.useQuery({
     project_id: project.id,
   });
+  const { data: expenditurePlan } = api.expenditure.getExpenditurePlan.useQuery(
+    {
+      project_id: project.id,
+    }
+  );
   const { data: approvedFunding } = api.approved.getApprovedFunding.useQuery({
     project_id: project.id,
   });
   const { data: approvedEstimates } = api.approved.getEstimates.useQuery({
     project_id: project.id,
   });
+  const [selectedTab, setSelectedTab] = useState<
+    | "obligation_bar"
+    | "obligation_line"
+    | "expenditure_bar"
+    | "expenditure_line"
+  >("obligation_bar");
 
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
@@ -31,7 +50,101 @@ function ProjectFunding({ project }: { project: view_project }) {
         {false ? (
           <p className="text-center italic">This project has no funding yet.</p>
         ) : (
-          <>TODO: display a table visualizing the funding</>
+          <div className="flex w-full flex-col gap-3">
+            {/* Don't display the graphs on Pre-Award pages (TODO: figure out of this is intended, but that is how the previous group did it...) */}
+            {(project.contract_status as string) !== "Pre-Award" &&
+              // Make sure the data is loaded before displaying the graphs
+              obligationPlan &&
+              expenditurePlan && (
+                // Graphs visualizing the funding:
+                <div className="h-[22rem] sm:h-[23.5rem]">
+                  <div className="mb-6 flex flex-col gap-3 sm:flex-row">
+                    <button
+                      className={`rounded-md px-4 py-2 text-white hover:bg-brand-dark/80 ${
+                        selectedTab === "obligation_bar"
+                          ? "cursor-not-allowed bg-brand-dark/80 ring-2 ring-yellow-500"
+                          : "cursor-pointer bg-brand-dark"
+                      }`}
+                      onClick={() => {
+                        setSelectedTab("obligation_bar");
+                      }}
+                    >
+                      Obligation Bar Chart
+                    </button>
+                    <button
+                      className={`rounded-md px-4 py-2 text-white hover:bg-brand-dark/80 ${
+                        selectedTab === "obligation_line"
+                          ? "cursor-not-allowed bg-brand-dark/80 ring-2 ring-yellow-500"
+                          : "cursor-pointer bg-brand-dark"
+                      }`}
+                      onClick={() => {
+                        setSelectedTab("obligation_line");
+                      }}
+                    >
+                      Obligation Line Chart
+                    </button>
+                    <button
+                      className={`rounded-md px-4 py-2 text-white hover:bg-brand-dark/80 ${
+                        selectedTab === "expenditure_bar"
+                          ? "cursor-not-allowed bg-brand-dark/80 ring-2 ring-yellow-500"
+                          : "cursor-pointer bg-brand-dark"
+                      }`}
+                      onClick={() => {
+                        setSelectedTab("expenditure_bar");
+                      }}
+                    >
+                      Expenditure Bar Chart
+                    </button>
+                    <button
+                      className={`rounded-md px-4 py-2 text-white hover:bg-brand-dark/80 ${
+                        selectedTab === "expenditure_line"
+                          ? "cursor-not-allowed bg-brand-dark/80 ring-2 ring-yellow-500"
+                          : "cursor-pointer bg-brand-dark"
+                      }`}
+                      onClick={() => {
+                        setSelectedTab("expenditure_line");
+                      }}
+                    >
+                      Expenditure Line Chart
+                    </button>
+                  </div>
+
+                  {/* Projected Obligation Bar Chart */}
+                  {selectedTab === "obligation_bar" && (
+                    <BarGraph
+                      data={formatDataForCharts(obligationPlan)}
+                      dataKey1="Projected"
+                      dataKey2="Actual"
+                    />
+                  )}
+                  {/* Projected Obligation Line Chart */}
+                  {selectedTab === "obligation_line" && (
+                    <LineGraph
+                      data={formatDataForCharts(obligationPlan)}
+                      dataKey1="Projected Total"
+                      dataKey2="Actual Total"
+                    />
+                  )}
+                  {/* Projected Expenditure Bar Chart */}
+                  {selectedTab === "expenditure_bar" && (
+                    <BarGraph
+                      data={formatDataForCharts(expenditurePlan)}
+                      dataKey1="Projected"
+                      dataKey2="Actual"
+                    />
+                  )}
+                  {/* Projected Expenditure Line Chart */}
+                  {selectedTab === "expenditure_line" && (
+                    <LineGraph
+                      data={formatDataForCharts(expenditurePlan)}
+                      dataKey1="Projected Total"
+                      dataKey2="Actual Total"
+                    />
+                  )}
+                </div>
+              )}
+            <span>TODO: display a table visualizing the funding</span>
+          </div>
         )}
       </div>
 
@@ -41,3 +154,21 @@ function ProjectFunding({ project }: { project: view_project }) {
 }
 
 export default ProjectFunding;
+
+function formatDataForCharts(data: any[]): any[] {
+  const retVal: any[] = [];
+  let temp: any = {};
+
+  data.forEach((info) => {
+    temp.id = info.id;
+    temp.Actual = info.Actual;
+    temp["Actual Total"] = info["Actual Total"];
+    temp.Projected = info.Projected;
+    temp["Projected Total"] = info["Projected Total"];
+    temp.date = format(new Date(info.date), "MM/dd/yyyy");
+    retVal.push(temp);
+    temp = {};
+  });
+
+  return retVal;
+}

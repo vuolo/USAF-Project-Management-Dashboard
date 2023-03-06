@@ -124,7 +124,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
                                     {timeline.requirement_plan
                                       ? format(
                                           new Date(timeline.requirement_plan),
-                                          "MMMM yyyy"
+                                          "MM/dd/yyyy"
                                         )
                                       : "N/A"}
                                   </td>
@@ -132,7 +132,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
                                     {timeline.draft_rfp_released
                                       ? format(
                                           new Date(timeline.draft_rfp_released),
-                                          "MMMM yyyy"
+                                          "MM/dd/yyyy"
                                         )
                                       : "N/A"}
                                   </td>
@@ -140,7 +140,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
                                     {timeline.approved_by_acb
                                       ? format(
                                           new Date(timeline.approved_by_acb),
-                                          "MMMM yyyy"
+                                          "MM/dd/yyyy"
                                         )
                                       : "N/A"}
                                   </td>
@@ -148,7 +148,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
                                     {timeline.rfp_released
                                       ? format(
                                           new Date(timeline.rfp_released),
-                                          "MMMM yyyy"
+                                          "MM/dd/yyyy"
                                         )
                                       : "N/A"}
                                   </td>
@@ -156,7 +156,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
                                     {timeline.proposal_received
                                       ? format(
                                           new Date(timeline.proposal_received),
-                                          "MMMM yyyy"
+                                          "MM/dd/yyyy"
                                         )
                                       : "N/A"}
                                   </td>
@@ -164,7 +164,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
                                     {timeline.tech_eval_comp
                                       ? format(
                                           new Date(timeline.tech_eval_comp),
-                                          "MMMM yyyy"
+                                          "MM/dd/yyyy"
                                         )
                                       : "N/A"}
                                   </td>
@@ -172,7 +172,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
                                     {timeline.negotiation_comp
                                       ? format(
                                           new Date(timeline.negotiation_comp),
-                                          "MMMM yyyy"
+                                          "MM/dd/yyyy"
                                         )
                                       : "N/A"}
                                   </td>
@@ -180,7 +180,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
                                     {timeline.awarded
                                       ? format(
                                           new Date(timeline.awarded),
-                                          "MMMM yyyy"
+                                          "MM/dd/yyyy"
                                         )
                                       : "N/A"}
                                   </td>

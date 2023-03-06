@@ -8,7 +8,7 @@ function NavBar() {
   const user = useSession().data?.db_user;
 
   return (
-    <nav className="flex h-[70px] w-full justify-between bg-brand-dark px-8 sm:px-16">
+    <nav className="flex h-[70px] w-full justify-between border-b border-black/10 bg-brand-dark px-8 sm:px-16">
       <Link href="/" className="flex items-center gap-2 hover:opacity-80">
         <Image
           src="/images/brand/AirForceLogoWhite.png"

@@ -2,8 +2,24 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 import type { expenditure } from "~/types/expenditure";
+import type { expenditure_plan } from "~/types/expenditure_plan";
 
 export const expenditureRouter = createTRPCRouter({
+  getExpenditurePlan: protectedProcedure
+    .input(z.object({ project_id: z.number() }))
+    .query(async ({ input }) => {
+      return await prisma.$queryRaw<expenditure_plan[]>`
+        SELECT 
+          id,
+          expen_funding_date as date,
+          expen_projected as Projected, 
+          expen_projected_total as "Projected Total",
+          expen_actual as Actual,
+          expen_actual_total as "Actual Total"
+        FROM view_expenditure 
+        WHERE project_id=${input.project_id}
+        ORDER BY expen_funding_date`;
+    }),
   getTotalExpenditure: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.session.db_user;
     if (!user) return null;

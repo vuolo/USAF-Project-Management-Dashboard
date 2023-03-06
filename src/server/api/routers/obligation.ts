@@ -8,23 +8,19 @@ export const obligationRouter = createTRPCRouter({
   getObligationPlan: protectedProcedure
     .input(z.object({ project_id: z.number() }))
     .query(async ({ input }) => {
-      return (
-        (
-          await prisma.$queryRaw<obligation_plan[]>`
-            SELECT
-                id,
-                obli_funding_date as date, 
-                obli_funding_type as FundingType, 
-                obli_fiscal_year as "FiscalYear", 
-                obli_projected as Projected,
-                obli_projected_total as "Projected Total",
-                obli_actual as Actual,
-                obli_actual_total as "Actual Total"
-            FROM view_obligation 
-            WHERE project_id=${input.project_id}
-            ORDER BY obli_funding_date`
-        )[0] || null
-      );
+      return await prisma.$queryRaw<obligation_plan[]>`
+        SELECT
+          id,
+          obli_funding_date as date, 
+          obli_funding_type as FundingType, 
+          obli_fiscal_year as "FiscalYear", 
+          obli_projected as Projected,
+          obli_projected_total as "Projected Total",
+          obli_actual as Actual,
+          obli_actual_total as "Actual Total"
+        FROM view_obligation 
+        WHERE project_id=${input.project_id}
+        ORDER BY obli_funding_date`;
     }),
   getTotalObligation: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.session.db_user;

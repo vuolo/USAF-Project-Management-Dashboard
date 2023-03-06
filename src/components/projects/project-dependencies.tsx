@@ -134,7 +134,7 @@ function ProjectDependencies({ project }: { project: view_project }) {
                                               new Date(
                                                 predecessor.predecessor_task_end_date
                                               ),
-                                              "MMMM yyyy"
+                                              "MM/dd/yyyy"
                                             )
                                           : "N/A"}
                                       </td>
@@ -150,7 +150,7 @@ function ProjectDependencies({ project }: { project: view_project }) {
                                               new Date(
                                                 predecessor.predecessor_task_end_date
                                               ),
-                                              "MMMM yyyy"
+                                              "MM/dd/yyyy"
                                             )
                                           : "N/A"}
                                       </td>
@@ -264,7 +264,7 @@ function ProjectDependencies({ project }: { project: view_project }) {
                                             new Date(
                                               successor.predecessor_task_end_date
                                             ),
-                                            "MMMM yyyy"
+                                            "MM/dd/yyyy"
                                           )
                                         : "N/A"}
                                     </td>
@@ -280,7 +280,7 @@ function ProjectDependencies({ project }: { project: view_project }) {
                                             new Date(
                                               successor.predecessor_task_end_date
                                             ),
-                                            "MMMM yyyy"
+                                            "MM/dd/yyyy"
                                           )
                                         : "N/A"}
                                     </td>
