@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import StatusIcon from "./icons/status-icon";
 
 import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
 
 function ProjectsOverview() {
+  const user = useSession().data?.db_user;
   const { data: projects } = api.project.list_view.useQuery();
 
   return (
@@ -68,24 +70,28 @@ function ProjectsOverview() {
                       >
                         Organization/Branch
                       </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Contract Value ($)
-                      </th>
+                      {user?.user_role !== "Contractor" && (
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Contract Value ($)
+                        </th>
+                      )}
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                       >
                         Dependency Status
                       </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Financial Status
-                      </th>
+                      {user?.user_role !== "Contractor" && (
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Financial Status
+                        </th>
+                      )}
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
@@ -120,15 +126,19 @@ function ProjectsOverview() {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {project.branch || "..."}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {formatCurrency(project.contract_value)}
-                          </td>
+                          {user?.user_role !== "Contractor" && (
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {formatCurrency(project.contract_value)}
+                            </td>
+                          )}
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             <StatusIcon status={project.dependency_status} />
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            <StatusIcon status={project.financial_status} />
-                          </td>
+                          {user?.user_role !== "Contractor" && (
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              <StatusIcon status={project.financial_status} />
+                            </td>
+                          )}
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             <StatusIcon status={project.schedule_status} />
                           </td>

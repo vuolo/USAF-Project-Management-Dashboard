@@ -1,3 +1,4 @@
+import { useSession } from "next-auth/react";
 import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
 import { format } from "date-fns";
@@ -9,6 +10,7 @@ function ProjectClinWBS({
   project_id: number;
   clin_num: number;
 }) {
+  const user = useSession().data?.db_user;
   const { data: wbs_list } = api.wbs.get.useQuery({ project_id, clin_num });
 
   return (
@@ -87,12 +89,14 @@ function ProjectClinWBS({
                       >
                         Resource Type
                       </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Rate
-                      </th>
+                      {user?.user_role !== "Contractor" && (
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Rate
+                        </th>
+                      )}
                       <th
                         scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
@@ -105,30 +109,38 @@ function ProjectClinWBS({
                       >
                         Units
                       </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Cost
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Base Cost
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Direct Cost
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Total Price
-                      </th>
+                      {user?.user_role !== "Contractor" && (
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Cost
+                        </th>
+                      )}
+                      {user?.user_role !== "Contractor" && (
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Base Cost
+                        </th>
+                      )}
+                      {user?.user_role !== "Contractor" && (
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Direct Cost
+                        </th>
+                      )}
+                      {user?.user_role !== "Contractor" && (
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Total Price
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="bg-white">
@@ -166,37 +178,47 @@ function ProjectClinWBS({
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {wbs.resource_type}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {wbs.rate
-                              ? formatCurrency(Number(wbs.rate))
-                              : "N/A"}
-                          </td>
+                          {user?.user_role !== "Contractor" && (
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {wbs.rate
+                                ? formatCurrency(Number(wbs.rate))
+                                : "N/A"}
+                            </td>
+                          )}
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {wbs.hours_worked}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {wbs.units ? Number(wbs.units) : "N/A"}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {wbs.cost
-                              ? formatCurrency(Number(wbs.cost))
-                              : "N/A"}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {wbs.base_cost
-                              ? formatCurrency(Number(wbs.base_cost))
-                              : "N/A"}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {wbs.direct_cost
-                              ? formatCurrency(Number(wbs.direct_cost))
-                              : "N/A"}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {wbs.total_price
-                              ? formatCurrency(Number(wbs.total_price))
-                              : "N/A"}
-                          </td>
+                          {user?.user_role !== "Contractor" && (
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {wbs.cost
+                                ? formatCurrency(Number(wbs.cost))
+                                : "N/A"}
+                            </td>
+                          )}
+                          {user?.user_role !== "Contractor" && (
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {wbs.base_cost
+                                ? formatCurrency(Number(wbs.base_cost))
+                                : "N/A"}
+                            </td>
+                          )}
+                          {user?.user_role !== "Contractor" && (
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {wbs.direct_cost
+                                ? formatCurrency(Number(wbs.direct_cost))
+                                : "N/A"}
+                            </td>
+                          )}
+                          {user?.user_role !== "Contractor" && (
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {wbs.total_price
+                                ? formatCurrency(Number(wbs.total_price))
+                                : "N/A"}
+                            </td>
+                          )}
                         </tr>
                       ))}
                   </tbody>

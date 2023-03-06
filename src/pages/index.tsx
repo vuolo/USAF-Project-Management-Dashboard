@@ -1,4 +1,5 @@
 import { type NextPage } from "next";
+import { useSession } from "next-auth/react";
 
 import NavBar from "~/components/nav-bar";
 import DependencySummary from "~/components/summaries/dependency-summary";
@@ -7,6 +8,8 @@ import FinancialSummary from "~/components/summaries/financial-summary";
 import ProjectsOverview from "~/components/summaries/projects-overview";
 
 const Home: NextPage = () => {
+  const user = useSession().data?.db_user;
+
   return (
     <>
       <NavBar />
@@ -20,9 +23,11 @@ const Home: NextPage = () => {
           </div>
 
           {/* Right */}
-          <div className="flex flex-col gap-6">
-            <FinancialSummary />
-          </div>
+          {user?.user_role !== "Contractor" && (
+            <div className="flex flex-col gap-6">
+              <FinancialSummary />
+            </div>
+          )}
         </div>
 
         {/* Underneath Top Section */}

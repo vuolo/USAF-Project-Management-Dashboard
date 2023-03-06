@@ -1,6 +1,7 @@
 import { Fragment, useCallback, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useSession } from "next-auth/react";
 import { Dialog, Transition } from "@headlessui/react";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
@@ -12,6 +13,7 @@ import type { view_clin } from "~/types/view_clin";
 
 function ProjectClin({ project_id }: { project_id: number }) {
   const router = useRouter();
+  const user = useSession().data?.db_user;
   const { data: clin_list } = api.clin.get.useQuery({ project_id });
 
   // Add CLIN Modal functionality (states)
@@ -252,7 +254,15 @@ function ProjectClin({ project_id }: { project_id: number }) {
         setEditModalInput_clinId(undefined);
       }, 500);
     },
-    [submitEditClin, setEditModalOpen]
+    [
+      submitEditClin,
+      setEditModalOpen,
+      editModalInput_clinId,
+      editModalInput_clinNumber,
+      editModalInput_selectedClinType,
+      editModalInput_clinScope,
+      editModalInput_igce,
+    ]
   );
 
   // Delete CLIN functionality
@@ -342,24 +352,30 @@ function ProjectClin({ project_id }: { project_id: number }) {
                       >
                         CLIN Scope
                       </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Projected CLIN Value ($)
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                      >
-                        Independent Goverment Cost Estimate ($)
-                      </th>
-                      <th
-                        scope="col"
-                        className="relative py-3.5 pl-3 pr-4 sm:pr-6"
-                      >
-                        <span className="sr-only">Edit</span>
-                      </th>
+                      {user?.user_role !== "Contractor" && (
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Projected CLIN Value ($)
+                        </th>
+                      )}
+                      {user?.user_role !== "Contractor" && (
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          Independent Goverment Cost Estimate ($)
+                        </th>
+                      )}
+                      {user?.user_role !== "Contractor" && (
+                        <th
+                          scope="col"
+                          className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                        >
+                          <span className="sr-only">Edit</span>
+                        </th>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="bg-white">
@@ -385,23 +401,31 @@ function ProjectClin({ project_id }: { project_id: number }) {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {clin.clin_scope}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {formatCurrency(clin.clin_value)}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {formatCurrency(clin.ind_gov_est)}
-                          </td>
-                          <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                            <a
-                              onClick={() => {
-                                openEditModal(clin);
-                              }}
-                              className="cursor-pointer text-blue-600 hover:text-blue-900"
-                            >
-                              Edit
-                              <span className="sr-only">, {clin.clin_num}</span>
-                            </a>
-                          </td>
+                          {user?.user_role !== "Contractor" && (
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {formatCurrency(clin.clin_value)}
+                            </td>
+                          )}
+                          {user?.user_role !== "Contractor" && (
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {formatCurrency(clin.ind_gov_est)}
+                            </td>
+                          )}
+                          {user?.user_role !== "Contractor" && (
+                            <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                              <a
+                                onClick={() => {
+                                  openEditModal(clin);
+                                }}
+                                className="cursor-pointer text-blue-600 hover:text-blue-900"
+                              >
+                                Edit
+                                <span className="sr-only">
+                                  , {clin.clin_num}
+                                </span>
+                              </a>
+                            </td>
+                          )}
                         </tr>
                       ))}
                   </tbody>

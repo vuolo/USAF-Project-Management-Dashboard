@@ -78,6 +78,13 @@ function Auth({ children }: AuthProps) {
           </div>
         </div>
 
+        <button
+          onClick={() => void router.push("/api/auth/signout")}
+          className="mt-4 inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-white/80 focus:outline-none focus:ring-0 focus:ring-brand-dark focus:ring-offset-2 sm:mt-0 sm:w-auto"
+        >
+          Sign Out
+        </button>
+
         <p className="mt-4 text-center text-sm italic">
           (If you are the developer, add your account to the database)
         </p>
