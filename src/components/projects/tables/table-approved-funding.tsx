@@ -1,4 +1,4 @@
-import type { approved_funding, funding_types } from "@prisma/client";
+import type { approved_funding } from "@prisma/client";
 import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
 
@@ -30,7 +30,7 @@ function TableApprovedFunding({ approvedFunding }: TableProps) {
 
   return (
     <>
-      <div className="mt-2 sm:flex sm:items-center">
+      <div className="mt-4 sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-gray-900">
             Approved Funding

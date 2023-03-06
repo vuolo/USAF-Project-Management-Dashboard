@@ -12,6 +12,8 @@ import LineGraph from "./graphs/line-graph";
 import type { view_project } from "~/types/view_project";
 import { formatCurrency } from "~/utils/currency";
 import TableApprovedFunding from "./tables/table-approved-funding";
+import TableObligationPlan from "./tables/table-obligation-plan";
+import TableExpenditurePlan from "./tables/table-expenditure-plan";
 
 function ProjectFunding({ project }: { project: view_project }) {
   const user = useSession().data?.db_user;
@@ -176,6 +178,8 @@ function ProjectFunding({ project }: { project: view_project }) {
 
             {/* Tables that visualize the funding: */}
             <TableApprovedFunding approvedFunding={approvedFunding} />
+            <TableObligationPlan obligationPlan={obligationPlan} />
+            <TableExpenditurePlan expenditurePlan={expenditurePlan} />
           </div>
         )}
       </div>
