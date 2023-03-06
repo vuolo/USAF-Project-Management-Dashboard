@@ -50,7 +50,7 @@ function DependencyGraph() {
 export default DependencyGraph;
 
 function GanttChartDataFormat(successors: all_successors[]) {
-  const rows: any = [];
+  const rows: any[] = [];
 
   successors.map((successor) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call

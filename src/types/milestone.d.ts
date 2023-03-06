@@ -7,6 +7,8 @@ export type milestone = {
   ProjectedEnd: Date;
   ActualStart: Date;
   ActualEnd: Date;
+  Predecessors: string;
+  Predecessors_Name: string;
 };
 
 // pm.id as ID,
@@ -17,3 +19,5 @@ export type milestone = {
 // pm.end_date as "ProjectedEnd",
 // pm.actual_start as "ActualStart",
 // pm.actual_end as "ActualEnd",
+// "Predecessors",
+// "Predecessors_Name"

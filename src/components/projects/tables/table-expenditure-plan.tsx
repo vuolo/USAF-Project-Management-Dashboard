@@ -7,7 +7,6 @@ type TableProps = {
 };
 
 function TableExpenditurePlan({ expenditurePlan }: TableProps) {
-  console.log(expenditurePlan);
   return (
     <>
       <div className="mt-4 sm:flex sm:items-center">

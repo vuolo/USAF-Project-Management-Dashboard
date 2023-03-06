@@ -35,7 +35,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
                       <div className="italic text-gray-500">Loading...</div>
                     </div>
                   ) : contractAwardTimeline.length === 0 ? (
-                    <div className="flex h-64 items-center justify-center px-64">
+                    <div className="flex h-64 w-full items-center justify-center px-8">
                       <div className="italic text-gray-500">
                         This project has no contract award timeline.
                       </div>
