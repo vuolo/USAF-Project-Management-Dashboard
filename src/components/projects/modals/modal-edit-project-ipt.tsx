@@ -106,7 +106,7 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
       if (selectedRemoveIptUser)
         ipt?.splice(
           ipt.findIndex((user) => user.id === selectedRemoveIptUser.id),
-          1
+          Infinity
         );
     },
   });
@@ -193,7 +193,7 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
           projectContractorUsers.findIndex(
             (user) => user.id === selectedRemoveContractorUser.id
           ),
-          1
+          Infinity
         );
     },
   });

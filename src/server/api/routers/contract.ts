@@ -5,6 +5,19 @@ import type { contract_award_timeline } from "@prisma/client";
 import type { contract_days_added } from "~/types/contract_days_added";
 
 export const contractRouter = createTRPCRouter({
+  updateContractStatus: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        contract_status: z.enum(["Pre_Award", "Awarded", "Closed"]),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.contract_award.update({
+        where: { id: input.id },
+        data: { contract_status: input.contract_status },
+      });
+    }),
   updateContractNumber: protectedProcedure
     .input(z.object({ id: z.number(), contract_num: z.string() }))
     .mutation(async ({ input }) => {

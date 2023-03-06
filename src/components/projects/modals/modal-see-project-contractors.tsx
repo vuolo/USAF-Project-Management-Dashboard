@@ -108,7 +108,9 @@ function ModalSeeProjectContractors({
                           </ul>
                         ))
                       ) : (
-                        <p className="text-gray-500">No contractors found.</p>
+                        <p className="text-gray-500">
+                          No contractors are assigned to this project.
+                        </p>
                       )}
                     </div>
                   </div>

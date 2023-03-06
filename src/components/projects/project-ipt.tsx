@@ -28,12 +28,21 @@ function ProjectIPT({ project }: { project: view_project }) {
       </div>
 
       <div className="flex flex-col gap-2 px-4 pt-4 pb-2 text-left sm:px-6 sm:pt-6">
-        {ipt &&
-          ipt.map((ipt) => (
-            <p key={ipt.id}>
-              <b>{ipt.mil_job_title}:</b> {ipt.user_name ?? "N/A"}
+        {ipt ? (
+          ipt.length === 0 ? (
+            <p className="mt-2 text-center italic sm:mt-0">
+              This project has no IPT members.
             </p>
-          ))}
+          ) : (
+            ipt.map((ipt) => (
+              <p key={ipt.id}>
+                <b>{ipt.mil_job_title}:</b> {ipt.user_name ?? "N/A"}
+              </p>
+            ))
+          )
+        ) : (
+          <p className="text-center italic">Loading...</p>
+        )}
       </div>
 
       <div className="mt-2 flex justify-evenly gap-4 px-6">
