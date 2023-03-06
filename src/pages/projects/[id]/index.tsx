@@ -39,8 +39,12 @@ function Project() {
             {/* Underneath Top Section */}
             <div className="flex flex-col gap-6 px-2 pt-2 pb-2 sm:px-6 sm:pt-6">
               <ProjectDependencies project={project} />
-              <ProjectContractStatus project={project} />
-              <ProjectFunding project={project} />
+              {(project.contract_status as string) === "Pre-Award" && (
+                <ProjectContractStatus project={project} />
+              )}
+              {user?.user_role !== "Contractor" && (
+                <ProjectFunding project={project} />
+              )}
               <ProjectSchedule project={project} />
 
               {project.contract_status !== "Closed" &&

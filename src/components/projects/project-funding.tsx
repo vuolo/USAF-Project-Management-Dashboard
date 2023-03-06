@@ -31,6 +31,8 @@ function ProjectFunding({ project }: { project: view_project }) {
           <>TODO: display a table visualizing the funding</>
         )}
       </div>
+
+      {/* TODO: Edit Funding Modal */}
     </div>
   );
 }
