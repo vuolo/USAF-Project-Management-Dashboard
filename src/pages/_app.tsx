@@ -65,11 +65,7 @@ function Auth({ children }: AuthProps) {
   const user = session?.db_user;
 
   // Prevent the user from accessing the app if their account has not been set up
-  if (
-    !user &&
-    status === "authenticated" &&
-    router.pathname !== "/auth/sign-in"
-  )
+  if (user && status === "authenticated" && router.pathname !== "/auth/sign-in")
     return (
       <div className="flex h-screen w-screen flex-col items-center justify-center gap-3 px-12 pb-[50vh]">
         <div className="flex gap-8">
@@ -84,13 +80,13 @@ function Auth({ children }: AuthProps) {
 
         <button
           onClick={() => void router.push("/api/auth/signout")}
-          className="mt-4 inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-white/80 focus:outline-none focus:ring-0 focus:ring-brand-dark focus:ring-offset-2 sm:mt-0 sm:w-auto"
+          className="mt-4 inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium text-red-700 shadow-sm hover:bg-white/80 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 active:ring-2 active:ring-red-700 sm:mt-0 sm:w-auto"
         >
           Sign Out
         </button>
 
         <p className="mt-4 text-center text-sm italic">
-          (If you are the developer, add your account to the database)
+          (If you are the developer, add your user to the database)
         </p>
       </div>
     );
