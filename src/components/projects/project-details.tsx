@@ -63,6 +63,7 @@ function ProjectDetails({ project }: { project: view_project }) {
           See CLIN Data
         </Link>
         {project.contract_status !== "Closed" && (
+          // TODO: Open a modal to upload the file, and parse the data
           <button className="mt-2 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto">
             Upload ProPricer
           </button>
