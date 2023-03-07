@@ -135,13 +135,12 @@ function ModalConfirmProjectMarkAwarded({
                       as="h3"
                       className="text-lg font-medium leading-6 text-gray-900"
                     >
-                      Are you sure you want to mark the contract status as
-                      awarded?
+                      Are you sure you want to mark the project as awarded?
                     </Dialog.Title>
                     <div className="mt-2 flex min-w-full flex-col gap-2">
                       <p className="text-sm text-gray-500">
                         Marking this project as awarded will prevent any further
-                        changes to the contract.
+                        changes to the contract award timeline.
                       </p>
                     </div>
                   </div>

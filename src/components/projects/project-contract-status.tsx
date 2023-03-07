@@ -44,7 +44,6 @@ function ProjectContractStatus({ project }: { project: view_project }) {
                 </button>
               )}
 
-              {/* TODO: Add onClick to edit the contract award timeline */}
               <button
                 onClick={() =>
                   !contractAward || contractAwardTimeline?.length === 0
@@ -238,7 +237,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
 
       {/* TODO: Edit Contract Status Modal */}
 
-      {/* TODO: Add Contract Award Timeline Modal */}
+      {/* Add Contract Award Timeline Modal */}
       <ModalAddProjectContract
         project={project}
         contractAward={contractAward}
