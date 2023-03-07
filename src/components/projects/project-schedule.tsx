@@ -60,6 +60,10 @@ function ProjectSchedule({ project }: { project: view_project }) {
           </div>
         )}
       </div>
+
+      {/* TODO: Add (Upload) Project Schedule Modal */}
+
+      {/* TODO: Edit Project Schedule Modal */}
     </div>
   );
 }

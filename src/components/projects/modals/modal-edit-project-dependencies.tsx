@@ -90,7 +90,7 @@ function ModalEditProjectDependencies({
       );
 
       // Refresh the UI data
-      router.reload(); // TODO: This is a hacky way to refresh the data, but it works for now. We should find a better way to do this.
+      router.reload(); // Note: This is a hacky way to refresh the data, but it works for now. We should find a better way to do this.
 
       // Reset the "Add Predecessor" modal states
       set_selectedAddPredecessorProject(undefined);
@@ -147,7 +147,7 @@ function ModalEditProjectDependencies({
       );
 
       // Refresh the UI data
-      router.reload(); // TODO: This is a hacky way to refresh the data, but it works for now. We should find a better way to do this.
+      router.reload(); // Note: This is a hacky way to refresh the data, but it works for now. We should find a better way to do this.
 
       // Reset the "Remove Predecessor" modal state
       set_selectedRemovePredecessor(undefined);
@@ -189,7 +189,7 @@ function ModalEditProjectDependencies({
       );
 
       // Refresh the UI data
-      router.reload(); // TODO: This is a hacky way to refresh the data, but it works for now. We should find a better way to do this.
+      router.reload(); // Note: This is a hacky way to refresh the data, but it works for now. We should find a better way to do this.
 
       // Reset the "Add Successor" modal states
       set_selectedAddSuccessorProject(undefined);
@@ -246,7 +246,7 @@ function ModalEditProjectDependencies({
       );
 
       // Refresh the UI data
-      router.reload(); // TODO: This is a hacky way to refresh the data, but it works for now. We should find a better way to do this.
+      router.reload(); // Note: This is a hacky way to refresh the data, but it works for now. We should find a better way to do this.
 
       // Reset the "Remove Successor" modal state
       set_selectedRemoveSuccessor(undefined);

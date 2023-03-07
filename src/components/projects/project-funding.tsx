@@ -178,8 +178,13 @@ function ProjectFunding({ project }: { project: view_project }) {
 
             {/* Tables that visualize the funding: */}
             <TableApprovedFunding approvedFunding={approvedFunding} />
-            <TableObligationPlan obligationPlan={obligationPlan} />
-            <TableExpenditurePlan expenditurePlan={expenditurePlan} />
+            <TableObligationPlan
+              project={project}
+              obligationPlan={obligationPlan}
+            />
+            {(project.contract_status as string) !== "Pre-Award" && (
+              <TableExpenditurePlan expenditurePlan={expenditurePlan} />
+            )}
           </div>
         )}
       </div>

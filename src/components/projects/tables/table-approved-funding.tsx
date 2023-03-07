@@ -83,7 +83,7 @@ function TableApprovedFunding({ approvedFunding }: TableProps) {
                             {fundingTypes.find(
                               (fundingType) =>
                                 fundingType.id === activeFundingTypeId
-                            )?.funding_type ?? "N/A"}
+                            )?.funding_type ?? "..."}
                           </td>
                           {fiscalYears.map((fiscalYear) =>
                             approvedFunding.map(

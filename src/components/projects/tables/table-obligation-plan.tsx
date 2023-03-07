@@ -3,12 +3,14 @@ import type { obligation_plan } from "~/types/obligation_plan";
 import { formatCurrency } from "~/utils/currency";
 import { format } from "date-fns";
 import type { funding_types } from "@prisma/client";
+import type { view_project } from "~/types/view_project";
 
 type TableProps = {
+  project: view_project;
   obligationPlan?: obligation_plan[];
 };
 
-function TableObligationPlan({ obligationPlan }: TableProps) {
+function TableObligationPlan({ project, obligationPlan }: TableProps) {
   const { data: fundingTypes } = api.funding_type.getAll.useQuery();
 
   return (
@@ -16,6 +18,8 @@ function TableObligationPlan({ obligationPlan }: TableProps) {
       <div className="mt-4 sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-gray-900">
+            {(project.contract_status as string) === "Pre-Award" &&
+              "Projected "}
             Obligation Plan
           </h1>
         </div>
@@ -56,7 +60,10 @@ function TableObligationPlan({ obligationPlan }: TableProps) {
                   <tbody className="bg-white">
                     {obligationPlan &&
                       // There are 4 rows in the table.
-                      [0, 1, 2, 3].map((row, rowIdx) => (
+                      ((project.contract_status as string) === "Pre-Award"
+                        ? [0, 1, 2] // Don't include "Actual" row for pre-award projects.
+                        : [0, 1, 2, 3]
+                      ).map((row, rowIdx) => (
                         <tr
                           key={rowIdx}
                           className={
@@ -99,7 +106,7 @@ function getRowValue(
     case 0:
       return (
         fundingTypes?.find((ft) => ft.id === Number(obli.FundingType))
-          ?.funding_type || ""
+          ?.funding_type || "..."
       );
 
     // Fiscal Year
@@ -115,7 +122,7 @@ function getRowValue(
       return formatCurrency(obli.Actual);
 
     default:
-      return "";
+      return "...";
   }
 }
 
