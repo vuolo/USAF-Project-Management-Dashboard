@@ -27,7 +27,10 @@ function ProjectDependencies({ project }: { project: view_project }) {
               onClick={() => setModalOpen(true)}
               className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto"
             >
-              Edit
+              {(!predecessors && !successors) ||
+              (predecessors?.length === 0 && successors?.length === 0)
+                ? "Add"
+                : "Edit"}
             </button>
           )}
       </div>

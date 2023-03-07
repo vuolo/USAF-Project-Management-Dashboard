@@ -362,133 +362,281 @@ function ModalEditProjectDependencies({
                     >
                       Edit Project Dependencies
                     </Dialog.Title>
+                    {!milestones || milestones.length === 0 ? (
+                      <div className="mt-2 flex min-w-full flex-col gap-2">
+                        <p className="text-sm text-gray-500">
+                          This project has no milestones. Please add milestones
+                          to this project before adding dependencies.
+                        </p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Top Section */}
+                        <div className="mt-2 flex flex-col gap-4 md:flex-row md:gap-16">
+                          {/* Add Predecessor [Left] */}
+                          <div className="mt-2 flex min-w-full flex-col gap-2 sm:min-w-[40%]">
+                            <h1 className="mx-auto font-medium underline">
+                              Add Predecessor
+                            </h1>
 
-                    {/* Top Section */}
-                    <div className="mt-2 flex flex-col gap-4 md:flex-row md:gap-16">
-                      {/* Add Predecessor [Left] */}
-                      <div className="mt-2 flex min-w-full flex-col gap-2 sm:min-w-[40%]">
-                        <h1 className="mx-auto font-medium underline">
-                          Add Predecessor
-                        </h1>
-
-                        {/* Predecessor Project */}
-                        <form
-                          onSubmit={(e) => e.preventDefault()}
-                          className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
-                        >
-                          <label
-                            className="sm:text-sm"
-                            htmlFor="add-predecessor-project-select"
-                          >
-                            Predecessor Project
-                          </label>
-                          <select
-                            id="add-predecessor-project-select"
-                            name="add-predecessor-project-select"
-                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
-                            value={selectedAddPredecessorProject?.id}
-                            onChange={(e) => {
-                              const id = parseInt(e.target.value);
-                              const project = projects?.find(
-                                (project) => project.id === id
-                              );
-                              set_selectedAddPredecessorProject(project);
-                            }}
-                          >
-                            <option value="">Select a Project</option>
-                            {projects?.map((project) => (
-                              <option key={project.id} value={project.id}>
-                                {project.project_name}
-                              </option>
-                            ))}
-                          </select>
-                        </form>
-
-                        {/* Predecessor Milestone */}
-                        {selectedAddPredecessorProject && (
-                          <form
-                            onSubmit={(e) => e.preventDefault()}
-                            className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
-                          >
-                            <label
-                              className="sm:text-sm"
-                              htmlFor="add-predecessor-project-milestone-select"
-                            >
-                              Predecessor Milestone
-                            </label>
-                            <select
-                              id="add-predecessor-project-milestone-select"
-                              name="add-predecessor-project-milestone-select"
-                              className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
-                              value={
-                                selectedAddPredecessorSelectedProjectMilestone?.ID
-                              }
-                              onChange={(e) => {
-                                const id = parseInt(e.target.value);
-                                const milestone =
-                                  addPredecessorSelectedProjectMilestones?.find(
-                                    (milestone) => milestone.ID === id
-                                  );
-                                set_selectedAddPredecessorSelectedProjectMilestone(
-                                  milestone
-                                );
-                              }}
-                            >
-                              <option value="">
-                                Select a Predecessor Milestone
-                              </option>
-                              {addPredecessorSelectedProjectMilestones?.map(
-                                (milestone) => (
-                                  <option
-                                    key={milestone.ID}
-                                    value={milestone.ID}
-                                  >
-                                    {`${milestone.Name}: ${format(
-                                      milestone.ProjectedStart,
-                                      "MM/dd/yyyy"
-                                    )} - ${format(
-                                      milestone.ProjectedEnd,
-                                      "MM/dd/yyyy"
-                                    )}`}
-                                  </option>
-                                )
-                              )}
-                            </select>
-                          </form>
-                        )}
-
-                        {/* Successor Milestone From This Project */}
-                        {selectedAddPredecessorProject &&
-                          selectedAddPredecessorSelectedProjectMilestone && (
+                            {/* Predecessor Project */}
                             <form
                               onSubmit={(e) => e.preventDefault()}
                               className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
                             >
                               <label
                                 className="sm:text-sm"
-                                htmlFor="add-predecessor-current-project-milestone-select"
+                                htmlFor="add-predecessor-project-select"
                               >
-                                Successor Milestone From This Project
+                                Predecessor Project
                               </label>
                               <select
-                                id="add-predecessor-current-project-milestone-select"
-                                name="add-predecessor-current-project-milestone-select"
+                                id="add-predecessor-project-select"
+                                name="add-predecessor-project-select"
                                 className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
-                                value={
-                                  selectedAddPredecessorCurrentProjectMilestone?.ID
-                                }
+                                value={selectedAddPredecessorProject?.id}
                                 onChange={(e) => {
                                   const id = parseInt(e.target.value);
-                                  const milestone = milestones?.find(
-                                    (milestone) => milestone.ID === id
+                                  const project = projects?.find(
+                                    (project) => project.id === id
                                   );
-                                  set_selectedAddPredecessorCurrentProjectMilestone(
-                                    milestone
+                                  set_selectedAddPredecessorProject(project);
+                                }}
+                              >
+                                <option value="">Select a Project</option>
+                                {projects?.map((project) => (
+                                  <option key={project.id} value={project.id}>
+                                    {project.project_name}
+                                  </option>
+                                ))}
+                              </select>
+                            </form>
+
+                            {/* Predecessor Milestone */}
+                            {selectedAddPredecessorProject && (
+                              <form
+                                onSubmit={(e) => e.preventDefault()}
+                                className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
+                              >
+                                <label
+                                  className="sm:text-sm"
+                                  htmlFor="add-predecessor-project-milestone-select"
+                                >
+                                  Predecessor Milestone
+                                </label>
+                                <select
+                                  id="add-predecessor-project-milestone-select"
+                                  name="add-predecessor-project-milestone-select"
+                                  className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                                  value={
+                                    selectedAddPredecessorSelectedProjectMilestone?.ID
+                                  }
+                                  onChange={(e) => {
+                                    const id = parseInt(e.target.value);
+                                    const milestone =
+                                      addPredecessorSelectedProjectMilestones?.find(
+                                        (milestone) => milestone.ID === id
+                                      );
+                                    set_selectedAddPredecessorSelectedProjectMilestone(
+                                      milestone
+                                    );
+                                  }}
+                                >
+                                  <option value="">
+                                    Select a Predecessor Milestone
+                                  </option>
+                                  {addPredecessorSelectedProjectMilestones?.map(
+                                    (milestone) => (
+                                      <option
+                                        key={milestone.ID}
+                                        value={milestone.ID}
+                                      >
+                                        {`${milestone.Name}: ${format(
+                                          milestone.ProjectedStart,
+                                          "MM/dd/yyyy"
+                                        )} - ${format(
+                                          milestone.ProjectedEnd,
+                                          "MM/dd/yyyy"
+                                        )}`}
+                                      </option>
+                                    )
+                                  )}
+                                </select>
+                              </form>
+                            )}
+
+                            {/* Successor Milestone From This Project */}
+                            {selectedAddPredecessorProject &&
+                              selectedAddPredecessorSelectedProjectMilestone && (
+                                <form
+                                  onSubmit={(e) => e.preventDefault()}
+                                  className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
+                                >
+                                  <label
+                                    className="sm:text-sm"
+                                    htmlFor="add-predecessor-current-project-milestone-select"
+                                  >
+                                    Successor Milestone From This Project
+                                  </label>
+                                  <select
+                                    id="add-predecessor-current-project-milestone-select"
+                                    name="add-predecessor-current-project-milestone-select"
+                                    className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                                    value={
+                                      selectedAddPredecessorCurrentProjectMilestone?.ID
+                                    }
+                                    onChange={(e) => {
+                                      const id = parseInt(e.target.value);
+                                      const milestone = milestones?.find(
+                                        (milestone) => milestone.ID === id
+                                      );
+                                      set_selectedAddPredecessorCurrentProjectMilestone(
+                                        milestone
+                                      );
+                                    }}
+                                  >
+                                    <option value="">
+                                      Select a Successor Milestone
+                                    </option>
+                                    {milestones?.map((milestone) => (
+                                      <option
+                                        key={milestone.ID}
+                                        value={milestone.ID}
+                                      >
+                                        {`${milestone.Name}: ${format(
+                                          milestone.ProjectedStart,
+                                          "MM/dd/yyyy"
+                                        )} - ${format(
+                                          milestone.ProjectedEnd,
+                                          "MM/dd/yyyy"
+                                        )}`}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </form>
+                              )}
+
+                            {/* Add Predecessor Button */}
+                            {selectedAddPredecessorProject &&
+                              selectedAddPredecessorSelectedProjectMilestone &&
+                              selectedAddPredecessorCurrentProjectMilestone && (
+                                <button
+                                  onClick={submitAddPredecessor}
+                                  type="submit"
+                                  className="mt-2 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
+                                >
+                                  Add Predecessor
+                                </button>
+                              )}
+                          </div>
+
+                          {/* Remove Predecessor [Right] */}
+                          <div className="mt-2 flex min-w-full flex-col gap-2 sm:min-w-[40%]">
+                            <h1 className="mx-auto font-medium underline">
+                              Remove Predecessor
+                            </h1>
+
+                            {/* Predecessor */}
+                            <form
+                              onSubmit={(e) => e.preventDefault()}
+                              className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
+                            >
+                              <label
+                                className="sm:text-sm"
+                                htmlFor="remove-predecessor-select"
+                              >
+                                Predecessor
+                              </label>
+                              <select
+                                id="remove-predecessor-select"
+                                name="remove-predecessor-select"
+                                className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                                value={`${
+                                  selectedRemovePredecessor?.predecessor_project ??
+                                  ""
+                                }_${
+                                  selectedRemovePredecessor?.predecessor_milestone ??
+                                  ""
+                                }_${
+                                  selectedRemovePredecessor?.successor_milestone ??
+                                  ""
+                                }`}
+                                onChange={(e) => {
+                                  set_selectedRemovePredecessor(
+                                    predecessors?.find(
+                                      (predecessor) =>
+                                        `${predecessor.predecessor_project}_${predecessor.predecessor_milestone}_${predecessor.successor_milestone}` ===
+                                        e.target.value
+                                    )
+                                  );
+                                }}
+                              >
+                                <option value="">Select a Predecessor</option>
+                                {predecessors?.map((predecessor) => (
+                                  <option
+                                    key={`${predecessor.predecessor_project}_${predecessor.predecessor_milestone}_${predecessor.successor_milestone}`}
+                                    value={`${predecessor.predecessor_project}_${predecessor.predecessor_milestone}_${predecessor.successor_milestone}`}
+                                  >
+                                    {`${predecessor.predecessor_name}: ${predecessor.predecessor_task_name} \u2192 ${predecessor.dep_proj_name}: ${predecessor.successor_task_name}`}
+                                  </option>
+                                ))}
+                              </select>
+                            </form>
+
+                            {/* Remove Predecessor Button */}
+                            {selectedRemovePredecessor && (
+                              <button
+                                onClick={submitRemovePredecessor}
+                                type="submit"
+                                className="mt-2 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
+                              >
+                                Remove Predecessor
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Divider */}
+                        <div className="my-8 w-full border-t border-gray-300" />
+
+                        {/* Bottom Section */}
+                        <div className="mt-4 flex flex-col gap-4 md:flex-row md:gap-16">
+                          {/* Add Successor [Left] */}
+                          <div className="mt-2 flex min-w-full flex-col gap-2 sm:min-w-[40%]">
+                            <h1 className="mx-auto font-medium underline">
+                              Add Successor
+                            </h1>
+
+                            {/* Predecessor Milestone From This Project */}
+                            <form
+                              onSubmit={(e) => e.preventDefault()}
+                              className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
+                            >
+                              <label
+                                className="sm:text-sm"
+                                htmlFor="add-successor-current-project-predecessor-milestone-select"
+                              >
+                                Predecessor Milestone From This Project
+                              </label>
+                              <select
+                                id="add-successor-current-project-predecessor-milestone-select"
+                                name="add-successor-current-project-predecessor-milestone-select"
+                                className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                                value={
+                                  selectedAddSuccessorCurrentProjectMilestone?.ID
+                                }
+                                onChange={(e) => {
+                                  set_selectedAddSuccessorCurrentProjectMilestone(
+                                    milestones?.find(
+                                      (milestone) =>
+                                        milestone.ID ===
+                                        parseInt(e.target.value)
+                                    )
                                   );
                                 }}
                               >
                                 <option value="">
-                                  Select a Successor Milestone
+                                  Select a Predecessor Milestone
                                 </option>
                                 {milestones?.map((milestone) => (
                                   <option
@@ -506,311 +654,180 @@ function ModalEditProjectDependencies({
                                 ))}
                               </select>
                             </form>
-                          )}
 
-                        {/* Add Predecessor Button */}
-                        {selectedAddPredecessorProject &&
-                          selectedAddPredecessorSelectedProjectMilestone &&
-                          selectedAddPredecessorCurrentProjectMilestone && (
-                            <button
-                              onClick={submitAddPredecessor}
-                              type="submit"
-                              className="mt-2 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
-                            >
-                              Add Predecessor
-                            </button>
-                          )}
-                      </div>
-
-                      {/* Remove Predecessor [Right] */}
-                      <div className="mt-2 flex min-w-full flex-col gap-2 sm:min-w-[40%]">
-                        <h1 className="mx-auto font-medium underline">
-                          Remove Predecessor
-                        </h1>
-
-                        {/* Predecessor */}
-                        <form
-                          onSubmit={(e) => e.preventDefault()}
-                          className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
-                        >
-                          <label
-                            className="sm:text-sm"
-                            htmlFor="remove-predecessor-select"
-                          >
-                            Predecessor
-                          </label>
-                          <select
-                            id="remove-predecessor-select"
-                            name="remove-predecessor-select"
-                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
-                            value={`${
-                              selectedRemovePredecessor?.predecessor_project ??
-                              ""
-                            }_${
-                              selectedRemovePredecessor?.predecessor_milestone ??
-                              ""
-                            }_${
-                              selectedRemovePredecessor?.successor_milestone ??
-                              ""
-                            }`}
-                            onChange={(e) => {
-                              set_selectedRemovePredecessor(
-                                predecessors?.find(
-                                  (predecessor) =>
-                                    `${predecessor.predecessor_project}_${predecessor.predecessor_milestone}_${predecessor.successor_milestone}` ===
-                                    e.target.value
-                                )
-                              );
-                            }}
-                          >
-                            <option value="">Select a Predecessor</option>
-                            {predecessors?.map((predecessor) => (
-                              <option
-                                key={`${predecessor.predecessor_project}_${predecessor.predecessor_milestone}_${predecessor.successor_milestone}`}
-                                value={`${predecessor.predecessor_project}_${predecessor.predecessor_milestone}_${predecessor.successor_milestone}`}
+                            {/* Successor Project */}
+                            {selectedAddSuccessorCurrentProjectMilestone && (
+                              <form
+                                onSubmit={(e) => e.preventDefault()}
+                                className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
                               >
-                                {`${predecessor.predecessor_name}: ${predecessor.predecessor_task_name} \u2192 ${predecessor.dep_proj_name}: ${predecessor.successor_task_name}`}
-                              </option>
-                            ))}
-                          </select>
-                        </form>
+                                <label
+                                  className="sm:text-sm"
+                                  htmlFor="add-successor-successor-project-select"
+                                >
+                                  Successor Project
+                                </label>
+                                <select
+                                  id="add-successor-successor-project-select"
+                                  name="add-successor-successor-project-select"
+                                  className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                                  value={selectedAddSuccessorProject?.id}
+                                  onChange={(e) => {
+                                    set_selectedAddSuccessorProject(
+                                      projects?.find(
+                                        (project) =>
+                                          project.id ===
+                                          parseInt(e.target.value)
+                                      )
+                                    );
+                                  }}
+                                >
+                                  <option value="">
+                                    Select a Successor Project
+                                  </option>
+                                  {projects?.map((project) => (
+                                    <option key={project.id} value={project.id}>
+                                      {project.project_name}
+                                    </option>
+                                  ))}
+                                </select>
+                              </form>
+                            )}
 
-                        {/* Remove Predecessor Button */}
-                        {selectedRemovePredecessor && (
-                          <button
-                            onClick={submitRemovePredecessor}
-                            type="submit"
-                            className="mt-2 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
-                          >
-                            Remove Predecessor
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                            {/* Successor Milestone */}
+                            {selectedAddSuccessorCurrentProjectMilestone &&
+                              selectedAddSuccessorProject && (
+                                <form
+                                  onSubmit={(e) => e.preventDefault()}
+                                  className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
+                                >
+                                  <label
+                                    className="sm:text-sm"
+                                    htmlFor="add-successor-successor-milestone-select"
+                                  >
+                                    Successor Milestone
+                                  </label>
+                                  <select
+                                    id="add-successor-successor-milestone-select"
+                                    name="add-successor-successor-milestone-select"
+                                    className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                                    value={
+                                      selectedAddSuccessorSelectedProjectMilestone?.ID
+                                    }
+                                    onChange={(e) => {
+                                      set_selectedAddSuccessorSelectedProjectMilestone(
+                                        addSuccessorSelectedProjectMilestones?.find(
+                                          (milestone) =>
+                                            milestone.ID ===
+                                            parseInt(e.target.value)
+                                        )
+                                      );
+                                    }}
+                                  >
+                                    <option value="">
+                                      Select a Successor Milestone
+                                    </option>
+                                    {addSuccessorSelectedProjectMilestones?.map(
+                                      (milestone) => (
+                                        <option
+                                          key={milestone.ID}
+                                          value={milestone.ID}
+                                        >
+                                          {`${milestone.Name}: ${format(
+                                            milestone.ProjectedStart,
+                                            "MM/dd/yyyy"
+                                          )} - ${format(
+                                            milestone.ProjectedEnd,
+                                            "MM/dd/yyyy"
+                                          )}`}
+                                        </option>
+                                      )
+                                    )}
+                                  </select>
+                                </form>
+                              )}
 
-                    {/* Divider */}
-                    <div className="my-8 w-full border-t border-gray-300" />
+                            {/* Add Successor Button */}
+                            {selectedAddSuccessorCurrentProjectMilestone &&
+                              selectedAddSuccessorProject &&
+                              selectedAddSuccessorSelectedProjectMilestone && (
+                                <button
+                                  onClick={submitAddSuccessor}
+                                  type="submit"
+                                  className="mt-2 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
+                                >
+                                  Add Successor
+                                </button>
+                              )}
+                          </div>
 
-                    {/* Bottom Section */}
-                    <div className="mt-4 flex flex-col gap-4 md:flex-row md:gap-16">
-                      {/* Add Successor [Left] */}
-                      <div className="mt-2 flex min-w-full flex-col gap-2 sm:min-w-[40%]">
-                        <h1 className="mx-auto font-medium underline">
-                          Add Successor
-                        </h1>
+                          {/* Remove Successor [Right] */}
+                          <div className="mt-2 flex min-w-full flex-col gap-2 sm:min-w-[40%]">
+                            <h1 className="mx-auto font-medium underline">
+                              Remove Successor
+                            </h1>
 
-                        {/* Predecessor Milestone From This Project */}
-                        <form
-                          onSubmit={(e) => e.preventDefault()}
-                          className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
-                        >
-                          <label
-                            className="sm:text-sm"
-                            htmlFor="add-successor-current-project-predecessor-milestone-select"
-                          >
-                            Predecessor Milestone From This Project
-                          </label>
-                          <select
-                            id="add-successor-current-project-predecessor-milestone-select"
-                            name="add-successor-current-project-predecessor-milestone-select"
-                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
-                            value={
-                              selectedAddSuccessorCurrentProjectMilestone?.ID
-                            }
-                            onChange={(e) => {
-                              set_selectedAddSuccessorCurrentProjectMilestone(
-                                milestones?.find(
-                                  (milestone) =>
-                                    milestone.ID === parseInt(e.target.value)
-                                )
-                              );
-                            }}
-                          >
-                            <option value="">
-                              Select a Predecessor Milestone
-                            </option>
-                            {milestones?.map((milestone) => (
-                              <option key={milestone.ID} value={milestone.ID}>
-                                {`${milestone.Name}: ${format(
-                                  milestone.ProjectedStart,
-                                  "MM/dd/yyyy"
-                                )} - ${format(
-                                  milestone.ProjectedEnd,
-                                  "MM/dd/yyyy"
-                                )}`}
-                              </option>
-                            ))}
-                          </select>
-                        </form>
-
-                        {/* Successor Project */}
-                        {selectedAddSuccessorCurrentProjectMilestone && (
-                          <form
-                            onSubmit={(e) => e.preventDefault()}
-                            className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
-                          >
-                            <label
-                              className="sm:text-sm"
-                              htmlFor="add-successor-successor-project-select"
-                            >
-                              Successor Project
-                            </label>
-                            <select
-                              id="add-successor-successor-project-select"
-                              name="add-successor-successor-project-select"
-                              className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
-                              value={selectedAddSuccessorProject?.id}
-                              onChange={(e) => {
-                                set_selectedAddSuccessorProject(
-                                  projects?.find(
-                                    (project) =>
-                                      project.id === parseInt(e.target.value)
-                                  )
-                                );
-                              }}
-                            >
-                              <option value="">
-                                Select a Successor Project
-                              </option>
-                              {projects?.map((project) => (
-                                <option key={project.id} value={project.id}>
-                                  {project.project_name}
-                                </option>
-                              ))}
-                            </select>
-                          </form>
-                        )}
-
-                        {/* Successor Milestone */}
-                        {selectedAddSuccessorCurrentProjectMilestone &&
-                          selectedAddSuccessorProject && (
+                            {/* Successor */}
                             <form
                               onSubmit={(e) => e.preventDefault()}
                               className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
                             >
                               <label
                                 className="sm:text-sm"
-                                htmlFor="add-successor-successor-milestone-select"
+                                htmlFor="remove-successor-select"
                               >
-                                Successor Milestone
+                                Successor
                               </label>
                               <select
-                                id="add-successor-successor-milestone-select"
-                                name="add-successor-successor-milestone-select"
+                                id="remove-successor-select"
+                                name="remove-successor-select"
                                 className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
-                                value={
-                                  selectedAddSuccessorSelectedProjectMilestone?.ID
-                                }
+                                value={`${
+                                  selectedRemoveSuccessor?.predecessor_milestone ??
+                                  ""
+                                }_${
+                                  selectedRemoveSuccessor?.successor_project ??
+                                  ""
+                                }_${
+                                  selectedRemoveSuccessor?.successor_milestone ??
+                                  ""
+                                }`}
                                 onChange={(e) => {
-                                  set_selectedAddSuccessorSelectedProjectMilestone(
-                                    addSuccessorSelectedProjectMilestones?.find(
-                                      (milestone) =>
-                                        milestone.ID ===
-                                        parseInt(e.target.value)
+                                  set_selectedRemoveSuccessor(
+                                    successors?.find(
+                                      (successor) =>
+                                        `${successor.predecessor_milestone}_${successor.successor_project}_${successor.successor_milestone}` ===
+                                        e.target.value
                                     )
                                   );
                                 }}
                               >
-                                <option value="">
-                                  Select a Successor Milestone
-                                </option>
-                                {addSuccessorSelectedProjectMilestones?.map(
-                                  (milestone) => (
-                                    <option
-                                      key={milestone.ID}
-                                      value={milestone.ID}
-                                    >
-                                      {`${milestone.Name}: ${format(
-                                        milestone.ProjectedStart,
-                                        "MM/dd/yyyy"
-                                      )} - ${format(
-                                        milestone.ProjectedEnd,
-                                        "MM/dd/yyyy"
-                                      )}`}
-                                    </option>
-                                  )
-                                )}
+                                <option value="">Select a Successor</option>
+                                {successors?.map((successor) => (
+                                  <option
+                                    key={`${successor.predecessor_milestone}_${successor.successor_project}_${successor.successor_milestone}`}
+                                    value={`${successor.predecessor_milestone}_${successor.successor_project}_${successor.successor_milestone}`}
+                                  >
+                                    {`${successor.predecessor_name}: ${successor.predecessor_task_name} \u2192 ${successor.succ_proj_name}: ${successor.successor_task_name}`}
+                                  </option>
+                                ))}
                               </select>
                             </form>
-                          )}
 
-                        {/* Add Successor Button */}
-                        {selectedAddSuccessorCurrentProjectMilestone &&
-                          selectedAddSuccessorProject &&
-                          selectedAddSuccessorSelectedProjectMilestone && (
-                            <button
-                              onClick={submitAddSuccessor}
-                              type="submit"
-                              className="mt-2 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
-                            >
-                              Add Successor
-                            </button>
-                          )}
-                      </div>
-
-                      {/* Remove Successor [Right] */}
-                      <div className="mt-2 flex min-w-full flex-col gap-2 sm:min-w-[40%]">
-                        <h1 className="mx-auto font-medium underline">
-                          Remove Successor
-                        </h1>
-
-                        {/* Successor */}
-                        <form
-                          onSubmit={(e) => e.preventDefault()}
-                          className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
-                        >
-                          <label
-                            className="sm:text-sm"
-                            htmlFor="remove-successor-select"
-                          >
-                            Successor
-                          </label>
-                          <select
-                            id="remove-successor-select"
-                            name="remove-successor-select"
-                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
-                            value={`${
-                              selectedRemoveSuccessor?.predecessor_milestone ??
-                              ""
-                            }_${
-                              selectedRemoveSuccessor?.successor_project ?? ""
-                            }_${
-                              selectedRemoveSuccessor?.successor_milestone ?? ""
-                            }`}
-                            onChange={(e) => {
-                              set_selectedRemoveSuccessor(
-                                successors?.find(
-                                  (successor) =>
-                                    `${successor.predecessor_milestone}_${successor.successor_project}_${successor.successor_milestone}` ===
-                                    e.target.value
-                                )
-                              );
-                            }}
-                          >
-                            <option value="">Select a Successor</option>
-                            {successors?.map((successor) => (
-                              <option
-                                key={`${successor.predecessor_milestone}_${successor.successor_project}_${successor.successor_milestone}`}
-                                value={`${successor.predecessor_milestone}_${successor.successor_project}_${successor.successor_milestone}`}
+                            {/* Remove Successor Button */}
+                            {selectedRemoveSuccessor && (
+                              <button
+                                onClick={submitRemoveSuccessor}
+                                type="submit"
+                                className="mt-2 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
                               >
-                                {`${successor.predecessor_name}: ${successor.predecessor_task_name} \u2192 ${successor.succ_proj_name}: ${successor.successor_task_name}`}
-                              </option>
-                            ))}
-                          </select>
-                        </form>
-
-                        {/* Remove Successor Button */}
-                        {selectedRemoveSuccessor && (
-                          <button
-                            onClick={submitRemoveSuccessor}
-                            type="submit"
-                            className="mt-2 inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:text-sm"
-                          >
-                            Remove Successor
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                                Remove Successor
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

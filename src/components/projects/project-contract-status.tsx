@@ -10,6 +10,7 @@ import { api } from "~/utils/api";
 import ModalAddProjectContract from "./modals/modal-add-project-contract";
 
 import type { view_project } from "~/types/view_project";
+import ModalConfirmProjectMarkAwarded from "./modals/modal-confirm-project-mark-awarded";
 
 function ProjectContractStatus({ project }: { project: view_project }) {
   const router = useRouter();
@@ -20,49 +21,10 @@ function ProjectContractStatus({ project }: { project: view_project }) {
     project_id: project.id,
   });
 
-  const markAwarded = api.contract.updateContractStatus.useMutation({
-    onError: (error) => {
-      toast.error(
-        toastMessage(
-          "Error Marking Project as Awarded",
-          "There was an error marking this project as awarded. Please try again later."
-        )
-      );
-      console.error(error);
-    },
-    onSuccess: () => {
-      toast.success(
-        toastMessage(
-          "Project Marked as Awarded",
-          "This project has been marked as awarded."
-        )
-      );
-
-      // Reload the page to show the new "Awarded" status
-      router.reload();
-    },
-  });
-
-  const submitMarkAwarded = useCallback(() => {
-    if (!contractAward) {
-      toast.error(
-        toastMessage(
-          "Error Marking Project as Awarded",
-          "Make sure the project has an awarded contract before marking it as awarded."
-        )
-      );
-      return;
-    }
-
-    markAwarded.mutate({
-      id: contractAward.id,
-      contract_status: "Awarded",
-    });
-  }, [markAwarded, contractAward]);
-
   // TODO: determine when a project can be awarded
   const [canBeAwarded, setCanBeAwarded] = useState(true);
 
+  const [markAwardedModalOpen, setMarkAwardedModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
 
@@ -75,7 +37,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
             <div className="flex gap-3">
               {canBeAwarded && (
                 <button
-                  onClick={submitMarkAwarded}
+                  onClick={() => setMarkAwardedModalOpen(true)}
                   className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto"
                 >
                   Award Project
@@ -266,6 +228,13 @@ function ProjectContractStatus({ project }: { project: view_project }) {
           </div>
         </div>
       </div>
+
+      {/* Confirm Project Mark Awarded Modal */}
+      <ModalConfirmProjectMarkAwarded
+        contractAward={contractAward}
+        isOpen={markAwardedModalOpen}
+        setIsOpen={setMarkAwardedModalOpen}
+      />
 
       {/* TODO: Edit Contract Status Modal */}
 
