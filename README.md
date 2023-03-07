@@ -1,4 +1,5 @@
 <div align="center">
+  <br>
   <a href="https://github.com/vuolo/USAF-Project-Management-Dashboard">
     <img src="public/images/brand/AirForceLogoWhite.png" alt="Logo" width="80" height="80">
   </a>
@@ -59,6 +60,7 @@ To start off - we switched the previous team's tech stack up a bit. Here's what 
 To run locally, follow the following steps:
   1. Download the SQL script that sets up the database table (Note: It's not hosted here yet, so use [this file](https://github.com/KatPrend/USAF-Dashboard/blob/main/Backend/usaf-dash_2022-11-12.sql) for now)
      - Make sure to create two users named `usaf` and `usaf_admin` with appropriate privileges
-  2. run `npm install` to install the node packages
-  3. run `npx prisma db push` to push the new database schema (that includes authentication) to the SQL server
-  4. run `npm run dev` to start the local development server
+  2. Run `npm install` to install the node packages
+  3. Duplicate [.env.example](https://github.com/vuolo/USAF-Project-Management-Dashboard/blob/main/.env.example) and rename it to `.env`, and fill it in with the appropriate contents
+  4. Run `npx prisma db push` to push the new database schema (that includes authentication) to the SQL server
+  5. Run `npm run dev` to start the local development server
