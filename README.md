@@ -51,7 +51,7 @@ We were tasked with improving the original source code, with the initial require
 
 To start off - we switched the previous team's tech stack up a bit. Here's what we changed:
   1. Switched our framework from [React Router](https://reactrouter.com) to [Next.js](https://nextjs.org)
-  2. Converted all files to [TypeScript](https://www.typescriptlang.org)
+  2. Converted all JavaScript files to [TypeScript](https://www.typescriptlang.org)
   3. Added [Prisma](https://www.prisma.io) for SQL Injection prevention (a serious issue that was present in the previous team's source code)
   4. Replaced [Express](https://expressjs.com) with [tRPC](https://trpc.io) to ensure API [type-safety](https://en.wikipedia.org/wiki/Type_safety) from the front-end client to the back-end server
  
