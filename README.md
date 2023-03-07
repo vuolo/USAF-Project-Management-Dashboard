@@ -20,7 +20,7 @@
   <li>Michael Vuolo</li>
 </ul>
 
-*And the original [Senior Design Team](https://github.com/KatPrend/USAF-Dashboard/graphs/contributors) that initially released the project using [React Router](https://reactrouter.com).*
+*...and the original [Senior Design Team](https://github.com/KatPrend/USAF-Dashboard/graphs/contributors) that initially released the project*
 
 <h2>About The Project</h2>
 <img src="public/images/screenshots/index.png" alt="Project Screenshot">
