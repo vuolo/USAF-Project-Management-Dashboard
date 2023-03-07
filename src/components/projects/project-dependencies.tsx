@@ -140,7 +140,7 @@ function ProjectDependencies({ project }: { project: view_project }) {
                                               ),
                                               "MM/dd/yyyy"
                                             )
-                                          : "N/A"}
+                                          : "..."}
                                       </td>
                                       <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-black">
                                         {predecessor.dep_proj_name}
@@ -156,7 +156,7 @@ function ProjectDependencies({ project }: { project: view_project }) {
                                               ),
                                               "MM/dd/yyyy"
                                             )
-                                          : "N/A"}
+                                          : "..."}
                                       </td>
                                     </tr>
                                   )
@@ -270,7 +270,7 @@ function ProjectDependencies({ project }: { project: view_project }) {
                                             ),
                                             "MM/dd/yyyy"
                                           )
-                                        : "N/A"}
+                                        : "..."}
                                     </td>
                                     <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-black">
                                       {successor.succ_proj_name}
@@ -286,7 +286,7 @@ function ProjectDependencies({ project }: { project: view_project }) {
                                             ),
                                             "MM/dd/yyyy"
                                           )
-                                        : "N/A"}
+                                        : "..."}
                                     </td>
                                   </tr>
                                 ))}

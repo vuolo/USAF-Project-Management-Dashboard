@@ -79,6 +79,64 @@ export const contractRouter = createTRPCRouter({
         INNER JOIN contract_award_timeline cat ON cat.contract_award_id = ca.id
         WHERE project_id = ${input.project_id}`;
     }),
+  addContractAwardTimeline: protectedProcedure
+    .input(
+      z.object({
+        contract_award_id: z.number(),
+        requirement_plan: z.date(),
+        draft_rfp_released: z.date(),
+        approved_by_acb: z.date(),
+        rfp_released: z.date(),
+        proposal_received: z.date(),
+        tech_eval_comp: z.date(),
+        negotiation_comp: z.date(),
+        awarded: z.date(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await Promise.all([
+        await prisma.$executeRaw`
+          INSERT INTO 
+            contract_award_timeline (
+              contract_award_id,
+              timeline_status, 
+              requirement_plan, 
+              draft_rfp_released, 
+              approved_by_acb, 
+              rfp_released, 
+              proposal_received, 
+              tech_eval_comp, 
+              negotiation_comp, 
+              awarded ) 
+            VALUES (
+              ${input.contract_award_id},
+              "Planned", 
+              ${input.requirement_plan}, 
+              ${input.draft_rfp_released}, 
+              ${input.approved_by_acb}, 
+              ${input.rfp_released}, 
+              ${input.proposal_received}, 
+              ${input.tech_eval_comp}, 
+              ${input.negotiation_comp}, 
+              ${input.awarded}
+            );`,
+
+        // Add the projected and actual timelines as well (these will be empty, but the user can add to them later)
+        await prisma.$executeRaw`
+          INSERT INTO
+            contract_award_timeline (
+              contract_award_id,
+              timeline_status ) 
+          VALUES (
+            ${input.contract_award_id},
+            "Projected" 
+          ),
+          (
+            ${input.contract_award_id},
+            "Actual"
+          )`,
+      ]);
+    }),
   getContractAward: protectedProcedure
     .input(z.object({ project_id: z.number() }))
     .query(async ({ input }) => {

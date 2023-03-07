@@ -18,6 +18,15 @@ main {
   overflow: auto;
 }
 
+/* react-modern-calendar-datepicker */
+.DatePicker {
+  z-index: unset !important;
+}
+
+.DatePicker__calendarContainer {
+  z-index: 10 !important;
+}
+
 /* Toastify */
 .Toastify__toast-body {
   font-family: -apple-system, system-ui, BlinkMacSystemFont, "Helvetica Neue",

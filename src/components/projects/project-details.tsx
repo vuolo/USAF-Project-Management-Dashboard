@@ -30,28 +30,28 @@ function ProjectDetails({ project }: { project: view_project }) {
 
       <div className="flex flex-col gap-2 px-4 pt-4 pb-2 text-left sm:px-6 sm:pt-6">
         <p>
-          <b>Project Name:</b> {project.project_name ?? "N/A"}
+          <b>Project Name:</b> {project.project_name || "N/A"}
         </p>
         <p>
-          <b>Contract Number:</b> {project.contract_num ?? "N/A"}
+          <b>Contract Number:</b> {project.contract_num || "N/A"}
         </p>
         <p>
-          <b>Contract Status:</b> {project.contract_status ?? "N/A"}
+          <b>Contract Status:</b> {project.contract_status || "N/A"}
         </p>
         <p>
-          <b>CCAR Number:</b> {project.ccar_num ?? "N/A"}
+          <b>CCAR Number:</b> {project.ccar_num || "N/A"}
         </p>
         <p>
-          <b>Contractor:</b> {project.contractor_name ?? "N/A"}
+          <b>Contractor:</b> {project.contractor_name || "N/A"}
         </p>
         <p>
-          <b>Organization/Branch:</b> {project.branch ?? "N/A"}
+          <b>Organization/Branch:</b> {project.branch || "N/A"}
         </p>
         <p>
-          <b>Requirement Type:</b> {project.requirement_type ?? "N/A"}
+          <b>Requirement Type:</b> {project.requirement_type || "N/A"}
         </p>
         <p>
-          <b>Capability Summary:</b> {project.summary ?? "N/A"}
+          <b>Capability Summary:</b> {project.summary || "N/A"}
         </p>
       </div>
 

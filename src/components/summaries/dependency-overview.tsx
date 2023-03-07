@@ -142,7 +142,7 @@ function DependencyOverview() {
                                   new Date(successor.pred_actual_start),
                                   "MM/dd/yyyy"
                                 )
-                              : "N/A"}
+                              : "..."}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {successor.pred_actual_end
@@ -150,7 +150,7 @@ function DependencyOverview() {
                                   new Date(successor.pred_actual_end),
                                   "MM/dd/yyyy"
                                 )
-                              : "N/A"}
+                              : "..."}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-black">
                             {successor.succ_proj_name}
@@ -176,7 +176,7 @@ function DependencyOverview() {
                                   new Date(successor.succ_actual_start),
                                   "MM/dd/yyyy"
                                 )
-                              : "N/A"}
+                              : "..."}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {successor.succ_actual_end
@@ -184,7 +184,7 @@ function DependencyOverview() {
                                   new Date(successor.succ_actual_end),
                                   "MM/dd/yyyy"
                                 )
-                              : "N/A"}
+                              : "..."}
                           </td>
                         </tr>
                       ))}

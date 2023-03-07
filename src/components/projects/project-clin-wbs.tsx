@@ -161,7 +161,7 @@ function ProjectClinWBS({
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {wbs.month
                               ? format(new Date(wbs.month), "MMMM yyyy")
-                              : "N/A"}
+                              : "..."}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {wbs.clin_num}
@@ -182,41 +182,41 @@ function ProjectClinWBS({
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                               {wbs.rate
                                 ? formatCurrency(Number(wbs.rate))
-                                : "N/A"}
+                                : "..."}
                             </td>
                           )}
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {wbs.hours_worked}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {wbs.units ? Number(wbs.units) : "N/A"}
+                            {wbs.units ? Number(wbs.units) : "..."}
                           </td>
                           {user?.user_role !== "Contractor" && (
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                               {wbs.cost
                                 ? formatCurrency(Number(wbs.cost))
-                                : "N/A"}
+                                : "..."}
                             </td>
                           )}
                           {user?.user_role !== "Contractor" && (
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                               {wbs.base_cost
                                 ? formatCurrency(Number(wbs.base_cost))
-                                : "N/A"}
+                                : "..."}
                             </td>
                           )}
                           {user?.user_role !== "Contractor" && (
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                               {wbs.direct_cost
                                 ? formatCurrency(Number(wbs.direct_cost))
-                                : "N/A"}
+                                : "..."}
                             </td>
                           )}
                           {user?.user_role !== "Contractor" && (
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                               {wbs.total_price
                                 ? formatCurrency(Number(wbs.total_price))
-                                : "N/A"}
+                                : "..."}
                             </td>
                           )}
                         </tr>

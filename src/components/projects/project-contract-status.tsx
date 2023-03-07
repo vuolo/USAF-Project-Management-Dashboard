@@ -1,10 +1,18 @@
+import { useCallback, useState } from "react";
+import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { format } from "date-fns";
+import { toast } from "react-toastify";
+import { toastMessage } from "~/utils/toast";
+import { isInvalidDate } from "~/utils/date";
 import { api } from "~/utils/api";
+
+import ModalAddProjectContract from "./modals/modal-add-project-contract";
 
 import type { view_project } from "~/types/view_project";
 
 function ProjectContractStatus({ project }: { project: view_project }) {
+  const router = useRouter();
   const user = useSession().data?.db_user;
   const { data: contractAwardTimeline } =
     api.contract.getContractAwardTimeline.useQuery({ project_id: project.id });
@@ -12,20 +20,87 @@ function ProjectContractStatus({ project }: { project: view_project }) {
     project_id: project.id,
   });
 
+  const markAwarded = api.contract.updateContractStatus.useMutation({
+    onError: (error) => {
+      toast.error(
+        toastMessage(
+          "Error Marking Project as Awarded",
+          "There was an error marking this project as awarded. Please try again later."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess: () => {
+      toast.success(
+        toastMessage(
+          "Project Marked as Awarded",
+          "This project has been marked as awarded."
+        )
+      );
+
+      // Reload the page to show the new "Awarded" status
+      router.reload();
+    },
+  });
+
+  const submitMarkAwarded = useCallback(() => {
+    if (!contractAward) {
+      toast.error(
+        toastMessage(
+          "Error Marking Project as Awarded",
+          "Make sure the project has an awarded contract before marking it as awarded."
+        )
+      );
+      return;
+    }
+
+    markAwarded.mutate({
+      id: contractAward.id,
+      contract_status: "Awarded",
+    });
+  }, [markAwarded, contractAward]);
+
+  // TODO: determine when a project can be awarded
+  const [canBeAwarded, setCanBeAwarded] = useState(true);
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
+
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
       <div className="flex items-center justify-between rounded-t-md bg-brand-dark px-8 py-2 font-medium text-white">
         <h1>Contract Status</h1>
         {project.contract_status !== "Closed" &&
           user?.user_role !== "Contractor" && (
-            <button className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto">
-              Edit
-            </button>
+            <div className="flex gap-3">
+              {canBeAwarded && (
+                <button
+                  onClick={submitMarkAwarded}
+                  className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto"
+                >
+                  Award Project
+                </button>
+              )}
+
+              {/* TODO: Add onClick to edit the contract award timeline */}
+              <button
+                onClick={() =>
+                  !contractAward || contractAwardTimeline?.length === 0
+                    ? setAddModalOpen(true)
+                    : setEditModalOpen(true)
+                }
+                className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto"
+              >
+                {!contractAward || contractAwardTimeline?.length === 0
+                  ? "Add"
+                  : "Edit"}
+              </button>
+            </div>
           )}
       </div>
 
       <div className="flex flex-col justify-around gap-2 pt-4 pb-2 text-left sm:px-6 sm:pt-6 md:flex-row">
-        <div className="flex flex-col gap-4 overflow-auto p-2 text-center">
+        <div className="flex w-full flex-col gap-4 overflow-auto p-2 text-center">
           <div className="mt-2 flex flex-col">
             <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -113,68 +188,72 @@ function ProjectContractStatus({ project }: { project: view_project }) {
                                 {timeline.timeline_status}
                               </td>
                               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {timeline.requirement_plan
+                                {!isInvalidDate(timeline.requirement_plan)
                                   ? format(
-                                      new Date(timeline.requirement_plan),
+                                      new Date(timeline.requirement_plan || ""),
                                       "MM/dd/yyyy"
                                     )
-                                  : "N/A"}
+                                  : "..."}
                               </td>
                               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {timeline.draft_rfp_released
+                                {!isInvalidDate(timeline.draft_rfp_released)
                                   ? format(
-                                      new Date(timeline.draft_rfp_released),
+                                      new Date(
+                                        timeline.draft_rfp_released || ""
+                                      ),
                                       "MM/dd/yyyy"
                                     )
-                                  : "N/A"}
+                                  : "..."}
                               </td>
                               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {timeline.approved_by_acb
+                                {!isInvalidDate(timeline.approved_by_acb)
                                   ? format(
-                                      new Date(timeline.approved_by_acb),
+                                      new Date(timeline.approved_by_acb || ""),
                                       "MM/dd/yyyy"
                                     )
-                                  : "N/A"}
+                                  : "..."}
                               </td>
                               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {timeline.rfp_released
+                                {!isInvalidDate(timeline.rfp_released)
                                   ? format(
-                                      new Date(timeline.rfp_released),
+                                      new Date(timeline.rfp_released || ""),
                                       "MM/dd/yyyy"
                                     )
-                                  : "N/A"}
+                                  : "..."}
                               </td>
                               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {timeline.proposal_received
+                                {!isInvalidDate(timeline.proposal_received)
                                   ? format(
-                                      new Date(timeline.proposal_received),
+                                      new Date(
+                                        timeline.proposal_received || ""
+                                      ),
                                       "MM/dd/yyyy"
                                     )
-                                  : "N/A"}
+                                  : "..."}
                               </td>
                               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {timeline.tech_eval_comp
+                                {!isInvalidDate(timeline.tech_eval_comp)
                                   ? format(
-                                      new Date(timeline.tech_eval_comp),
+                                      new Date(timeline.tech_eval_comp || ""),
                                       "MM/dd/yyyy"
                                     )
-                                  : "N/A"}
+                                  : "..."}
                               </td>
                               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {timeline.negotiation_comp
+                                {!isInvalidDate(timeline.negotiation_comp)
                                   ? format(
-                                      new Date(timeline.negotiation_comp),
+                                      new Date(timeline.negotiation_comp || ""),
                                       "MM/dd/yyyy"
                                     )
-                                  : "N/A"}
+                                  : "..."}
                               </td>
                               <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                {timeline.awarded
+                                {!isInvalidDate(timeline.awarded)
                                   ? format(
-                                      new Date(timeline.awarded),
+                                      new Date(timeline.awarded || ""),
                                       "MM/dd/yyyy"
                                     )
-                                  : "N/A"}
+                                  : "..."}
                               </td>
                             </tr>
                           ))}
@@ -189,6 +268,14 @@ function ProjectContractStatus({ project }: { project: view_project }) {
       </div>
 
       {/* TODO: Edit Contract Status Modal */}
+
+      {/* TODO: Add Contract Award Timeline Modal */}
+      <ModalAddProjectContract
+        project={project}
+        contractAward={contractAward}
+        isOpen={addModalOpen}
+        setIsOpen={setAddModalOpen}
+      />
     </div>
   );
 }
