@@ -27,7 +27,6 @@
 This project is an extension of a previous year's [Senior Design Project](https://www.eecs.ucf.edu/cssd) located [here](https://github.com/KatPrend/USAF-Dashboard).
 
 We were tasked with improving the original source code, with the initial requirements proposed by our sponsor:
-
 <ul>
   <li>Data Visualization</li>
   <ul>
@@ -50,9 +49,16 @@ We were tasked with improving the original source code, with the initial require
 </ul
 
 To start off - we switched the previous team's tech stack up a bit. Here's what we changed:
-
   1. Switched our framework from [React Router](https://reactrouter.com) to [Next.js](https://nextjs.org)
   2. Converted all files to [TypeScript](https://www.typescriptlang.org)
   3. Added [Prisma](https://www.prisma.io) for SQL Injection prevention (a serious issue that was present in the previous team's source code)
   4. Replaced [Express](https://expressjs.com) with [tRPC](https://trpc.io) to ensure API [type-safety](https://en.wikipedia.org/wiki/Type_safety) from the front-end client to the back-end server
-  
+ 
+<h2>Usage</h2>
+
+To run locally, follow the following steps:
+  1. Download the SQL script that sets up the database table (Note: not hosted here yet, use [this file](https://github.com/KatPrend/USAF-Dashboard/blob/main/Backend/usaf-dash_2022-11-12.sql) for now)
+     - Make sure to create two users named `usaf` and `usaf_admin` with appropriate privileges
+  2. run `npm install` to install the node packages
+  3. run `npx prisma db push` to push the new database schema (that includes authentication) to the SQL server
+  4. run `npm run dev` to start the local development server
