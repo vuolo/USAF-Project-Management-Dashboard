@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { format } from "date-fns";
 import { api } from "~/utils/api";
 
 import type { view_project } from "~/types/view_project";
+import ModalEditProjectDependencies from "./modals/modal-edit-project-dependencies";
 
 function ProjectDependencies({ project }: { project: view_project }) {
   const user = useSession().data?.db_user;
@@ -12,9 +14,8 @@ function ProjectDependencies({ project }: { project: view_project }) {
   const { data: successors } = api.dependency.getSuccessors.useQuery({
     project_id: project.id,
   });
-  const { data: milestones } = api.milestone.getSchedules.useQuery({
-    project_id: project.id,
-  });
+
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
@@ -22,7 +23,10 @@ function ProjectDependencies({ project }: { project: view_project }) {
         <h1>Dependencies</h1>
         {project.contract_status !== "Closed" &&
           user?.user_role !== "Contractor" && (
-            <button className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto">
+            <button
+              onClick={() => setModalOpen(true)}
+              className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto"
+            >
               Edit
             </button>
           )}
@@ -299,7 +303,14 @@ function ProjectDependencies({ project }: { project: view_project }) {
         )}
       </div>
 
-      {/* TODO: Edit Dependencies Modal */}
+      {/* Edit Dependencies Modal */}
+      <ModalEditProjectDependencies
+        project={project}
+        predecessors={predecessors}
+        successors={successors}
+        isOpen={modalOpen}
+        setIsOpen={setModalOpen}
+      />
     </div>
   );
 }

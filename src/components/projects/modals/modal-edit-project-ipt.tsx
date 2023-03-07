@@ -319,7 +319,7 @@ function ModalEditProjectIPT({ project, ipt, isOpen, setIsOpen }: ModalProps) {
                     </Dialog.Title>
 
                     {/* Top Section */}
-                    <div className="flex flex-col gap-4 md:flex-row md:gap-16">
+                    <div className="mt-2 flex flex-col gap-4 md:flex-row md:gap-16">
                       {/* Add IPT Member [Left] */}
                       <div className="mt-2 flex min-w-full flex-col gap-2 sm:min-w-[40%]">
                         <h1 className="mx-auto font-medium underline">

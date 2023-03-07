@@ -7,6 +7,45 @@ import type { predecessor } from "~/types/predecessor";
 import type { successor } from "~/types/successor";
 
 export const dependencyRouter = createTRPCRouter({
+  addDependency: protectedProcedure
+    .input(
+      z.object({
+        predecessor_project: z.number(),
+        predecessor_milestone: z.number(),
+        successor_project: z.number(),
+        successor_milestone: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.$executeRaw`
+        INSERT INTO project_milestone_dependency (
+          predecessor_project, 
+          predecessor_milestone,
+          successor_project,
+          successor_milestone) 
+        VALUES (
+          ${input.predecessor_project},
+          ${input.predecessor_milestone},
+          ${input.successor_project},
+          ${input.successor_milestone})`;
+    }),
+  removeDependency: protectedProcedure
+    .input(
+      z.object({
+        predecessor_project: z.number(),
+        predecessor_milestone: z.number(),
+        successor_project: z.number(),
+        successor_milestone: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.$executeRaw`
+        DELETE FROM project_milestone_dependency
+        WHERE predecessor_project = ${input.predecessor_project}
+        AND predecessor_milestone = ${input.predecessor_milestone}
+        AND successor_project = ${input.successor_project}
+        AND successor_milestone = ${input.successor_milestone}`;
+    }),
   getAllSuccessors: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.session.db_user;
     if (!user) return null;
