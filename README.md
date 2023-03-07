@@ -57,7 +57,7 @@ To start off - we switched the previous team's tech stack up a bit. Here's what 
 <h2>Usage</h2>
 
 To run locally, follow the following steps:
-  1. Download the SQL script that sets up the database table (Note: not hosted here yet, use [this file](https://github.com/KatPrend/USAF-Dashboard/blob/main/Backend/usaf-dash_2022-11-12.sql) for now)
+  1. Download the SQL script that sets up the database table (Note: It's not hosted here yet, so use [this file](https://github.com/KatPrend/USAF-Dashboard/blob/main/Backend/usaf-dash_2022-11-12.sql) for now)
      - Make sure to create two users named `usaf` and `usaf_admin` with appropriate privileges
   2. run `npm install` to install the node packages
   3. run `npx prisma db push` to push the new database schema (that includes authentication) to the SQL server
