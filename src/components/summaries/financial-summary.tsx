@@ -1,6 +1,7 @@
 import { Chart } from "react-google-charts";
 
 import { api } from "~/utils/api";
+import { formatCurrency } from "~/utils/currency";
 
 function FinancialSummary() {
   const { data: obligation } = api.obligation.getTotalObligation.useQuery();
@@ -54,11 +55,20 @@ function FinancialSummary() {
                       ).toFixed(2)}%`}
                 </h2>
                 <p className="text-sm">
-                  Actual Obligation: <b>{obligation.obli_actual ?? "N/A"}</b>
+                  Actual Obligation:{" "}
+                  <b>
+                    {obligation.obli_actual
+                      ? formatCurrency(obligation.obli_actual)
+                      : "N/A"}
+                  </b>
                 </p>
                 <p className="text-sm">
                   Planned Obligation:{" "}
-                  <b>{obligation.obli_projected ?? "N/A"}</b>
+                  <b>
+                    {obligation.obli_projected
+                      ? formatCurrency(obligation.obli_projected)
+                      : "N/A"}
+                  </b>
                 </p>
               </div>
             </div>
@@ -102,11 +112,20 @@ function FinancialSummary() {
                       ).toFixed(2)}%`}
                 </h2>
                 <p className="text-sm">
-                  Actual Expenditure: <b>{expenditure.expen_actual ?? "N/A"}</b>
+                  Actual Expenditure:{" "}
+                  <b>
+                    {expenditure.expen_actual
+                      ? formatCurrency(expenditure.expen_actual)
+                      : "N/A"}
+                  </b>
                 </p>
                 <p className="text-sm">
                   Planned Expenditure:{" "}
-                  <b>{expenditure.expen_projected ?? "N/A"}</b>
+                  <b>
+                    {expenditure.expen_projected
+                      ? formatCurrency(expenditure.expen_projected)
+                      : "N/A"}
+                  </b>
                 </p>
               </div>
             </div>
