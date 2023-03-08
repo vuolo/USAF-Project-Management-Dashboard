@@ -54,6 +54,7 @@ To start off - we switched the previous team's tech stack up a bit. Here's what 
   2. Converted all JavaScript files to [TypeScript](https://www.typescriptlang.org)
   3. Added [Prisma](https://www.prisma.io) for SQL Injection prevention (a serious issue that was present in the previous team's source code)
   4. Replaced [Express](https://expressjs.com) with [tRPC](https://trpc.io) to ensure API [type-safety](https://en.wikipedia.org/wiki/Type_safety) from the front-end client to the back-end server
+  5. Switched from [React Bootstrap](https://react-bootstrap.github.io) to [Headless UI](https://headlessui.com) for more style customization
  
 <h2>Usage</h2>
 
@@ -64,3 +65,28 @@ To run locally, follow the following steps:
   3. Duplicate [.env.example](https://github.com/vuolo/USAF-Project-Management-Dashboard/blob/main/.env.example) and rename it to `.env`, and fill it in with the appropriate contents
   4. Run `npx prisma db push` to push the new database schema (that includes authentication) to the SQL server
   5. Run `npm run dev` to start the local development server
+
+<h2>Tech Stack</h2>
+
+<h3>Front-End</h3>
+
+* [React](https://reactjs.org)
+* [Headless UI](https://headlessui.com)
+* [Tailwind CSS](https://tailwindcss.com)
+* [Google Charts](https://developers.google.com/chart)
+* [Recharts](https://recharts.org)
+* [React Toastify](https://www.npmjs.com/package/react-toastify)
+
+
+<h3>Back-End</h3>
+
+* [Next.js](https://nextjs.org)
+* [TypeScript](https://www.typescriptlang.org)
+* [Prisma](https://www.prisma.io)
+* [tRPC](https://trpc.io)
+* [NextAuth.js](https://next-auth.js.org)
+* [Zod](https://zod.dev)
+
+<h3>Database</h3>
+
+* [MySQL](https://www.mysql.com) ([Azure SQL Database](https://azure.microsoft.com/en-us/products/azure-sql/database) for production)
