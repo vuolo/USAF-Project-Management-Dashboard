@@ -11,6 +11,7 @@ import ModalAddProjectContract from "./modals/modal-add-project-contract";
 
 import type { view_project } from "~/types/view_project";
 import ModalConfirmProjectMarkAwarded from "./modals/modal-confirm-project-mark-awarded";
+import ModalEditProjectContractStatus from "./modals/modal-edit-project-contract-status";
 
 function ProjectContractStatus({ project }: { project: view_project }) {
   const router = useRouter();
@@ -235,11 +236,17 @@ function ProjectContractStatus({ project }: { project: view_project }) {
         setIsOpen={setMarkAwardedModalOpen}
       />
 
-      {/* TODO: Edit Contract Status Modal */}
+      {/* Edit Contract Status Modal */}
+      <ModalEditProjectContractStatus
+        project={project}
+        contractAwardTimeline={contractAwardTimeline}
+        contractAward={contractAward}
+        isOpen={editModalOpen}
+        setIsOpen={setEditModalOpen}
+      />
 
       {/* Add Contract Award Timeline Modal */}
       <ModalAddProjectContract
-        project={project}
         contractAward={contractAward}
         isOpen={addModalOpen}
         setIsOpen={setAddModalOpen}

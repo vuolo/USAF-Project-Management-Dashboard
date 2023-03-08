@@ -14,17 +14,14 @@ import {
 } from "~/utils/date";
 import { api } from "~/utils/api";
 import type { contract_award } from "@prisma/client";
-import type { view_project } from "~/types/view_project";
 
 type ModalProps = {
-  project: view_project;
   contractAward?: contract_award | null;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 };
 
 function ModalAddProjectContract({
-  project,
   contractAward,
   isOpen,
   setIsOpen,

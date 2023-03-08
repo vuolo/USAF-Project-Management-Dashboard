@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { Dialog, Transition } from "@headlessui/react";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
-import { AlertTriangle } from "lucide-react";
+import { Award } from "lucide-react";
 import { api } from "~/utils/api";
 import type { contract_award } from "@prisma/client";
 
@@ -125,7 +125,7 @@ function ModalConfirmProjectMarkAwarded({
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <AlertTriangle
+                    <Award
                       className="h-6 w-6 text-yellow-600"
                       aria-hidden="true"
                     />
