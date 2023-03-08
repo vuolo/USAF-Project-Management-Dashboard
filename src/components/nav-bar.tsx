@@ -4,11 +4,11 @@ import { Tooltip } from "react-tooltip";
 import { Cog, Home, LogOut } from "lucide-react";
 import { useSession } from "next-auth/react";
 
-function NavBar() {
+function NavBar({ title }: { title?: string }) {
   const user = useSession().data?.db_user;
 
   return (
-    <nav className="flex h-[70px] w-full justify-between border-b border-black/10 bg-brand-dark px-8 sm:px-16">
+    <nav className="flex h-[70px] w-full items-center justify-between border-b border-black/10 bg-brand-dark px-8 sm:px-16">
       <Link href="/" className="flex items-center gap-2 hover:opacity-80">
         <Image
           src="/images/brand/AirForceLogoWhite.png"
@@ -18,6 +18,9 @@ function NavBar() {
         />
         <h1 className="text-2xl tracking-wider text-white">METIS</h1>
       </Link>
+
+      {title && <h2 className="text-2xl tracking-wide text-white">{title}</h2>}
+
       <div className="flex items-center gap-4 text-white">
         {/* Admin Page */}
         {user?.user_role === "Admin" && (

@@ -23,7 +23,7 @@ function Project() {
 
   return (
     <>
-      <NavBar />
+      <NavBar title={project?.project_name} />
       <main>
         {project && (
           <>
