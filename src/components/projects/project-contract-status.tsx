@@ -1,9 +1,6 @@
-import { useCallback, useState } from "react";
-import { useRouter } from "next/router";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { format } from "date-fns";
-import { toast } from "react-toastify";
-import { toastMessage } from "~/utils/toast";
 import { isInvalidDate } from "~/utils/date";
 import { api } from "~/utils/api";
 
@@ -14,7 +11,6 @@ import ModalConfirmProjectMarkAwarded from "./modals/modal-confirm-project-mark-
 import ModalEditProjectContractStatus from "./modals/modal-edit-project-contract-status";
 
 function ProjectContractStatus({ project }: { project: view_project }) {
-  const router = useRouter();
   const user = useSession().data?.db_user;
   const { data: contractAwardTimeline } =
     api.contract.getContractAwardTimeline.useQuery({ project_id: project.id });

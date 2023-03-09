@@ -16,6 +16,30 @@ export const approvedRouter = createTRPCRouter({
         },
       });
     }),
+  updateApprovedFunding: protectedProcedure
+    .input(
+      z.object({
+        approvedID: z.number(),
+        projectID: z.number(),
+        appro_funding_type: z.number(),
+        appro_fiscal_year: z.number(),
+        approved_amount: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.approved_funding.update({
+        where: {
+          id: input.approvedID,
+        },
+        data: {
+          project_id: input.projectID,
+          appro_funding_type: input.appro_funding_type,
+          appro_fiscal_year: input.appro_fiscal_year,
+          approved_amount: input.approved_amount,
+        },
+      });
+    }),
+
   getEstimates: protectedProcedure
     .input(z.object({ project_id: z.number() }))
     .query(async ({ input }) => {

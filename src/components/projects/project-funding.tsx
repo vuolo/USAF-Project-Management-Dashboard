@@ -14,6 +14,7 @@ import { formatCurrency } from "~/utils/currency";
 import TableApprovedFunding from "./tables/table-approved-funding";
 import TableObligationPlan from "./tables/table-obligation-plan";
 import TableExpenditurePlan from "./tables/table-expenditure-plan";
+import ModalEditProjectFunding from "./modals/modal-edit-project-funding";
 
 function ProjectFunding({ project }: { project: view_project }) {
   const user = useSession().data?.db_user;
@@ -39,13 +40,18 @@ function ProjectFunding({ project }: { project: view_project }) {
     | "expenditure_line"
   >("obligation_bar");
 
+  const [modalOpen, setModalOpen] = useState(false);
+
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
       <div className="flex items-center justify-between rounded-t-md bg-brand-dark px-8 py-2 font-medium text-white">
         <h1>Funding</h1>
         {project.contract_status !== "Closed" &&
           user?.user_role !== "Contractor" && (
-            <button className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto">
+            <button
+              onClick={() => setModalOpen(true)}
+              className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto"
+            >
               Edit
             </button>
           )}
@@ -189,7 +195,14 @@ function ProjectFunding({ project }: { project: view_project }) {
         )}
       </div>
 
-      {/* TODO: Edit Funding Modal */}
+      {/* Edit Funding Modal */}
+      <ModalEditProjectFunding
+        obligationPlan={obligationPlan}
+        expenditurePlan={expenditurePlan}
+        approvedFunding={approvedFunding}
+        isOpen={modalOpen}
+        setIsOpen={setModalOpen}
+      />
     </div>
   );
 }

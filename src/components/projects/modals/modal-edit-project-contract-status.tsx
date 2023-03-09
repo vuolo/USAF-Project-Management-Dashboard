@@ -146,6 +146,11 @@ function ModalEditProjectContractStatus({
       setIsOpen(false);
 
       if (save) submitUpdateContractAwardTimeline();
+
+      // Reset the edit state
+      setTimeout(() => {
+        setContractAwardTimeline_editState([]);
+      }, 500);
     },
     [setIsOpen, submitUpdateContractAwardTimeline]
   );
