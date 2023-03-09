@@ -145,14 +145,17 @@ function ModalAddProjectContract({
 
     addContractAwardTimeline.mutate({
       contract_award_id: contractAward.id,
-      requirement_plan: convertDayValueToDate(requirementPlanDate) as Date,
-      draft_rfp_released: convertDayValueToDate(draftRfpReleasedDate) as Date,
-      approved_by_acb: convertDayValueToDate(approvedByAcbDate) as Date,
-      rfp_released: convertDayValueToDate(rfpReleasedDate) as Date,
-      proposal_received: convertDayValueToDate(proposalReceivedDate) as Date,
-      tech_eval_comp: convertDayValueToDate(techEvalCompDate) as Date,
-      negotiation_comp: convertDayValueToDate(negotiationCompDate) as Date,
-      awarded: convertDayValueToDate(awardedDate) as Date,
+      requirement_plan: convertDayValueToDate(requirementPlanDate, 1) as Date,
+      draft_rfp_released: convertDayValueToDate(
+        draftRfpReleasedDate,
+        1
+      ) as Date,
+      approved_by_acb: convertDayValueToDate(approvedByAcbDate, 1) as Date,
+      rfp_released: convertDayValueToDate(rfpReleasedDate, 1) as Date,
+      proposal_received: convertDayValueToDate(proposalReceivedDate, 1) as Date,
+      tech_eval_comp: convertDayValueToDate(techEvalCompDate, 1) as Date,
+      negotiation_comp: convertDayValueToDate(negotiationCompDate, 1) as Date,
+      awarded: convertDayValueToDate(awardedDate, 1) as Date,
     });
   }, [
     addContractAwardTimeline,

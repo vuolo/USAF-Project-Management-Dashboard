@@ -238,9 +238,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
 
       {/* Edit Contract Status Modal */}
       <ModalEditProjectContractStatus
-        project={project}
         contractAwardTimeline={contractAwardTimeline}
-        contractAward={contractAward}
         isOpen={editModalOpen}
         setIsOpen={setEditModalOpen}
       />

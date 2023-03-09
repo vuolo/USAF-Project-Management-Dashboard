@@ -19,7 +19,11 @@ function NavBar({ title }: { title?: string }) {
         <h1 className="text-2xl tracking-wider text-white">METIS</h1>
       </Link>
 
-      {title && <h2 className="text-2xl tracking-wide text-white">{title}</h2>}
+      {title && (
+        <h2 className="hidden text-2xl tracking-wide text-white sm:block">
+          {title}
+        </h2>
+      )}
 
       <div className="flex items-center gap-4 text-white">
         {/* Admin Page */}

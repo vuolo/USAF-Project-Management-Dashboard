@@ -137,6 +137,40 @@ export const contractRouter = createTRPCRouter({
           )`,
       ]);
     }),
+  updateContractAwardTimeline: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        contract_award_id: z.number(),
+        timeline_status: z.enum(["Planned", "Projected", "Actual"]),
+        requirement_plan: z.date().optional(),
+        draft_rfp_released: z.date().optional(),
+        approved_by_acb: z.date().optional(),
+        rfp_released: z.date().optional(),
+        proposal_received: z.date().optional(),
+        tech_eval_comp: z.date().optional(),
+        negotiation_comp: z.date().optional(),
+        awarded: z.date().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.contract_award_timeline.update({
+        where: { id: input.id },
+        data: {
+          contract_award_id: input.contract_award_id,
+          timeline_status: input.timeline_status,
+
+          requirement_plan: input.requirement_plan,
+          draft_rfp_released: input.draft_rfp_released,
+          approved_by_acb: input.approved_by_acb,
+          rfp_released: input.rfp_released,
+          proposal_received: input.proposal_received,
+          tech_eval_comp: input.tech_eval_comp,
+          negotiation_comp: input.negotiation_comp,
+          awarded: input.awarded,
+        },
+      });
+    }),
   getContractAward: protectedProcedure
     .input(z.object({ project_id: z.number() }))
     .query(async ({ input }) => {

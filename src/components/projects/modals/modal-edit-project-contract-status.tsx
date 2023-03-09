@@ -1,27 +1,29 @@
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { Dialog, Transition } from "@headlessui/react";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
-import { AlertTriangle, CalendarClock, Scroll } from "lucide-react";
-import { format } from "date-fns";
-import { isInvalidDate } from "~/utils/date";
+import { CalendarClock, Trash2 } from "lucide-react";
+import {
+  convertDateToDayValue,
+  convertDayValueToDate,
+  isInvalidDate,
+} from "~/utils/date";
 import { api } from "~/utils/api";
-import type { contract_award, contract_award_timeline } from "@prisma/client";
-import type { view_project } from "~/types/view_project";
+import type { contract_award_timeline } from "@prisma/client";
+import type { contract_award_timeline_using_day_values } from "~/types/contract_award_timeline_using_day_values";
+import DatePicker, {
+  type DayValue,
+} from "@hassanmojab/react-modern-calendar-datepicker";
 
 type ModalProps = {
-  project?: view_project | null;
   contractAwardTimeline?: contract_award_timeline[] | null;
-  contractAward?: contract_award | null;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 };
 
 function ModalEditProjectContractStatus({
-  project,
   contractAwardTimeline,
-  contractAward,
   isOpen,
   setIsOpen,
 }: ModalProps) {
@@ -29,6 +31,108 @@ function ModalEditProjectContractStatus({
 
   // Modal functionality (states)
   const [modalOpen, setModalOpen] = useState(false);
+  const [contractAwardTimeline_editState, setContractAwardTimeline_editState] =
+    useState<contract_award_timeline_using_day_values[]>([]);
+  const saveButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Listen for changes in contractAwardTimeline, and update edit state (the edit state is used to render the table on the modal)
+  useEffect(() => {
+    if (!contractAwardTimeline || contractAwardTimeline_editState.length > 0)
+      return;
+
+    setContractAwardTimeline_editState(
+      contractAwardTimeline.map((t) =>
+        // Convert each date to a DayValue object (this is used by the date picker)
+        ({
+          ...t,
+          requirement_plan: isInvalidDate(t.requirement_plan)
+            ? null
+            : convertDateToDayValue(t.requirement_plan),
+          draft_rfp_released: isInvalidDate(t.draft_rfp_released)
+            ? null
+            : convertDateToDayValue(t.draft_rfp_released),
+          approved_by_acb: isInvalidDate(t.approved_by_acb)
+            ? null
+            : convertDateToDayValue(t.approved_by_acb),
+          rfp_released: isInvalidDate(t.rfp_released)
+            ? null
+            : convertDateToDayValue(t.rfp_released),
+          proposal_received: isInvalidDate(t.proposal_received)
+            ? null
+            : convertDateToDayValue(t.proposal_received),
+          tech_eval_comp: isInvalidDate(t.tech_eval_comp)
+            ? null
+            : convertDateToDayValue(t.tech_eval_comp),
+          negotiation_comp: isInvalidDate(t.negotiation_comp)
+            ? null
+            : convertDateToDayValue(t.negotiation_comp),
+          awarded: isInvalidDate(t.awarded)
+            ? null
+            : convertDateToDayValue(t.awarded),
+        })
+      ) as contract_award_timeline_using_day_values[]
+    );
+  }, [contractAwardTimeline, contractAwardTimeline_editState]);
+
+  const updateContractAwardTimeline =
+    api.contract.updateContractAwardTimeline.useMutation({
+      onError: (error) => {
+        toast.error(
+          toastMessage(
+            "Error Updating Contract Award Timeline",
+            "There was an error updating the contract award timeline. Please try again."
+          )
+        );
+        console.error(error);
+      },
+      onSuccess: () => {
+        toast.success(
+          toastMessage(
+            "Contract Award Timeline Updated",
+            "The contract award timeline has been updated."
+          )
+        );
+
+        // Update UI to reflect new data
+        router.reload(); // For now, just reload the page instead of updating the UI (this is a bit hacky, but it works for now)
+      },
+    });
+
+  const submitUpdateContractAwardTimeline = useCallback(() => {
+    // Convert each DayValue to a Date (this is used by the database)
+    contractAwardTimeline_editState.map(
+      (t) =>
+        t.timeline_status &&
+        t.hasBeenUpdated &&
+        updateContractAwardTimeline.mutate({
+          id: t.id,
+          contract_award_id: t.contract_award_id,
+          timeline_status: t.timeline_status,
+          requirement_plan: t.requirement_plan
+            ? convertDayValueToDate(t.requirement_plan, 1)
+            : new Date("December 31, 1969"),
+          draft_rfp_released: t.draft_rfp_released
+            ? convertDayValueToDate(t.draft_rfp_released, 1)
+            : new Date("December 31, 1969"),
+          approved_by_acb: t.approved_by_acb
+            ? convertDayValueToDate(t.approved_by_acb, 1)
+            : new Date("December 31, 1969"),
+          rfp_released: t.rfp_released
+            ? convertDayValueToDate(t.rfp_released, 1)
+            : new Date("December 31, 1969"),
+          proposal_received: t.proposal_received
+            ? convertDayValueToDate(t.proposal_received, 1)
+            : new Date("December 31, 1969"),
+          tech_eval_comp: t.tech_eval_comp
+            ? convertDayValueToDate(t.tech_eval_comp, 1)
+            : new Date("December 31, 1969"),
+          negotiation_comp: t.negotiation_comp
+            ? convertDayValueToDate(t.negotiation_comp, 1)
+            : new Date("December 31, 1969"),
+          awarded: t.awarded ? convertDayValueToDate(t.awarded) : undefined,
+        })
+    );
+  }, [contractAwardTimeline_editState, updateContractAwardTimeline]);
 
   // Open modal
   const openModal = useCallback(() => {
@@ -41,20 +145,56 @@ function ModalEditProjectContractStatus({
       setModalOpen(false);
       setIsOpen(false);
 
-      // if (save) { }
+      if (save) submitUpdateContractAwardTimeline();
     },
-    [setIsOpen]
+    [setIsOpen, submitUpdateContractAwardTimeline]
   );
 
   useEffect(() => {
     if (isOpen) openModal();
   }, [isOpen, openModal]);
 
+  const updateDate = useCallback(
+    (timelineIndex: number, dateType: string, date: DayValue) => {
+      setContractAwardTimeline_editState((prev) => {
+        return prev.map((t, i) => {
+          if (i === timelineIndex) {
+            return {
+              ...t,
+              [dateType]: date,
+              hasBeenUpdated: true,
+            };
+          }
+
+          return t;
+        });
+      });
+    },
+    []
+  );
+
+  const clearDate = useCallback((timelineIndex: number, dateType: string) => {
+    setContractAwardTimeline_editState((prev) => {
+      return prev.map((t, i) => {
+        if (i === timelineIndex) {
+          return {
+            ...t,
+            [dateType]: null,
+            hasBeenUpdated: true,
+          };
+        }
+
+        return t;
+      });
+    });
+  }, []);
+
   return (
     <Transition.Root show={modalOpen} as={Fragment}>
       <Dialog
         as="div"
         className="fixed inset-0 z-10 overflow-y-auto"
+        initialFocus={saveButtonRef}
         onClose={() => {
           closeModal(false);
         }}
@@ -88,29 +228,29 @@ function ModalEditProjectContractStatus({
             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
-            <div className="relative inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-[95%] sm:align-middle">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <CalendarClock
-                      className="h-6 w-6 text-blue-600"
-                      aria-hidden="true"
-                    />
-                  </div>
-                  <div className="mt-3 mr-2 w-full text-center sm:mt-0 sm:ml-4 sm:text-left">
+            <div className="relative my-8 inline-block w-full max-w-full transform rounded-lg bg-white text-left align-middle shadow-xl transition-all">
+              <div className="w-fit rounded-lg bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4 2xl:w-full">
+                <div className="flex items-start">
+                  <div className="mr-2 mt-3 ml-4 w-full text-left">
                     <Dialog.Title
                       as="h3"
-                      className="text-lg font-medium leading-6 text-gray-900"
+                      className="flex items-center gap-4 text-lg font-medium leading-6 text-gray-900"
                     >
-                      Edit Contract Award Timeline
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                        <CalendarClock
+                          className="h-6 w-6 text-blue-600"
+                          aria-hidden="true"
+                        />
+                      </div>
+                      <span>Edit Contract Award Timeline</span>
                     </Dialog.Title>
 
-                    <div className="flex flex-col justify-around gap-2 pt-4 pb-2 text-left sm:px-6 sm:pt-6 md:flex-row">
-                      <div className="flex w-full flex-col gap-4 overflow-auto p-2 text-center">
-                        <div className="mt-2 flex flex-col">
-                          <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <div className="mx-auto flex flex-row items-center justify-center gap-2 pt-4 pb-2 text-left sm:px-6 sm:pt-6">
+                      <div className="mx-auto flex w-full flex-col items-center justify-center gap-4 p-2 text-center">
+                        <div className="mt-2 flex flex-col items-center justify-center">
+                          <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
                             <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                              <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
                                 {!contractAwardTimeline ? (
                                   <div className="flex h-64 items-center justify-center px-64">
                                     <div className="italic text-gray-500">
@@ -125,7 +265,7 @@ function ModalEditProjectContractStatus({
                                     </div>
                                   </div>
                                 ) : (
-                                  <table className="min-w-full divide-y divide-gray-300">
+                                  <table className="mx-auto min-w-full divide-y divide-gray-300">
                                     <thead className="bg-gray-50">
                                       <tr>
                                         <th
@@ -185,127 +325,243 @@ function ModalEditProjectContractStatus({
                                       </tr>
                                     </thead>
                                     <tbody className="bg-white">
-                                      {/* TODO: add editable date pickers */}
-                                      {contractAwardTimeline &&
-                                        contractAwardTimeline.map(
-                                          (timeline, timelineIdx) => (
-                                            <tr
-                                              key={timeline.id}
-                                              className={
-                                                timelineIdx % 2 === 0
-                                                  ? undefined
-                                                  : "bg-gray-50"
-                                              }
-                                            >
-                                              <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
-                                                {timeline.timeline_status}
-                                              </td>
-                                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {!isInvalidDate(
-                                                  timeline.requirement_plan
-                                                )
-                                                  ? format(
-                                                      new Date(
-                                                        timeline.requirement_plan ||
-                                                          ""
-                                                      ),
-                                                      "MM/dd/yyyy"
+                                      {contractAwardTimeline_editState.map(
+                                        (timeline, timelineIdx) => (
+                                          <tr
+                                            key={timeline.id}
+                                            className={
+                                              timelineIdx % 2 === 0
+                                                ? undefined
+                                                : "bg-gray-50"
+                                            }
+                                          >
+                                            <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
+                                              {timeline.timeline_status}
+                                            </td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                              <div className="z-50 flex items-center gap-2">
+                                                <DatePicker
+                                                  value={
+                                                    timeline.requirement_plan
+                                                  }
+                                                  onChange={(date) =>
+                                                    updateDate(
+                                                      timelineIdx,
+                                                      "requirement_plan",
+                                                      date
                                                     )
-                                                  : "..."}
-                                              </td>
-                                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {!isInvalidDate(
-                                                  timeline.draft_rfp_released
-                                                )
-                                                  ? format(
-                                                      new Date(
-                                                        timeline.draft_rfp_released ||
-                                                          ""
-                                                      ),
-                                                      "MM/dd/yyyy"
+                                                  }
+                                                  inputPlaceholder="No Date"
+                                                  inputClassName="w-[5.5rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                                  calendarClassName="z-50"
+                                                />
+
+                                                <Trash2
+                                                  onClick={() =>
+                                                    clearDate(
+                                                      timelineIdx,
+                                                      "requirement_plan"
                                                     )
-                                                  : "..."}
-                                              </td>
-                                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {!isInvalidDate(
-                                                  timeline.approved_by_acb
-                                                )
-                                                  ? format(
-                                                      new Date(
-                                                        timeline.approved_by_acb ||
-                                                          ""
-                                                      ),
-                                                      "MM/dd/yyyy"
+                                                  }
+                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                />
+                                              </div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                              <div className="flex items-center gap-2">
+                                                <DatePicker
+                                                  value={
+                                                    timeline.draft_rfp_released
+                                                  }
+                                                  onChange={(date) =>
+                                                    updateDate(
+                                                      timelineIdx,
+                                                      "draft_rfp_released",
+                                                      date
                                                     )
-                                                  : "..."}
-                                              </td>
-                                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {!isInvalidDate(
-                                                  timeline.rfp_released
-                                                )
-                                                  ? format(
-                                                      new Date(
-                                                        timeline.rfp_released ||
-                                                          ""
-                                                      ),
-                                                      "MM/dd/yyyy"
+                                                  }
+                                                  inputPlaceholder="No Date"
+                                                  inputClassName="w-[5.5rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                                  calendarClassName="z-50"
+                                                />
+                                                <Trash2
+                                                  onClick={() =>
+                                                    clearDate(
+                                                      timelineIdx,
+                                                      "draft_rfp_released"
                                                     )
-                                                  : "..."}
-                                              </td>
-                                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {!isInvalidDate(
-                                                  timeline.proposal_received
-                                                )
-                                                  ? format(
-                                                      new Date(
-                                                        timeline.proposal_received ||
-                                                          ""
-                                                      ),
-                                                      "MM/dd/yyyy"
+                                                  }
+                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                />
+                                              </div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                              <div className="flex items-center gap-2">
+                                                <DatePicker
+                                                  value={
+                                                    timeline.approved_by_acb
+                                                  }
+                                                  onChange={(date) =>
+                                                    updateDate(
+                                                      timelineIdx,
+                                                      "approved_by_acb",
+                                                      date
                                                     )
-                                                  : "..."}
-                                              </td>
-                                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {!isInvalidDate(
-                                                  timeline.tech_eval_comp
-                                                )
-                                                  ? format(
-                                                      new Date(
-                                                        timeline.tech_eval_comp ||
-                                                          ""
-                                                      ),
-                                                      "MM/dd/yyyy"
+                                                  }
+                                                  inputPlaceholder="No Date"
+                                                  inputClassName="w-[5.5rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                                  calendarClassName="z-50"
+                                                />
+                                                <Trash2
+                                                  onClick={() =>
+                                                    clearDate(
+                                                      timelineIdx,
+                                                      "approved_by_acb"
                                                     )
-                                                  : "..."}
-                                              </td>
-                                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {!isInvalidDate(
-                                                  timeline.negotiation_comp
-                                                )
-                                                  ? format(
-                                                      new Date(
-                                                        timeline.negotiation_comp ||
-                                                          ""
-                                                      ),
-                                                      "MM/dd/yyyy"
+                                                  }
+                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                />
+                                              </div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                              <div className="flex items-center gap-2">
+                                                <DatePicker
+                                                  value={timeline.rfp_released}
+                                                  onChange={(date) =>
+                                                    updateDate(
+                                                      timelineIdx,
+                                                      "rfp_released",
+                                                      date
                                                     )
-                                                  : "..."}
-                                              </td>
-                                              <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                                {!isInvalidDate(
-                                                  timeline.awarded
-                                                )
-                                                  ? format(
-                                                      new Date(
-                                                        timeline.awarded || ""
-                                                      ),
-                                                      "MM/dd/yyyy"
+                                                  }
+                                                  inputPlaceholder="No Date"
+                                                  inputClassName="w-[5.5rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                                  calendarClassName="z-50"
+                                                />
+                                                <Trash2
+                                                  onClick={() =>
+                                                    clearDate(
+                                                      timelineIdx,
+                                                      "rfp_released"
                                                     )
-                                                  : "..."}
-                                              </td>
-                                            </tr>
-                                          )
-                                        )}
+                                                  }
+                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                />
+                                              </div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                              <div className="flex items-center gap-2">
+                                                <DatePicker
+                                                  value={
+                                                    timeline.proposal_received
+                                                  }
+                                                  onChange={(date) =>
+                                                    updateDate(
+                                                      timelineIdx,
+                                                      "proposal_received",
+                                                      date
+                                                    )
+                                                  }
+                                                  inputPlaceholder="No Date"
+                                                  inputClassName="w-[5.5rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                                  calendarClassName="z-50"
+                                                />
+                                                <Trash2
+                                                  onClick={() =>
+                                                    clearDate(
+                                                      timelineIdx,
+                                                      "proposal_received"
+                                                    )
+                                                  }
+                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                />
+                                              </div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                              <div className="flex items-center gap-2">
+                                                <DatePicker
+                                                  value={
+                                                    timeline.tech_eval_comp
+                                                  }
+                                                  onChange={(date) =>
+                                                    updateDate(
+                                                      timelineIdx,
+                                                      "tech_eval_comp",
+                                                      date
+                                                    )
+                                                  }
+                                                  inputPlaceholder="No Date"
+                                                  inputClassName="w-[5.5rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                                  calendarClassName="z-50"
+                                                />
+                                                <Trash2
+                                                  onClick={() =>
+                                                    clearDate(
+                                                      timelineIdx,
+                                                      "tech_eval_comp"
+                                                    )
+                                                  }
+                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                />
+                                              </div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                              <div className="flex items-center gap-2">
+                                                <DatePicker
+                                                  value={
+                                                    timeline.negotiation_comp
+                                                  }
+                                                  onChange={(date) =>
+                                                    updateDate(
+                                                      timelineIdx,
+                                                      "negotiation_comp",
+                                                      date
+                                                    )
+                                                  }
+                                                  inputPlaceholder="No Date"
+                                                  inputClassName="w-[5.5rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                                  calendarClassName="z-50"
+                                                />
+                                                <Trash2
+                                                  onClick={() =>
+                                                    clearDate(
+                                                      timelineIdx,
+                                                      "negotiation_comp"
+                                                    )
+                                                  }
+                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                />
+                                              </div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                              <div className="flex items-center gap-2">
+                                                <DatePicker
+                                                  value={timeline.awarded}
+                                                  onChange={(date) =>
+                                                    updateDate(
+                                                      timelineIdx,
+                                                      "awarded",
+                                                      date
+                                                    )
+                                                  }
+                                                  inputPlaceholder="No Date"
+                                                  inputClassName="w-[5.5rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                                  calendarClassName="z-50"
+                                                />
+                                                <Trash2
+                                                  onClick={() =>
+                                                    clearDate(
+                                                      timelineIdx,
+                                                      "awarded"
+                                                    )
+                                                  }
+                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                />
+                                              </div>
+                                            </td>
+                                          </tr>
+                                        )
+                                      )}
                                     </tbody>
                                   </table>
                                 )}
@@ -317,22 +573,24 @@ function ModalEditProjectContractStatus({
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                <button
-                  type="button"
-                  className="inline-flex w-full justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => closeModal(true)}
-                >
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                  onClick={() => closeModal(false)}
-                >
-                  Cancel
-                </button>
+
+                <div className="mt-4 gap-2 rounded-lg bg-gray-50 px-4 py-3 sm:flex sm:px-6">
+                  <button
+                    ref={saveButtonRef}
+                    type="button"
+                    className="inline-flex w-fit justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={() => closeModal(true)}
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="mt-3 ml-3 inline-flex w-fit justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={() => closeModal(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           </Transition.Child>
