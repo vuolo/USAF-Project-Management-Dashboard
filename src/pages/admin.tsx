@@ -11,6 +11,7 @@ import AdminOrganizationsBranches from "~/components/admin/admin-organizations-b
 import AdminMilitaryJobTitles from "~/components/admin/admin-military-job-titles";
 import AdminProjects from "~/components/admin/admin-projects";
 import AdminUsers from "~/components/admin/admin-users";
+import AdminListUsers from "~/components/admin/admin-list-users";
 
 const Admin: NextPage = () => {
   const user = useSession().data?.db_user;
@@ -104,6 +105,16 @@ const Admin: NextPage = () => {
                   Users
                 </p>
                 <p
+                  onClick={() => setSelectedOption("listusers")}
+                  className={`rounded-md px-4 py-2 text-white hover:bg-brand-dark/80 ${
+                    selectedOption === "users"
+                      ? "cursor-not-allowed bg-brand-dark/80 ring-2 ring-yellow-500"
+                      : "cursor-pointer bg-brand-dark"
+                  }`}
+                >
+                  List Users
+                </p>
+                <p
                   onClick={() => setSelectedOption("projects")}
                   className={`rounded-md px-4 py-2 text-white hover:bg-brand-dark/80 ${
                     selectedOption === "projects"
@@ -151,6 +162,8 @@ const renderSettingsDetails = (selectedOption: string) => {
       return <AdminMilitaryJobTitles />;
     case "users":
       return <AdminUsers />;
+    case "listusers":
+      return <AdminListUsers />
     case "projects":
       return <AdminProjects />;
     default:
