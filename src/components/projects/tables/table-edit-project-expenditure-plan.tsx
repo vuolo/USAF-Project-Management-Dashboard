@@ -31,8 +31,8 @@ function TableEditExpenditurePlan({ expenditurePlan }: TableProps) {
 
   return (
     <div className="mx-auto flex flex-row items-center justify-center gap-2 pt-2 pb-2 text-left sm:px-6">
-      <div className="mx-auto flex w-full flex-col items-center justify-center gap-4 p-2 text-center">
-        <div className="mt-2 flex flex-col items-center justify-center">
+      <div className="mx-auto flex w-full flex-col justify-center gap-4 p-2 text-center lg:items-center">
+        <div className="mt-2 flex flex-col justify-center lg:items-center">
           <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
               <div className="mb-4 sm:flex sm:items-center">
@@ -88,6 +88,20 @@ function TableEditExpenditurePlan({ expenditurePlan }: TableProps) {
                             </div>
                           </th>
                         ))}
+                        <th
+                          scope="col"
+                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                        >
+                          <div className="flex items-center justify-center gap-2">
+                            <span>Add Expenditure</span>
+                            <PlusCircle
+                              onClick={() => {
+                                // TODO: Add expenditure
+                              }}
+                              className="h-4 w-4 cursor-pointer text-gray-400 hover:text-green-500"
+                            />
+                          </div>
+                        </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white">
@@ -111,6 +125,9 @@ function TableEditExpenditurePlan({ expenditurePlan }: TableProps) {
                                 {getRowValue(expen, rowIdx)}
                               </td>
                             ))}
+                            <td className="px-3 py-4 text-sm text-gray-500">
+                              <span>...</span>
+                            </td>
                           </tr>
                         ))}
                     </tbody>

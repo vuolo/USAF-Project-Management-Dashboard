@@ -136,9 +136,11 @@ function ModalEditProjectFunding({
                     />
 
                     {/* Edit Expenditure Plan Table */}
-                    <TableEditExpenditurePlan
-                      expenditurePlan={expenditurePlan}
-                    />
+                    {project.contract_status !== "Pre-Award" && (
+                      <TableEditExpenditurePlan
+                        expenditurePlan={expenditurePlan}
+                      />
+                    )}
                   </div>
                 </div>
 

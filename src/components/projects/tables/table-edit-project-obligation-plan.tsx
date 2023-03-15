@@ -36,8 +36,8 @@ function TableEditObligationPlan({
 
   return (
     <div className="mx-auto flex flex-row items-center justify-center gap-2 pt-2 pb-2 text-left sm:px-6">
-      <div className="mx-auto flex w-full flex-col items-center justify-center gap-4 p-2 text-center">
-        <div className="mt-2 flex flex-col items-center justify-center">
+      <div className="mx-auto flex w-full flex-col justify-center gap-4 p-2 text-center lg:items-center">
+        <div className="mt-2 flex flex-col justify-center lg:items-center">
           <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
               <div className="mb-4 sm:flex sm:items-center">
@@ -135,6 +135,9 @@ function TableEditObligationPlan({
                                 {getRowValue(obli, rowIdx, fundingTypes)}
                               </td>
                             ))}
+                            <td className="px-3 py-4 text-sm text-gray-500">
+                              <span>...</span>
+                            </td>
                           </tr>
                         ))}
                     </tbody>
@@ -175,7 +178,7 @@ function getRowValue(
         <div className="flex flex-col">
           <select
             className="w-fit rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-            // value={} TODO: Set value to the current funding type
+            value={obli.FundingType}
             onChange={(e) => {
               // TODO: Update funding type
             }}
@@ -190,11 +193,6 @@ function getRowValue(
           </select>
         </div>
       );
-    // OLD CODE to display funding type (we are editing the funding type now, so we don't need this) TODO: remove this comment and the code below
-    // (
-    //   fundingTypes?.find((ft) => ft.id === Number(obli.FundingType))
-    //     ?.funding_type || "..."
-    // );
 
     // Fiscal Year
     case 1:
@@ -234,7 +232,20 @@ function getRowValue(
 
     // Actual
     case 3:
-      return formatCurrency(obli.Actual);
+      return (
+        <div className="flex items-center gap-2">
+          <span>$</span>
+          <input
+            type="number"
+            step={0.01}
+            className="w-32 rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={Number(obli.Actual)}
+            onChange={(e) => {
+              // TODO: Update actual
+            }}
+          />
+        </div>
+      );
 
     default:
       return "...";

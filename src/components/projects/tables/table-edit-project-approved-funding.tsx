@@ -393,9 +393,18 @@ function TableEditApprovedFunding({
                                 ) : null
                               )
                             )}
+                            <td className="px-3 py-4 text-sm text-gray-500">
+                              <span>...</span>
+                            </td>
                           </tr>
                         ))}
-                      <tr>
+                      <tr
+                        className={
+                          activeFundingTypeIds.length % 2 === 0
+                            ? undefined
+                            : "bg-gray-50"
+                        }
+                      >
                         <td className="px-3 py-4 text-sm text-black">
                           <div className="flex items-center justify-center gap-2">
                             <div className="flex flex-col">
@@ -423,6 +432,17 @@ function TableEditApprovedFunding({
                               className="h-4 w-4 cursor-pointer text-gray-400 hover:text-green-500"
                             />
                           </div>
+                        </td>
+                        {fiscalYears.map((fiscalYear) => (
+                          <td
+                            key={fiscalYear}
+                            className="px-3 py-4 text-sm text-gray-500"
+                          >
+                            <span>...</span>
+                          </td>
+                        ))}
+                        <td className="px-3 py-4 text-sm text-gray-500">
+                          <span>...</span>
                         </td>
                       </tr>
                     </tbody>

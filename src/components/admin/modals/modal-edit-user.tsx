@@ -2,7 +2,7 @@ import { Fragment, useCallback, useEffect, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
-import { List } from "lucide-react";
+import { List, UserCog } from "lucide-react";
 import { api } from "~/utils/api";
 import { users, users_user_role } from "@prisma/client";
 
@@ -12,11 +12,7 @@ type ModalProps = {
   setIsOpen: (isOpen: boolean) => void;
 };
 
-function ModalEditUserDetails({
-  user,
-  isOpen,
-  setIsOpen,
-}: ModalProps) {
+function ModalEditUserDetails({ user, isOpen, setIsOpen }: ModalProps) {
   // Modal functionality (states)
   const [modalOpen, setModalOpen] = useState(false);
   const [userName, set_userName] = useState("");
@@ -72,10 +68,7 @@ function ModalEditUserDetails({
       typeof userRole !== "object"
     ) {
       toast.error(
-        toastMessage(
-          "Error updating user.",
-          "Please enter valid user details."
-        )
+        toastMessage("Error updating user.", "Please enter valid user details.")
       );
       setIsOpen(false);
       return;
@@ -85,16 +78,9 @@ function ModalEditUserDetails({
       id: user?.id,
       user_name: userName,
       user_email: userEmail,
-      user_role: userRole
+      user_role: userRole,
     });
-
-  }, [
-    userName,
-    userRole,
-    userEmail,
-    updateUser,
-    setIsOpen,
-  ]);
+  }, [userName, userRole, userEmail, updateUser, setIsOpen]);
 
   // Open modal
   const openModal = useCallback(() => {
@@ -136,13 +122,7 @@ function ModalEditUserDetails({
         setIsOpen(false);
       }, 500);
     },
-    [
-      userName,
-      userRole,
-      userEmail,
-      submitUpdateUser,
-      setIsOpen,
-    ]
+    [userName, userRole, userEmail, submitUpdateUser, setIsOpen]
   );
 
   useEffect(() => {
@@ -191,8 +171,8 @@ function ModalEditUserDetails({
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <List
-                      className="h-6 w-6 text-blue-600"
+                    <UserCog
+                      className="ml-0.5 h-6 w-6 text-blue-600"
                       aria-hidden="true"
                     />
                   </div>
@@ -241,16 +221,12 @@ function ModalEditUserDetails({
                           className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                           value={userRole}
                           onChange={(e) => {
-                            set_userRole((e.target.value as users_user_role));
+                            set_userRole(e.target.value as users_user_role);
                           }}
                         >
                           {/* <option value={0}>Select Contractor</option> */}
                           {Object.keys(users_user_role).map((role) => (
-                            <option
-                              value={role}
-                            >
-                              {role}
-                            </option>
+                            <option value={role}>{role}</option>
                           ))}
                         </select>
                       </form>
