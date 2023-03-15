@@ -1,21 +1,24 @@
-import Link from "next/link";
-import { useSession } from "next-auth/react";
-import StatusIcon from "./icons/status-icon";
-
 import { api } from "~/utils/api";
-import { formatCurrency } from "~/utils/currency";
+import ModalEditUser from "../admin/modals/modal-edit-user";
+import { useState } from "react";
+import { users } from "@prisma/client";
 
 function UsersTable() {
-  //const user = useSession().data?.db_user;
-  //const { data: projects } = api.project.list_view.useQuery();
-
-  const { data: users } = api.user.getAll.useQuery();
+  const { data: allUsers } = api.user.getAll.useQuery();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<users>({
+    id: -1,
+    contractor_id: -1,
+    user_email: null,
+    user_name: null,
+    user_role: "IPT_Member"
+  });
 
   return (
     <>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Projects</h1>
+          <h1 className="text-xl font-semibold text-gray-900">Users</h1>
           <p className="mt-2 text-sm text-gray-700">
             A list of all the users.
           </p>
@@ -25,11 +28,11 @@ function UsersTable() {
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-              {!users ? (
+              {!allUsers ? (
                 <div className="flex h-64 items-center justify-center">
                   <div className="italic text-gray-500">Loading...</div>
                 </div>
-              ) : users.length === 0 ? (
+              ) : allUsers.length === 0 ? (
                 <div className="flex h-64 items-center justify-center">
                   <div className="italic text-gray-500">
                     No users to display.
@@ -66,8 +69,8 @@ function UsersTable() {
                     </tr>
                   </thead>
                   <tbody className="bg-white">
-                    {users &&
-                      users.map((user, userIdx) => (
+                    {allUsers &&
+                      allUsers.map((user, userIdx) => (
                         <tr
                           key={user.id}
                           className={
@@ -86,7 +89,8 @@ function UsersTable() {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             <button
                               onClick={() => {
-                                console.log(`Attempting to edit user with index ${userIdx}`)
+                                setSelectedUser(user);
+                                setModalOpen(true);
                               }}
                               className="mt-6 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
                             >
@@ -101,6 +105,11 @@ function UsersTable() {
             </div>
           </div>
         </div>
+        <ModalEditUser
+          user={selectedUser}
+          isOpen={modalOpen}
+          setIsOpen={setModalOpen}
+        />
       </div>
     </>
   );

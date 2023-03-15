@@ -19,6 +19,21 @@ export const userRouter = createTRPCRouter({
       },
     });
   }),
+  update: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        user_name: z.string(),
+        user_role: z.enum(["Admin", "IPT_Member", "Contractor"]),
+        user_email: z.string(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.project.update({
+        where: { id: input.id },
+        data: { ...input },
+      });
+    }),
   getProjectContractorUsers: protectedProcedure
     .input(z.object({ project_id: z.number() }))
     .query(async ({ input }) => {
