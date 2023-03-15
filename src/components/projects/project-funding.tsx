@@ -197,6 +197,7 @@ function ProjectFunding({ project }: { project: view_project }) {
 
       {/* Edit Funding Modal */}
       <ModalEditProjectFunding
+        project={project}
         obligationPlan={obligationPlan}
         expenditurePlan={expenditurePlan}
         approvedFunding={approvedFunding}
