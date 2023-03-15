@@ -16,6 +16,25 @@ export const approvedRouter = createTRPCRouter({
         },
       });
     }),
+  addApprovedFunding: protectedProcedure
+    .input(
+      z.object({
+        projectID: z.number(),
+        appro_funding_type: z.number(),
+        appro_fiscal_year: z.number(),
+        approved_amount: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.approved_funding.create({
+        data: {
+          project_id: input.projectID,
+          appro_funding_type: input.appro_funding_type,
+          appro_fiscal_year: input.appro_fiscal_year,
+          approved_amount: input.approved_amount,
+        },
+      });
+    }),
   updateApprovedFunding: protectedProcedure
     .input(
       z.object({
@@ -39,7 +58,15 @@ export const approvedRouter = createTRPCRouter({
         },
       });
     }),
-
+  removeApprovedFunding: protectedProcedure
+    .input(z.object({ approvedID: z.number() }))
+    .mutation(async ({ input }) => {
+      return await prisma.approved_funding.delete({
+        where: {
+          id: input.approvedID,
+        },
+      });
+    }),
   getEstimates: protectedProcedure
     .input(z.object({ project_id: z.number() }))
     .query(async ({ input }) => {
