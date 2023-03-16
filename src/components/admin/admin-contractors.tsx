@@ -82,7 +82,6 @@ function AdminContractors() {
   });
 
   const submitRemoveContractor = () => {
-    console.log(selectedContractor);
     if (typeof selectedContractor !== "object") {
       toast.error(
         toastMessage(

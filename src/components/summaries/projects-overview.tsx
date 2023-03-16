@@ -9,8 +9,6 @@ function ProjectsOverview() {
   const user = useSession().data?.db_user;
   const { data: projects } = api.project.list_view.useQuery();
 
-  console.log("projects", projects);
-
   return (
     <>
       <div className="sm:flex sm:items-center">

@@ -51,4 +51,41 @@ export const expenditureRouter = createTRPCRouter({
       })[0] || null
     );
   }),
+  addExpenditure: protectedProcedure
+    .input(
+      z.object({
+        project_id: z.number(),
+        expen_funding_date: z.date(),
+        expen_projected: z.number(),
+        expen_actual: z.number().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.expenditure_funding_data.create({
+        data: { ...input },
+      });
+    }),
+  updateExpenditure: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        project_id: z.number(),
+        expen_funding_date: z.date(),
+        expen_projected: z.number(),
+        expen_actual: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.expenditure_funding_data.update({
+        where: { id: input.id },
+        data: { ...input },
+      });
+    }),
+  deleteExpenditure: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      return await prisma.expenditure_funding_data.delete({
+        where: { id: input.id },
+      });
+    }),
 });

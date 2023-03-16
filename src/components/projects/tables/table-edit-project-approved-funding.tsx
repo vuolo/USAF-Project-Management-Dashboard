@@ -21,9 +21,18 @@ function TableEditApprovedFunding({
 }: TableProps) {
   const router = useRouter();
 
-  const [editState, setEditState] = useState<approved_funding[]>([]);
+  const [editableApprovedFunding, setEditableApprovedFunding] = useState<
+    approved_funding[]
+  >([]);
   const [addFYCurrent, setAddFYCurrent] = useState<number | null>(null);
   const [addFTCurrent, setAddFTCurrent] = useState<number | null>(null);
+
+  const [addApprovedFunding_FY, setAddApprovedFunding_FY] = useState<
+    number | null
+  >(null);
+  const [addApprovedFunding_FT, setAddApprovedFunding_FT] = useState<
+    number | null
+  >(null);
 
   const fiscalYears: number[] = [];
   const activeFundingTypeIds: number[] = [];
@@ -46,9 +55,9 @@ function TableEditApprovedFunding({
 
   // Listen for changes in approvedFunding, and update edit state (the edit state is used to render the table on the modal)
   useEffect(() => {
-    if (!approvedFunding || editState.length > 0) return;
-    setEditState([...approvedFunding]);
-  }, [approvedFunding, editState.length]);
+    if (!approvedFunding || editableApprovedFunding.length > 0) return;
+    setEditableApprovedFunding([...approvedFunding]);
+  }, [approvedFunding, editableApprovedFunding.length]);
 
   const updateApprovedFunding = api.approved.updateApprovedFunding.useMutation({
     onError(error) {
@@ -74,7 +83,7 @@ function TableEditApprovedFunding({
   });
 
   const submitUpdateApprovedFunding = useCallback(() => {
-    editState.forEach((approvedFund) => {
+    editableApprovedFunding.forEach((approvedFund) => {
       if (
         typeof approvedFund.id !== "number" ||
         typeof approvedFund.project_id !== "number" ||
@@ -92,7 +101,7 @@ function TableEditApprovedFunding({
         approved_amount: approvedFund.approved_amount,
       });
     });
-  }, [updateApprovedFunding, editState]);
+  }, [updateApprovedFunding, editableApprovedFunding]);
 
   const addApprovedFunding = api.approved.addApprovedFunding.useMutation({
     onError(error) {
@@ -230,7 +239,7 @@ function TableEditApprovedFunding({
 
   const submitRemoveFiscalYear = useCallback(
     (fiscalYear: number) => {
-      editState.forEach((approvedFund) => {
+      editableApprovedFunding.forEach((approvedFund) => {
         if (approvedFund.appro_fiscal_year !== fiscalYear) return;
 
         removeApprovedFunding.mutate({
@@ -238,12 +247,12 @@ function TableEditApprovedFunding({
         });
       });
     },
-    [editState, removeApprovedFunding]
+    [editableApprovedFunding, removeApprovedFunding]
   );
 
   const submitRemoveFundingType = useCallback(
     (fundingTypeID: number) => {
-      editState.forEach((approvedFund) => {
+      editableApprovedFunding.forEach((approvedFund) => {
         if (approvedFund.appro_funding_type !== fundingTypeID) return;
 
         removeApprovedFunding.mutate({
@@ -251,13 +260,37 @@ function TableEditApprovedFunding({
         });
       });
     },
-    [editState, removeApprovedFunding]
+    [editableApprovedFunding, removeApprovedFunding]
   );
 
+  const submitAddApprovedFunding = useCallback(() => {
+    if (!addApprovedFunding_FY || !addApprovedFunding_FT) {
+      toast.error(
+        toastMessage(
+          "Could Not Add Approved Funding",
+          "Please make sure you have both a fiscal year and funding type entered first."
+        )
+      );
+      return;
+    }
+
+    addApprovedFunding.mutate({
+      projectID: project.id,
+      appro_funding_type: addApprovedFunding_FT,
+      appro_fiscal_year: addApprovedFunding_FY,
+      approved_amount: 0,
+    });
+  }, [
+    addApprovedFunding,
+    project,
+    addApprovedFunding_FT,
+    addApprovedFunding_FY,
+  ]);
+
   return (
-    <div className="mx-auto flex flex-row items-center justify-center gap-2 pt-4 pb-2 text-left sm:px-6 sm:pt-6">
-      <div className="mx-auto flex w-full flex-col items-center justify-center gap-4 p-2 text-center">
-        <div className="mt-2 flex flex-col items-center lg:justify-center">
+    <div className="flex flex-row items-center gap-2 pt-4 pb-2 text-left sm:px-6 sm:pt-6">
+      <div className="flex w-fit flex-col items-center gap-4 p-2 text-center">
+        <div className="mt-2 flex flex-col items-center">
           <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
               <div className="mb-4 sm:flex sm:items-center">
@@ -274,10 +307,64 @@ function TableEditApprovedFunding({
                     <div className="italic text-gray-500">Loading...</div>
                   </div>
                 ) : approvedFunding.length === 0 ? (
-                  <div className="flex h-64 w-full items-center justify-center px-8">
-                    <div className="italic text-gray-500">
-                      TODO: Add approved funding section
-                    </div>
+                  // Add Approved Funding Section
+                  <div className="flex h-64 w-full flex-col items-center justify-center gap-2 px-8">
+                    <h2 className="font-bold">Add Approved Funding</h2>
+
+                    {/* Input: Fiscal Year (addApprovedFunding_FY) */}
+                    <form
+                      onSubmit={(e) => e.preventDefault()}
+                      className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
+                    >
+                      <label htmlFor="add-fiscal-year">Fiscal Year (YY)</label>
+                      <input
+                        type="number"
+                        name="add-fiscal-year"
+                        id="add-fiscal-year"
+                        className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                        placeholder="e.g. '23'"
+                        min={0}
+                        max={99}
+                        value={Number(addApprovedFunding_FY)}
+                        onChange={(e) =>
+                          setAddApprovedFunding_FY(Number(e.target.value))
+                        }
+                      />
+                    </form>
+
+                    {/* Select: Funding Type (addApprovedFunding_FT) */}
+                    <form
+                      onSubmit={(e) => e.preventDefault()}
+                      className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
+                    >
+                      <label htmlFor="add-funding-type">Funding Type</label>
+                      <select
+                        name="add-funding-type"
+                        id="add-funding-type"
+                        className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                        value={addApprovedFunding_FT || ""}
+                        onChange={(e) =>
+                          setAddApprovedFunding_FT(Number(e.target.value))
+                        }
+                      >
+                        <option value="">Select...</option>
+                        {fundingTypes &&
+                          fundingTypes.map((fundingType) => (
+                            <option key={fundingType.id} value={fundingType.id}>
+                              {fundingType.funding_type}
+                            </option>
+                          ))}
+                      </select>
+                    </form>
+
+                    {/* Add New Button */}
+                    <button
+                      type="button"
+                      className="mt-2 inline-flex w-fit justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:w-auto sm:text-sm"
+                      onClick={submitAddApprovedFunding}
+                    >
+                      Submit Approved Funding
+                    </button>
                   </div>
                 ) : (
                   <table className="mx-auto min-w-full divide-y divide-gray-300">
@@ -356,41 +443,44 @@ function TableEditApprovedFunding({
                             </td>
 
                             {fiscalYears.map((fiscalYear) =>
-                              editState.map((approvedFund, approvedFundIdx) =>
-                                approvedFund.appro_fiscal_year === fiscalYear &&
-                                approvedFund.appro_funding_type ===
-                                  activeFundingTypeId ? (
-                                  <td
-                                    key={approvedFundIdx}
-                                    className="px-3 py-4 text-sm text-gray-500"
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      <span>$</span>
-                                      <input
-                                        type="number"
-                                        step={0.01}
-                                        className="w-32 rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        value={Number(
-                                          approvedFund.approved_amount
-                                        )}
-                                        onChange={(e) =>
-                                          setEditState(
-                                            editState.map((approvedFund, idx) =>
-                                              idx === approvedFundIdx
-                                                ? {
-                                                    ...approvedFund,
-                                                    approved_amount: Number(
-                                                      e.target.value
-                                                    ) as unknown as Decimal,
-                                                  }
-                                                : approvedFund
+                              editableApprovedFunding.map(
+                                (approvedFund, approvedFundIdx) =>
+                                  approvedFund.appro_fiscal_year ===
+                                    fiscalYear &&
+                                  approvedFund.appro_funding_type ===
+                                    activeFundingTypeId ? (
+                                    <td
+                                      key={approvedFundIdx}
+                                      className="px-3 py-4 text-sm text-gray-500"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <span>$</span>
+                                        <input
+                                          type="number"
+                                          step={0.01}
+                                          className="w-32 rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                          value={Number(
+                                            approvedFund.approved_amount
+                                          )}
+                                          onChange={(e) =>
+                                            setEditableApprovedFunding(
+                                              editableApprovedFunding.map(
+                                                (approvedFund, idx) =>
+                                                  idx === approvedFundIdx
+                                                    ? {
+                                                        ...approvedFund,
+                                                        approved_amount: Number(
+                                                          e.target.value
+                                                        ) as unknown as Decimal,
+                                                      }
+                                                    : approvedFund
+                                              )
                                             )
-                                          )
-                                        }
-                                      />
-                                    </div>
-                                  </td>
-                                ) : null
+                                          }
+                                        />
+                                      </div>
+                                    </td>
+                                  ) : null
                               )
                             )}
                             <td className="px-3 py-4 text-sm text-gray-500">
@@ -450,15 +540,17 @@ function TableEditApprovedFunding({
                 )}
               </div>
 
-              <div className="mt-4 flex justify-start lg:justify-center">
-                <button
-                  type="button"
-                  className="inline-flex w-fit justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:w-auto sm:text-sm"
-                  onClick={submitUpdateApprovedFunding}
-                >
-                  Save Updated Fields
-                </button>
-              </div>
+              {approvedFunding?.length !== 0 && (
+                <div className="mt-4 flex justify-start">
+                  <button
+                    type="button"
+                    className="inline-flex w-fit justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:w-auto sm:text-sm"
+                    onClick={submitUpdateApprovedFunding}
+                  >
+                    Save Updated Fields
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

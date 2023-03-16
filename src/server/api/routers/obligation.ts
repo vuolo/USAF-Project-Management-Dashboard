@@ -53,4 +53,45 @@ export const obligationRouter = createTRPCRouter({
       })[0] || null
     );
   }),
+  addObligation: protectedProcedure
+    .input(
+      z.object({
+        project_id: z.number(),
+        obli_funding_date: z.date(),
+        obli_funding_type: z.string(),
+        obli_fiscal_year: z.string(),
+        obli_projected: z.number(),
+        obli_actual: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.obligation_funding_data.create({
+        data: { ...input },
+      });
+    }),
+  updateObligation: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        project_id: z.number(),
+        obli_funding_date: z.date(),
+        obli_funding_type: z.string(),
+        obli_fiscal_year: z.string(),
+        obli_projected: z.number(),
+        obli_actual: z.number(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.obligation_funding_data.update({
+        where: { id: input.id },
+        data: { ...input },
+      });
+    }),
+  deleteObligation: protectedProcedure
+    .input(z.object({ id: z.number() }))
+    .mutation(async ({ input }) => {
+      return await prisma.obligation_funding_data.delete({
+        where: { id: input.id },
+      });
+    }),
 });
