@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { view_project } from "~/types/view_project";
 import { api } from "~/utils/api";
 import ModalEditProjectDetails from "./modals/modal-edit-project-details";
+import ModalUploadProjectProPricer from "./modals/modal-upload-project-pro-pricer";
 
 function ProjectDetails({ project }: { project: view_project }) {
   const user = useSession().data?.db_user;
@@ -11,7 +12,8 @@ function ProjectDetails({ project }: { project: view_project }) {
   const { data: branches } = api.branch.getAll.useQuery();
   const { data: requirementTypes } = api.requirement_type.getAll.useQuery();
 
-  const [modalOpen, setModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
 
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
@@ -20,7 +22,7 @@ function ProjectDetails({ project }: { project: view_project }) {
         {project.contract_status !== "Closed" &&
           user?.user_role !== "Contractor" && (
             <button
-              onClick={() => setModalOpen(true)}
+              onClick={() => setEditModalOpen(true)}
               className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto"
             >
               Edit
@@ -63,8 +65,10 @@ function ProjectDetails({ project }: { project: view_project }) {
           See CLIN Data
         </Link>
         {project.contract_status !== "Closed" && (
-          // TODO: Open a modal to upload the file, and parse the data
-          <button className="mt-2 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto">
+          <button
+            onClick={() => setUploadModalOpen(true)}
+            className="mt-2 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+          >
             Upload ProPricer
           </button>
         )}
@@ -76,8 +80,15 @@ function ProjectDetails({ project }: { project: view_project }) {
         contractors={contractors}
         branches={branches}
         requirementTypes={requirementTypes}
-        isOpen={modalOpen}
-        setIsOpen={setModalOpen}
+        isOpen={editModalOpen}
+        setIsOpen={setEditModalOpen}
+      />
+
+      {/* Upload ProPricer Modal */}
+      <ModalUploadProjectProPricer
+        project={project}
+        isOpen={uploadModalOpen}
+        setIsOpen={setUploadModalOpen}
       />
     </div>
   );

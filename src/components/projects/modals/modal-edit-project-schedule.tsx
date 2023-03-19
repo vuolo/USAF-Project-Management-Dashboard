@@ -381,12 +381,6 @@ function ModalEditProjectSchedule({
                                       Loading...
                                     </div>
                                   </div>
-                                ) : editableMilestoneSchedules.length === 0 ? (
-                                  <div className="flex h-64 w-full items-center justify-center px-8">
-                                    <div className="italic text-gray-500">
-                                      This project has no milestone schedules.
-                                    </div>
-                                  </div>
                                 ) : (
                                   <table className="mx-auto min-w-full divide-y divide-gray-300">
                                     <thead className="bg-gray-50">
@@ -644,6 +638,7 @@ function ModalEditProjectSchedule({
                                         <td />
                                         <td />
                                         <td />
+                                        <td />
                                       </tr>
                                     </tbody>
                                   </table>
@@ -656,6 +651,8 @@ function ModalEditProjectSchedule({
                     </div>
                   </div>
                 </div>
+
+                {/* TODO: Upload Project Schedule */}
 
                 <div className="mt-4 gap-2 rounded-lg bg-gray-50 px-4 py-3 sm:flex sm:px-6">
                   <button
