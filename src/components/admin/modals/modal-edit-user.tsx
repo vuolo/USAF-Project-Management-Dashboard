@@ -65,7 +65,7 @@ function ModalEditUserDetails({ user, isOpen, setIsOpen }: ModalProps) {
     if (
       typeof userName !== "string" ||
       typeof userEmail !== "string" ||
-      typeof userRole !== "object"
+      typeof userRole !== "string"
     ) {
       toast.error(
         toastMessage("Error updating user.", "Please enter valid user details.")
@@ -99,7 +99,7 @@ function ModalEditUserDetails({ user, isOpen, setIsOpen }: ModalProps) {
         if (
           typeof userName !== "string" ||
           typeof userEmail !== "string" ||
-          typeof userRole !== "object"
+          typeof userRole !== "string"
         ) {
           toast.error(
             toastMessage(
