@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import type { milestone } from "~/types/milestone";
+import { isInvalidDate } from "~/utils/date";
 
 type TableProps = {
   milestoneSchedules?: milestone[];
@@ -72,28 +73,40 @@ function TableProjectSchedule({ milestoneSchedules }: TableProps) {
                         className={schIdx % 2 === 0 ? undefined : "bg-gray-50"}
                       >
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
-                          {milestoneSchedule.Name}
+                          {milestoneSchedule.Name || "..."}
                         </td>
                         <td className="px-3 py-4 text-sm text-gray-500">
-                          {format(
-                            milestoneSchedule.ProjectedStart,
-                            "MM/dd/yyyy"
-                          )}
-                        </td>
-                        <td className="px-3 py-4 text-sm text-gray-500">
-                          {format(milestoneSchedule.ProjectedEnd, "MM/dd/yyyy")}
-                        </td>
-                        <td className="px-3 py-4 text-sm text-gray-500">
-                          {milestoneSchedule.ActualStart
+                          {!isInvalidDate(milestoneSchedule.ProjectedStart)
                             ? format(
-                                milestoneSchedule.ActualStart,
+                                new Date(
+                                  milestoneSchedule.ProjectedStart || ""
+                                ),
                                 "MM/dd/yyyy"
                               )
                             : "..."}
                         </td>
                         <td className="px-3 py-4 text-sm text-gray-500">
-                          {milestoneSchedule.ActualEnd
-                            ? format(milestoneSchedule.ActualEnd, "MM/dd/yyyy")
+                          {!isInvalidDate(milestoneSchedule.ProjectedEnd)
+                            ? format(
+                                new Date(milestoneSchedule.ProjectedEnd || ""),
+                                "MM/dd/yyyy"
+                              )
+                            : "..."}
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-500">
+                          {!isInvalidDate(milestoneSchedule.ActualStart)
+                            ? format(
+                                new Date(milestoneSchedule.ActualStart || ""),
+                                "MM/dd/yyyy"
+                              )
+                            : "..."}
+                        </td>
+                        <td className="px-3 py-4 text-sm text-gray-500">
+                          {!isInvalidDate(milestoneSchedule.ActualEnd)
+                            ? format(
+                                new Date(milestoneSchedule.ActualEnd || ""),
+                                "MM/dd/yyyy"
+                              )
                             : "..."}
                         </td>
                         <td className="px-3 py-4 text-sm text-gray-500">

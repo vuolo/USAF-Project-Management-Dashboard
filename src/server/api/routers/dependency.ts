@@ -29,6 +29,14 @@ export const dependencyRouter = createTRPCRouter({
           ${input.successor_project},
           ${input.successor_milestone})`;
     }),
+  removeAllAssociatedDependencies: protectedProcedure
+    .input(z.object({ milestone_id: z.number() }))
+    .mutation(async ({ input }) => {
+      return await prisma.$executeRaw`
+        DELETE FROM project_milestone_dependency
+        WHERE predecessor_project = successor_project
+        AND successor_milestone = ${input.milestone_id}`;
+    }),
   removeDependency: protectedProcedure
     .input(
       z.object({

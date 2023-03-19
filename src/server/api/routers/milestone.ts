@@ -72,4 +72,63 @@ export const milestoneRouter = createTRPCRouter({
       null
     );
   }),
+  addMilestoneSchedule: protectedProcedure
+    .input(
+      z.object({
+        project_id: z.number(),
+        task_name: z.string(),
+        projected_start: z.date(),
+        projected_end: z.date(),
+        actual_start: z.date().optional(),
+        actual_end: z.date().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.project_milestones.create({
+        data: {
+          project_id: input.project_id,
+          task_name: input.task_name,
+          start_date: input.projected_start,
+          end_date: input.projected_end,
+          actual_start: input.actual_start,
+          actual_end: input.actual_end,
+        },
+      });
+    }),
+  updateMilestoneSchedule: protectedProcedure
+    .input(
+      z.object({
+        milestone_id: z.number(),
+        project_id: z.number(),
+        task_name: z.string(),
+        projected_start: z.date().optional(),
+        projected_end: z.date().optional(),
+        actual_start: z.date().optional(),
+        actual_end: z.date().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.project_milestones.update({
+        where: {
+          id: input.milestone_id,
+        },
+        data: {
+          project_id: input.project_id,
+          task_name: input.task_name,
+          start_date: input.projected_start,
+          end_date: input.projected_end,
+          actual_start: input.actual_start,
+          actual_end: input.actual_end,
+        },
+      });
+    }),
+  deleteMilestoneSchedule: protectedProcedure
+    .input(z.object({ milestone_id: z.number() }))
+    .mutation(async ({ input }) => {
+      return await prisma.project_milestones.delete({
+        where: {
+          id: input.milestone_id,
+        },
+      });
+    }),
 });
