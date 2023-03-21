@@ -4,8 +4,10 @@ import { useState } from "react";
 import { users } from "@prisma/client";
 
 function UsersTable() {
-  const { data: allUsers } = api.user.getAll.useQuery();
+  //let { data: allUsers } = api.user.getAll.useQuery();
   const [modalOpen, setModalOpen] = useState(false);
+  const [filter, setFilter] = useState("");
+  const {data: allUsers, refetch} = api.user.searchByName.useQuery({search: filter});
   const [selectedUser, setSelectedUser] = useState<users>({
     id: -1,
     contractor_id: -1,
@@ -23,6 +25,19 @@ function UsersTable() {
             A list of all the users.
           </p>
         </div>
+      </div>
+      <div>
+        <input 
+          type="text"
+          name="filter"
+          id="filter"
+          className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+          placeholder="Enter user to search for"
+          onChange={(e) => {
+            setFilter(e.target.value);
+            refetch();
+          }}
+        />
       </div>
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
