@@ -643,13 +643,21 @@ function ModalEditProjectDependencies({
                                     key={milestone.ID}
                                     value={milestone.ID}
                                   >
-                                    {`${milestone.Name}: ${format(
-                                      milestone.ProjectedStart,
-                                      "MM/dd/yyyy"
-                                    )} - ${format(
-                                      milestone.ProjectedEnd,
-                                      "MM/dd/yyyy"
-                                    )}`}
+                                    {`${milestone.Name}: ${
+                                      milestone.ProjectedStart
+                                        ? format(
+                                            milestone.ProjectedStart,
+                                            "MM/dd/yyyy"
+                                          )
+                                        : "..."
+                                    } - ${
+                                      milestone.ProjectedEnd
+                                        ? format(
+                                            milestone.ProjectedEnd,
+                                            "MM/dd/yyyy"
+                                          )
+                                        : "..."
+                                    }`}
                                   </option>
                                 ))}
                               </select>
