@@ -23,7 +23,8 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: 'metispm-nextjs - Web Deploy'
+  AZURE_WEBAPP_NAME: 'metispm'
+  AZURE_WEBAPP_SLOT_NAME: 'nextjs'
   AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
   NODE_VERSION: '18.x'
 
@@ -83,5 +84,6 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
+        slot-name: ${{ env.AZURE_WEBAPP_SLOT_NAME }}
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
