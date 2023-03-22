@@ -7,13 +7,15 @@ function UsersTable() {
   //let { data: allUsers } = api.user.getAll.useQuery();
   const [modalOpen, setModalOpen] = useState(false);
   const [filter, setFilter] = useState("");
-  const {data: allUsers, refetch} = api.user.searchByName.useQuery({search: filter});
+  const { data: allUsers, refetch } = api.user.searchByName.useQuery({
+    search: filter,
+  });
   const [selectedUser, setSelectedUser] = useState<users>({
     id: -1,
     contractor_id: -1,
     user_email: null,
     user_name: null,
-    user_role: "IPT_Member"
+    user_role: "IPT_Member",
   });
 
   return (
@@ -21,13 +23,11 @@ function UsersTable() {
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-xl font-semibold text-gray-900">Users</h1>
-          <p className="mt-2 text-sm text-gray-700">
-            A list of all the users.
-          </p>
+          <p className="mt-2 text-sm text-gray-700">A list of all the users.</p>
         </div>
       </div>
       <div>
-        <input 
+        <input
           type="text"
           name="filter"
           id="filter"
@@ -35,7 +35,7 @@ function UsersTable() {
           placeholder="Enter user to search for"
           onChange={(e) => {
             setFilter(e.target.value);
-            refetch();
+            void refetch();
           }}
         />
       </div>
@@ -47,7 +47,7 @@ function UsersTable() {
                 <div className="flex h-64 items-center justify-center">
                   <div className="italic text-gray-500">Loading...</div>
                 </div>
-              ) : allUsers.length === 0 ? (
+              ) : allUsers?.length === 0 ? (
                 <div className="flex h-64 items-center justify-center">
                   <div className="italic text-gray-500">
                     No users to display.
