@@ -48,27 +48,27 @@ export const milestoneRouter = createTRPCRouter({
             SELECT
               (SELECT COUNT(schedule_status) 
                 FROM view_project
-                WHERE schedule_status= 'ONTRACK') as green_sch,
+                WHERE schedule_status= 'ONTRACK' COLLATE utf8mb4_general_ci) as green_sch,
               (SELECT COUNT(schedule_status) 
                 FROM view_project
-                WHERE schedule_status= 'BEHIND') as yellow_sch,
+                WHERE schedule_status= 'BEHIND' COLLATE utf8mb4_general_ci) as yellow_sch,
               (SELECT COUNT(schedule_status) 
                 FROM view_project
-                WHERE schedule_status= 'REALLY-BEHIND') as red_sch`
+                WHERE schedule_status= 'REALLY-BEHIND' COLLATE utf8mb4_general_ci) as red_sch`
         : await prisma.$queryRaw<schedule_summary[]>`
             SELECT
               (SELECT COUNT(schedule_status) 
                 FROM view_project vp
                 INNER JOIN user_project_link upl on vp.id = upl.project_id
-                WHERE schedule_status= 'ONTRACK' AND upl.user_id = ${user.id}) as green_sch,
+                WHERE schedule_status= 'ONTRACK' COLLATE utf8mb4_general_ci AND upl.user_id = ${user.id}) as green_sch,
               (SELECT COUNT(schedule_status) 
                 FROM view_project vp
                 INNER JOIN user_project_link upl on vp.id = upl.project_id
-                WHERE schedule_status= 'BEHIND' AND upl.user_id = ${user.id}) as yellow_sch,
+                WHERE schedule_status= 'BEHIND' COLLATE utf8mb4_general_ci AND upl.user_id = ${user.id}) as yellow_sch,
               (SELECT COUNT(schedule_status) 
                 FROM view_project vp
                 INNER JOIN user_project_link upl on vp.id = upl.project_id
-                WHERE schedule_status= 'REALLY-BEHIND' AND upl.user_id = ${user.id}) as red_sch`)[0] ||
+                WHERE schedule_status= 'REALLY-BEHIND' COLLATE utf8mb4_general_ci AND upl.user_id = ${user.id}) as red_sch`)[0] ||
       null
     );
   }),
