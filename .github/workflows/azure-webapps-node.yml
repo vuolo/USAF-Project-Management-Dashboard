@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: metispm-nextjs
+  AZURE_WEBAPP_NAME: 'metispm-nextjs - Web Deploy'
   AZURE_WEBAPP_PACKAGE_PATH: '.'      # set this to the path to your web app project, defaults to the repository root
   NODE_VERSION: '18.x'
 
@@ -70,9 +70,7 @@ jobs:
       contents: none
     runs-on: ubuntu-latest
     needs: build
-    environment:
-      name: production
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    environment: production
 
     steps:
     - name: Download artifact from build job
