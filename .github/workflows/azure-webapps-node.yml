@@ -41,6 +41,16 @@ jobs:
       with:
         node-version: ${{ env.NODE_VERSION }}
         cache: 'npm'
+        
+    - name: Create .env file
+      run: |
+        touch .env
+        echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env
+        echo NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }} >> .env
+        echo NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }} >> .env
+        echo AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }} >> .env
+        echo AZURE_AD_CLIENT_SECRET=${{ secrets.AZURE_AD_CLIENT_SECRET }} >> .env
+        echo AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }} >> .env
 
     - name: npm install, build, and test
       run: |
