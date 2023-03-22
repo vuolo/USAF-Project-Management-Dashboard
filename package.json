@@ -30,6 +30,7 @@
     "react-toastify": "^9.1.1",
     "react-tooltip": "^5.8.3",
     "recharts": "^2.4.3",
+    "sharp": "^0.31.3",
     "superjson": "1.9.1",
     "zod": "^3.20.2"
   },
