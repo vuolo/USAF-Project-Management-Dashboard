@@ -4,40 +4,23 @@ import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
 import { List, UserCog } from "lucide-react";
 import { api } from "~/utils/api";
-import { users, users_user_role } from "@prisma/client";
+import { contractor, users, users_user_role } from "@prisma/client";
 
 type ModalProps = {
   user: users;
+  contractors: contractor[];
+  refetch: () => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 };
 
-function ModalEditUserDetails({ user, isOpen, setIsOpen }: ModalProps) {
+function ModalEditUserDetails({ user, contractors, refetch, isOpen, setIsOpen }: ModalProps) {
   // Modal functionality (states)
   const [modalOpen, setModalOpen] = useState(false);
   const [userName, set_userName] = useState("");
   const [userRole, set_userRole] = useState<users_user_role>("IPT_Member");
   const [userEmail, set_userEmail] = useState("");
-
-  const updateContractNumber = api.contract.updateContractNumber.useMutation({
-    onError(error) {
-      toast.error(
-        toastMessage(
-          "Error updating contract number.",
-          "Please try again later or contact support."
-        )
-      );
-      console.error(error);
-    },
-    onSuccess() {
-      toast.success(
-        toastMessage(
-          "Contract number updated.",
-          "The contract number has been updated."
-        )
-      );
-    },
-  });
+  const [selectedContractor, set_selectedContractor] = useState<contractor>();
 
   const updateUser = api.user.update.useMutation({
     onError(error) {
@@ -58,6 +41,10 @@ function ModalEditUserDetails({ user, isOpen, setIsOpen }: ModalProps) {
       user.user_name = userName;
       user.user_role = userRole;
       user.user_email = userEmail;
+      user.contractor_id = selectedContractor?.id ?? null;
+
+      // Refetch data
+      refetch();
     },
   });
 
@@ -65,7 +52,8 @@ function ModalEditUserDetails({ user, isOpen, setIsOpen }: ModalProps) {
     if (
       typeof userName !== "string" ||
       typeof userEmail !== "string" ||
-      typeof userRole !== "string"
+      typeof userRole !== "string" ||
+      typeof selectedContractor !== "object"
     ) {
       toast.error(
         toastMessage("Error updating user.", "Please enter valid user details.")
@@ -76,19 +64,24 @@ function ModalEditUserDetails({ user, isOpen, setIsOpen }: ModalProps) {
 
     updateUser.mutate({
       id: user?.id,
+      contractor_id: userRole === "Contractor" ? selectedContractor.id : 1,
       user_name: userName,
       user_email: userEmail,
       user_role: userRole,
     });
-  }, [userName, userRole, userEmail, updateUser, setIsOpen]);
+  }, [userName, userRole, userEmail, updateUser, selectedContractor, setIsOpen]);
 
   // Open modal
   const openModal = useCallback(() => {
     set_userName(user.user_name || "");
     set_userRole(user.user_role || undefined);
     set_userEmail(user.user_email || "");
+    set_selectedContractor(
+      contractors.find((contractor) => contractor.id === Number(user.contractor_id)) ||
+        undefined
+    );
     setModalOpen(true);
-  }, [user]);
+  }, [user, contractors]);
 
   // Close modal
   const closeModal = useCallback(
@@ -99,7 +92,8 @@ function ModalEditUserDetails({ user, isOpen, setIsOpen }: ModalProps) {
         if (
           typeof userName !== "string" ||
           typeof userEmail !== "string" ||
-          typeof userRole !== "string"
+          typeof userRole !== "string" ||
+          typeof selectedContractor !== "object"
         ) {
           toast.error(
             toastMessage(
@@ -119,10 +113,11 @@ function ModalEditUserDetails({ user, isOpen, setIsOpen }: ModalProps) {
         set_userName("");
         set_userRole("IPT_Member");
         set_userEmail("");
+        set_selectedContractor(undefined);
         setIsOpen(false);
       }, 500);
     },
-    [userName, userRole, userEmail, submitUpdateUser, setIsOpen]
+    [userName, userRole, userEmail, submitUpdateUser, selectedContractor, setIsOpen]
   );
 
   useEffect(() => {
@@ -206,7 +201,7 @@ function ModalEditUserDetails({ user, isOpen, setIsOpen }: ModalProps) {
                         />
                       </form>
 
-                      {/* Contractor */}
+                      {/* User Role */}
                       <form
                         onSubmit={(e) => {
                           e.preventDefault();
@@ -224,7 +219,7 @@ function ModalEditUserDetails({ user, isOpen, setIsOpen }: ModalProps) {
                             set_userRole(e.target.value as users_user_role);
                           }}
                         >
-                          {/* <option value={0}>Select Contractor</option> */}
+                          {/* <option value={0}>Select User Role</option> */}
                           {Object.keys(users_user_role).map((role, roleIdx) => (
                             <option key={roleIdx} value={role}>
                               {role}
@@ -254,6 +249,39 @@ function ModalEditUserDetails({ user, isOpen, setIsOpen }: ModalProps) {
                           }}
                         />
                       </form>
+
+                      {/* Contractor */}
+                      {userRole === "Contractor" && contractors && (
+                        <form
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                          }}
+                          className="mt-1 flex flex-col gap-1 rounded-md shadow-sm"
+                        >
+                          <label htmlFor="contractor-select">Contractor</label>
+                          <select
+                            id="contractor-select"
+                            name="contractor-select" 
+                            className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+                            value={selectedContractor?.id}
+                            onChange={(e) => {
+                              set_selectedContractor(
+                                contractors?.find(
+                                  (contractor) =>
+                                    contractor.id === Number(e.target.value)
+                                )  
+                              );
+                            }}
+                          >
+                            {/* <option value={0}>Select Contractor</option> */}
+                            {contractors.map((contractor, contractorIdx) => (
+                              <option key={contractorIdx} value={contractor.id}>
+                                {contractor.contractor_name}
+                              </option> 
+                            ))}
+                          </select>
+                        </form>
+                      )}
                     </div>
                   </div>
                 </div>

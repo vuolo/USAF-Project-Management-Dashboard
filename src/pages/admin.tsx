@@ -105,9 +105,9 @@ const Admin: NextPage = () => {
                   Users
                 </p>
                 <p
-                  onClick={() => setSelectedOption("listusers")}
+                  onClick={() => setSelectedOption("list-users")}
                   className={`rounded-md px-4 py-2 text-white hover:bg-brand-dark/80 ${
-                    selectedOption === "users"
+                    selectedOption === "list-users"
                       ? "cursor-not-allowed bg-brand-dark/80 ring-2 ring-yellow-500"
                       : "cursor-pointer bg-brand-dark"
                   }`}
@@ -162,7 +162,7 @@ const renderSettingsDetails = (selectedOption: string) => {
       return <AdminMilitaryJobTitles />;
     case "users":
       return <AdminUsers />;
-    case "listusers":
+    case "list-users":
       return <AdminListUsers />
     case "projects":
       return <AdminProjects />;

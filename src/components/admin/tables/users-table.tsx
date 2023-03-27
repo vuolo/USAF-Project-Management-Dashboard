@@ -1,15 +1,30 @@
 import { api } from "~/utils/api";
-import ModalEditUser from "../admin/modals/modal-edit-user";
+import ModalEditUser from "../modals/modal-edit-user";
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { users } from "@prisma/client";
+import ModalConfirmDeleteUser from "../modals/modal-confirm-delete-user";
+
+type FilterType = "user_name" | "user_email" | "user_role" | "contractor_name";
 
 function UsersTable() {
   //let { data: allUsers } = api.user.getAll.useQuery();
+  const {data: contractors} = api.contractor.getAll.useQuery();
   const [modalOpen, setModalOpen] = useState(false);
-  const [filter, setFilter] = useState("");
-  const { data: allUsers, refetch } = api.user.searchByName.useQuery({
-    search: filter,
+  const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
+  const [filterQuery, setFilterQuery] = useState("");
+  const [filterType, setFilterType] = useState<FilterType>("user_name");
+
+  const refetchQuery = () => {
+    void refetch();
+  }
+  
+  // Original query
+  const { data: allUsers, refetch } = api.user.search.useQuery({
+    filterQuery,
+    filterType,
   });
+
   const [selectedUser, setSelectedUser] = useState<users>({
     id: -1,
     contractor_id: -1,
@@ -22,24 +37,39 @@ function UsersTable() {
     <>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Users</h1>
           <p className="mt-2 text-sm text-gray-700">A list of all the users.</p>
         </div>
       </div>
-      <div>
+      <div className="flex mt-4 px-2 gap-2 w-fit">
         <input
           type="text"
           name="filter"
           id="filter"
-          className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+          className="block sm:min-w-full w-full flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
           placeholder="Enter user to search for"
           onChange={(e) => {
-            setFilter(e.target.value);
+            setFilterQuery(e.target.value);
+            
             void refetch();
           }}
         />
+        <select
+          id="filter-select"
+          name="filter-select"
+          className="block flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+          value={filterType}
+          onChange={(e) => {
+            setFilterType(e.target.value as FilterType);
+          }}
+        >
+          {/* Filter Type */}
+          <option value="user_name">User Name</option>
+          <option value="user_email">User Email</option>
+          <option value="user_role">User Role</option>
+          <option value="contractor_name">Contractor Name</option>
+        </select>
       </div>
-      <div className="mt-8 flex flex-col">
+      <div className="mt-4 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
@@ -79,7 +109,13 @@ function UsersTable() {
                         scope="col"
                         className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900"
                       >
-                        Edit
+                        Contractor
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-center text-sm font-semibold text-gray-900"
+                      >
+                        Actions
                       </th>
                     </tr>
                   </thead>
@@ -102,15 +138,29 @@ function UsersTable() {
                             {user.user_email || "..."}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            <button
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setModalOpen(true);
-                              }}
-                              className="mt-6 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
-                            >
-                              Edit
-                            </button>
+                            {user.contractor_name === "None" ? "..." : user.contractor_name || "..."}
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <div className="flex gap-4 justify-center items-center">
+                              <button
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setModalOpen(true);
+                                }}
+                                className="inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+                              >
+                                Edit
+                              </button>
+                              <Trash2
+                                onClick={() =>
+                                  {
+                                    setSelectedUser(user);
+                                    setShowDeleteUserModal(true);
+                                  }
+                                }
+                                className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                              />
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -120,10 +170,22 @@ function UsersTable() {
             </div>
           </div>
         </div>
-        <ModalEditUser
+
+        {/* Edit User Modal */}
+        {contractors && <ModalEditUser
           user={selectedUser}
+          contractors={contractors}
+          refetch={refetchQuery}
           isOpen={modalOpen}
           setIsOpen={setModalOpen}
+        />}
+
+        {/* Confirm Close Project Modal */}
+        <ModalConfirmDeleteUser
+          user={selectedUser}
+          refetch={refetchQuery}
+          isOpen={showDeleteUserModal}
+          setIsOpen={setShowDeleteUserModal}
         />
       </div>
     </>

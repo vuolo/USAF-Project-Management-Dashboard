@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 import { api } from "~/utils/api";
 import { toastMessage } from "~/utils/toast";
 import type { contractor, users } from "@prisma/client";
-import UsersTable from "../summaries/users-table";
+import UsersTable from "./tables/users-table";
 
 function AdminListUsers() {
   const { data: users } = api.user.getAll.useQuery();

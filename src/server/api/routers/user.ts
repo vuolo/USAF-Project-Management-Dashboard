@@ -23,11 +23,45 @@ export const userRouter = createTRPCRouter({
     search: z.string()
   })
   ).query(async ({input}) => {
-    return await prisma.users.findMany({
-      where: {
-        user_name: { contains: input.search}
-      }
-    })
+    return await prisma.$queryRaw<(users & { contractor_name: string })[]>`
+      SELECT u.*, c.contractor_name from users u 
+      LEFT JOIN contractor c 
+      ON u.contractor_id = c.id
+      WHERE u.user_name LIKE ${"%" + input.search + "%"}`
+  }),
+  search: protectedProcedure.input(z.object({
+    filterQuery: z.string().optional(),
+    filterType: z.enum(["user_name", "user_email", "user_role", "contractor_name"])
+  })
+  ).query(async ({input}) => {
+    return input.filterQuery && input.filterType === "user_name" ? await prisma.$queryRaw<(users & { contractor_name: string })[]>`
+        SELECT u.*, c.contractor_name from users u 
+        LEFT JOIN contractor c 
+        ON u.contractor_id = c.id
+        WHERE u.user_name LIKE ${"%" + input.filterQuery + "%"}` :
+
+      input.filterQuery && input.filterType === "user_email" ? await prisma.$queryRaw<(users & { contractor_name: string })[]>`
+        SELECT u.*, c.contractor_name from users u
+        LEFT JOIN contractor c
+        ON u.contractor_id = c.id
+        WHERE u.user_email LIKE ${"%" + input.filterQuery + "%"}` :
+
+      input.filterQuery && input.filterType === "user_role" ? await prisma.$queryRaw<(users & { contractor_name: string })[]>`
+        SELECT u.*, c.contractor_name from users u
+        LEFT JOIN contractor c
+        ON u.contractor_id = c.id
+        WHERE u.user_role LIKE ${"%" + input.filterQuery + "%"}` :
+
+      input.filterQuery && input.filterType === "contractor_name" ? await prisma.$queryRaw<(users & { contractor_name: string })[]>`
+        SELECT u.*, c.contractor_name from users u
+        LEFT JOIN contractor c
+        ON u.contractor_id = c.id
+        WHERE c.contractor_name LIKE ${"%" + input.filterQuery + "%"}` :
+
+      await prisma.$queryRaw<(users & { contractor_name: string })[]>`
+        SELECT u.*, c.contractor_name from users u
+        LEFT JOIN contractor c
+        ON u.contractor_id = c.id`
   }),
   update: protectedProcedure
     .input(
@@ -36,6 +70,7 @@ export const userRouter = createTRPCRouter({
         user_name: z.string(),
         user_role: z.enum(["Admin", "IPT_Member", "Contractor"]),
         user_email: z.string(),
+        contractor_id: z.number().optional()
       })
     )
     .mutation(async ({ input }) => {
