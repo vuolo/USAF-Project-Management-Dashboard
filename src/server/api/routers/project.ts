@@ -8,14 +8,7 @@ export const projectRouter = createTRPCRouter({
     const user = ctx.session.db_user;
     if (!user) return null;
 
-    return user.user_role === "Admin"
-      ? await prisma.$queryRaw<view_project[]>`SELECT * FROM view_project`
-      : await prisma.$queryRaw<view_project[]>`
-          SELECT * 
-          FROM user_project_link upl
-          INNER JOIN view_project vp ON vp.id = upl.project_id
-          WHERE upl.user_id = ${user.id}
-          ORDER BY upl.project_id ASC`;
+    return await prisma.$queryRaw<view_project[]>`SELECT * FROM view_project`;
   }),
   get_view: protectedProcedure
     .input(z.object({ id: z.number() }))
