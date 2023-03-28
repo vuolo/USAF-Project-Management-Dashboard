@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
@@ -20,37 +21,52 @@ export const expenditureRouter = createTRPCRouter({
         WHERE project_id=${input.project_id}
         ORDER BY expen_funding_date`;
     }),
-  getTotalExpenditure: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx.session.db_user;
-    if (!user) return null;
+  getTotalExpenditure: protectedProcedure
+    .input(z.object({ project_ids: z.array(z.number()).optional() }))
+    .query(async ({ ctx, input }) => {
+      const user = ctx.session.db_user;
+      if (!user) return null;
 
-    return (
-      (user.user_role === "Admin"
-        ? await prisma.$queryRaw<expenditure[]>`
-            SELECT 
-              SUM(expen_projected) as expen_projected,
-              SUM(expen_actual) as expen_actual
-            FROM view_expenditure ve
-            JOIN contract_award ca on ve.project_id = ca.project_id
-            WHERE ca.contract_status = 2 AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0`
-        : await prisma.$queryRaw<expenditure[]>`
-            SELECT 
-              SUM(expen_projected) as expen_projected,
-              SUM(expen_actual) as expen_actual
-            FROM view_expenditure ve
-            JOIN user_project_link upl on ve.project_id = upl.project_id
-            JOIN contract_award ca on upl.project_id = ca.project_id
-            JOIN users u on upl.user_id = u.id
-            WHERE u.id = ${user.id} AND ca.contract_status = 2 AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0`
-      ).map((expen) => {
-        // Map the query result to numbers (for some reason, the query result is a string)
-        return {
-          expen_actual: Number(expen.expen_actual || 0),
-          expen_projected: Number(expen.expen_projected || 0),
-        };
-      })[0] || null
-    );
-  }),
+      return (
+        // NOTE: This only calculates "Awarded" projects (contract_status = 2)
+        (user.user_role === "Admin"
+          ? // Select filtered input project_ids if they exist, otherwise select all projects
+            input.project_ids && input.project_ids.length > 0
+            ? await prisma.$queryRaw<expenditure[]>`
+              SELECT 
+                SUM(expen_projected) as expen_projected,
+                SUM(expen_actual) as expen_actual
+              FROM view_expenditure ve
+              JOIN contract_award ca on ve.project_id = ca.project_id
+              WHERE ca.contract_status = 2
+              AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0
+              AND ve.project_id IN (${Prisma.join(input.project_ids)})`
+            : await prisma.$queryRaw<expenditure[]>`
+              SELECT 
+                SUM(expen_projected) as expen_projected,
+                SUM(expen_actual) as expen_actual
+              FROM view_expenditure ve
+              JOIN contract_award ca on ve.project_id = ca.project_id
+              WHERE ca.contract_status = 2 AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0`
+          : // TODO: add project_id filtering for non-admins
+            await prisma.$queryRaw<expenditure[]>`
+              SELECT 
+                SUM(expen_projected) as expen_projected,
+                SUM(expen_actual) as expen_actual
+              FROM view_expenditure ve
+              JOIN user_project_link upl on ve.project_id = upl.project_id
+              JOIN contract_award ca on upl.project_id = ca.project_id
+              JOIN users u on upl.user_id = u.id
+              WHERE u.id = ${user.id} AND ca.contract_status = 2 AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0`
+        ).map((expen) => {
+          // Map the query result to numbers (for some reason, the query result is a string)
+          return {
+            expen_actual: Number(expen.expen_actual || 0),
+            expen_projected: Number(expen.expen_projected || 0),
+          };
+        })[0] || null
+      );
+    }),
   addExpenditure: protectedProcedure
     .input(
       z.object({

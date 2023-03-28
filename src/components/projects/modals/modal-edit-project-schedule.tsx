@@ -63,7 +63,7 @@ function ModalEditProjectSchedule({
         })
       ) as milestone_using_day_values[]
     );
-  }, [milestoneSchedules, editableMilestoneSchedules]);
+  }, [milestoneSchedules, editableMilestoneSchedules.length]);
 
   const addMilestoneSchedule = api.milestone.addMilestoneSchedule.useMutation({
     onError: (error) => {

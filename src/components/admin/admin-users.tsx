@@ -289,7 +289,7 @@ function AdminUsers() {
                     className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
                   />
                 </div>
-                <div className="mt-2 flex items-center justify-center gap-4 pl-2">
+                <div className="mt-2 flex items-center justify-center gap-4 pl-10">
                   <label htmlFor="contractor-email">Email:</label>
                   <input
                     onChange={(e) => {

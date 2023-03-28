@@ -9,7 +9,7 @@ type FilterType = "user_name" | "user_email" | "user_role" | "contractor_name";
 
 function UsersTable() {
   //let { data: allUsers } = api.user.getAll.useQuery();
-  const {data: contractors} = api.contractor.getAll.useQuery();
+  const { data: contractors } = api.contractor.getAll.useQuery();
   const [modalOpen, setModalOpen] = useState(false);
   const [showDeleteUserModal, setShowDeleteUserModal] = useState(false);
   const [filterQuery, setFilterQuery] = useState("");
@@ -17,8 +17,8 @@ function UsersTable() {
 
   const refetchQuery = () => {
     void refetch();
-  }
-  
+  };
+
   // Original query
   const { data: allUsers, refetch } = api.user.search.useQuery({
     filterQuery,
@@ -40,16 +40,16 @@ function UsersTable() {
           <p className="mt-2 text-sm text-gray-700">A list of all the users.</p>
         </div>
       </div>
-      <div className="flex mt-4 px-2 gap-2 w-fit">
+      <div className="mt-4 flex w-fit gap-2 px-2">
         <input
           type="text"
           name="filter"
           id="filter"
-          className="block sm:min-w-full w-full flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
-          placeholder="Enter user to search for"
+          className="block w-full flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:min-w-full sm:text-sm"
+          placeholder="Search..."
           onChange={(e) => {
             setFilterQuery(e.target.value);
-            
+
             void refetch();
           }}
         />
@@ -138,10 +138,12 @@ function UsersTable() {
                             {user.user_email || "..."}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {user.contractor_name === "None" ? "..." : user.contractor_name || "..."}
+                            {user.contractor_name === "None"
+                              ? "..."
+                              : user.contractor_name || "..."}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            <div className="flex gap-4 justify-center items-center">
+                            <div className="flex items-center justify-center gap-4">
                               <button
                                 onClick={() => {
                                   setSelectedUser(user);
@@ -152,12 +154,10 @@ function UsersTable() {
                                 Edit
                               </button>
                               <Trash2
-                                onClick={() =>
-                                  {
-                                    setSelectedUser(user);
-                                    setShowDeleteUserModal(true);
-                                  }
-                                }
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setShowDeleteUserModal(true);
+                                }}
                                 className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
                               />
                             </div>
@@ -172,13 +172,15 @@ function UsersTable() {
         </div>
 
         {/* Edit User Modal */}
-        {contractors && <ModalEditUser
-          user={selectedUser}
-          contractors={contractors}
-          refetch={refetchQuery}
-          isOpen={modalOpen}
-          setIsOpen={setModalOpen}
-        />}
+        {contractors && (
+          <ModalEditUser
+            user={selectedUser}
+            contractors={contractors}
+            refetch={refetchQuery}
+            isOpen={modalOpen}
+            setIsOpen={setModalOpen}
+          />
+        )}
 
         {/* Confirm Close Project Modal */}
         <ModalConfirmDeleteUser

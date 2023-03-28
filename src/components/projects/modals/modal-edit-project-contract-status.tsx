@@ -72,7 +72,7 @@ function ModalEditProjectContractStatus({
         })
       ) as contract_award_timeline_using_day_values[]
     );
-  }, [contractAwardTimeline, contractAwardTimeline_editState]);
+  }, [contractAwardTimeline, contractAwardTimeline_editState.length]);
 
   const updateContractAwardTimeline =
     api.contract.updateContractAwardTimeline.useMutation({
