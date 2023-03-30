@@ -31,10 +31,10 @@ export const obligationRouter = createTRPCRouter({
 
       return (
         // NOTE: This only calculates "Awarded" projects (contract_status = 2)
-        (user.user_role === "Admin"
+        (user.user_role === "Admin" || user.user_role === "IPT_Member"
           ? // Select filtered input project_ids if they exist, otherwise select all projects
             input.project_ids && input.project_ids.length > 0
-            ? // TODO: make the filtering with project_ids actuallly work... right now it only gets the first ID in the input... (use IN {input.project_ids.join(",")}
+            ?
               await prisma.$queryRaw<obligation[]>`
                 SELECT
                   SUM(obli_projected) as obli_projected,
@@ -51,6 +51,7 @@ export const obligationRouter = createTRPCRouter({
                 FROM view_obligation vo
                 JOIN contract_award ca on vo.project_id = ca.project_id
                 WHERE ca.contract_status = 2 AND (SELECT DATEDIFF((SELECT CURDATE()), vo.obli_funding_date)) >= 0`
+            // Contractors    
           : // TODO: add project_id filtering for non-admins
             await prisma.$queryRaw<obligation[]>`
               SELECT 

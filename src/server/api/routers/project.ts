@@ -7,8 +7,15 @@ export const projectRouter = createTRPCRouter({
   list_view: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.session.db_user;
     if (!user) return null;
-
-    return await prisma.$queryRaw<view_project[]>`SELECT * FROM view_project`;
+    
+    return user.user_role === "Admin" || user.user_role === "IPT_Member"
+      ? await prisma.$queryRaw<view_project[]>`SELECT * FROM view_project`
+      // Contractors
+      : await prisma.$queryRaw<view_project[]>`
+          SELECT * 
+          FROM view_project vp
+          WHERE vp.contractor_id = ${user.contractor_id}
+          ORDER BY vp.id ASC`;
   }),
   get_view: protectedProcedure
     .input(z.object({ id: z.number() }))
