@@ -16,7 +16,7 @@ function AdminUsers() {
   const [iptName, setIptName] = useState<string>();
   const [iptEmail, setIptEmail] = useState<string>();
   const [contractorName, setContractorName] = useState<string>();
-  const [contractorSummary, setContractorSummary] = useState<string>();
+  const [contractorEmail, setContractorEmail] = useState<string>();
 
   const addAdmin = api.user.add.useMutation({
     onError(error) {
@@ -122,7 +122,7 @@ function AdminUsers() {
   const submitAddContractor = () => {
     if (
       typeof contractorName !== "string" ||
-      typeof contractorSummary !== "string" ||
+      typeof contractorEmail !== "string" ||
       selectedContractor === undefined
     ) {
       toast.error(
@@ -137,12 +137,12 @@ function AdminUsers() {
     addContractor.mutate({
       contractor_id: selectedContractor.id,
       user_name: contractorName,
-      user_email: contractorSummary,
+      user_email: contractorEmail,
       user_role: "Contractor",
     });
 
     setContractorName("");
-    setContractorSummary("");
+    setContractorEmail("");
   };
 
   const removeUser = api.user.delete.useMutation({
@@ -289,17 +289,17 @@ function AdminUsers() {
                     className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
                   />
                 </div>
-                <div className="mt-2 flex items-center justify-center gap-4 pl-2">
-                  <label htmlFor="contractor-email">Summary:</label>
+                <div className="mt-2 flex items-center justify-center gap-4 pl-10">
+                  <label htmlFor="contractor-email">Email:</label>
                   <input
                     onChange={(e) => {
-                      setContractorSummary(e.target.value);
+                      setContractorEmail(e.target.value);
                     }}
                     type="text"
                     id="contractor-email"
                     name="contractor-email"
-                    placeholder="e.g. 'John Doe is a contractor at the Department of Defense'"
-                    value={contractorSummary ?? ""}
+                    placeholder="e.g. 'contractor@example.com'"
+                    value={contractorEmail ?? ""}
                     className="w-full rounded-md bg-gray-200 px-4 py-2 text-black"
                   />
                 </div>

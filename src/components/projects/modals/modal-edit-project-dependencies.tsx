@@ -317,7 +317,7 @@ function ModalEditProjectDependencies({
           closeModal();
         }}
       >
-        <div className="flex min-h-screen items-end justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -643,13 +643,21 @@ function ModalEditProjectDependencies({
                                     key={milestone.ID}
                                     value={milestone.ID}
                                   >
-                                    {`${milestone.Name}: ${format(
-                                      milestone.ProjectedStart,
-                                      "MM/dd/yyyy"
-                                    )} - ${format(
-                                      milestone.ProjectedEnd,
-                                      "MM/dd/yyyy"
-                                    )}`}
+                                    {`${milestone.Name}: ${
+                                      milestone.ProjectedStart
+                                        ? format(
+                                            milestone.ProjectedStart,
+                                            "MM/dd/yyyy"
+                                          )
+                                        : "..."
+                                    } - ${
+                                      milestone.ProjectedEnd
+                                        ? format(
+                                            milestone.ProjectedEnd,
+                                            "MM/dd/yyyy"
+                                          )
+                                        : "..."
+                                    }`}
                                   </option>
                                 ))}
                               </select>

@@ -4,49 +4,45 @@ import { Dialog, Transition } from "@headlessui/react";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
 import type { view_project } from "~/types/view_project";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, UserX } from "lucide-react";
 import { api } from "~/utils/api";
+import { users } from "@prisma/client";
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from "@tanstack/react-query";
 
 type ModalProps = {
-  project?: view_project | null;
+  user?: users;
+  refetch: () => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 };
 
-function ModalConfirmProjectClose({ project, isOpen, setIsOpen }: ModalProps) {
+function ModalConfirmDeleteUser({ user, refetch, isOpen, setIsOpen }: ModalProps) {
   const router = useRouter();
 
-  const closeProject = api.contract.updateContractStatus.useMutation({
-    onError: (error) => {
+  const removeUser = api.user.delete.useMutation({
+    onError(error) {
       toast.error(
         toastMessage(
-          "Error Closing Project",
-          "There was an error closing the project. Please try again."
+          "Error Removing User",
+          "Please try again later. If the problem persists, please contact support."
         )
       );
       console.error(error);
     },
-    onSuccess: () => {
+    onSuccess(data) {
       toast.success(
-        toastMessage("Project Closed", "The project was successfully closed.")
+        toastMessage("User Removed", "The user was removed successfully.")
       );
 
-      // Update the project state to closed
-      if (project) project.contract_status = "Closed";
-
-      // Refresh the page (this is a bit hacky, but it works as a temporary solution)
-      router.reload();
+      void refetch();
     },
   });
 
-  const submitCloseProject = useCallback(() => {
-    if (project) {
-      closeProject.mutate({
-        id: project.contract_award_id,
-        contract_status: "Closed",
-      });
-    }
-  }, [project, closeProject]);
+  const submitRemoveUser = () => {
+    if (!user) return;
+
+    removeUser.mutate({ id: user.id });
+  };
 
   // Modal functionality (states)
   const [modalOpen, setModalOpen] = useState(false);
@@ -62,9 +58,9 @@ function ModalConfirmProjectClose({ project, isOpen, setIsOpen }: ModalProps) {
       setModalOpen(false);
       setIsOpen(false);
 
-      if (closeProject) submitCloseProject();
+      if (closeProject) submitRemoveUser();
     },
-    [setIsOpen, submitCloseProject]
+    [setIsOpen, submitRemoveUser]
   );
 
   useEffect(() => {
@@ -112,9 +108,9 @@ function ModalConfirmProjectClose({ project, isOpen, setIsOpen }: ModalProps) {
             <div className="relative inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
               <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
-                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-yellow-100 sm:mx-0 sm:h-10 sm:w-10">
-                    <AlertTriangle
-                      className="h-6 w-6 text-yellow-600"
+                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <UserX
+                      className="h-6 w-6 text-red-600"
                       aria-hidden="true"
                     />
                   </div>
@@ -123,13 +119,11 @@ function ModalConfirmProjectClose({ project, isOpen, setIsOpen }: ModalProps) {
                       as="h3"
                       className="text-lg font-medium leading-6 text-gray-900"
                     >
-                      Are you sure you want to close this project?
+                      Are you sure you want to remove this user?
                     </Dialog.Title>
                     <div className="mt-2 flex min-w-full flex-col gap-2">
                       <p className="text-sm text-gray-500">
-                        Closing this project will prevent you from making any
-                        changes to it. You will still be able to view the
-                        project&apos;s details and history.
+                        This action cannot be undone.
                       </p>
                     </div>
                   </div>
@@ -138,14 +132,14 @@ function ModalConfirmProjectClose({ project, isOpen, setIsOpen }: ModalProps) {
               <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
                 <button
                   type="button"
-                  className="inline-flex w-full justify-center rounded-md border border-transparent bg-yellow-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-600 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
                   onClick={() => closeModal(true)}
                 >
-                  Close Project
+                  Delete User
                 </button>
                 <button
                   type="button"
-                  className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                   onClick={() => closeModal(false)}
                 >
                   Cancel
@@ -159,4 +153,4 @@ function ModalConfirmProjectClose({ project, isOpen, setIsOpen }: ModalProps) {
   );
 }
 
-export default ModalConfirmProjectClose;
+export default ModalConfirmDeleteUser;

@@ -31,7 +31,7 @@ function ProjectContractStatus({ project }: { project: view_project }) {
         <h1>Contract Status</h1>
         {project.contract_status !== "Closed" &&
           user?.user_role !== "Contractor" && (
-            <div className="flex gap-3">
+            <div className="flex gap-1 sm:gap-3">
               {canBeAwarded && (
                 <button
                   onClick={() => setMarkAwardedModalOpen(true)}

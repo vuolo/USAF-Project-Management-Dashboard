@@ -48,28 +48,87 @@ export const milestoneRouter = createTRPCRouter({
             SELECT
               (SELECT COUNT(schedule_status) 
                 FROM view_project
-                WHERE schedule_status= 'ONTRACK') as green_sch,
+                WHERE schedule_status= 'ONTRACK' COLLATE utf8mb4_general_ci) as green_sch,
               (SELECT COUNT(schedule_status) 
                 FROM view_project
-                WHERE schedule_status= 'BEHIND') as yellow_sch,
+                WHERE schedule_status= 'BEHIND' COLLATE utf8mb4_general_ci) as yellow_sch,
               (SELECT COUNT(schedule_status) 
                 FROM view_project
-                WHERE schedule_status= 'REALLY-BEHIND') as red_sch`
+                WHERE schedule_status= 'REALLY-BEHIND' COLLATE utf8mb4_general_ci) as red_sch`
         : await prisma.$queryRaw<schedule_summary[]>`
             SELECT
               (SELECT COUNT(schedule_status) 
                 FROM view_project vp
                 INNER JOIN user_project_link upl on vp.id = upl.project_id
-                WHERE schedule_status= 'ONTRACK' AND upl.user_id = ${user.id}) as green_sch,
+                WHERE schedule_status= 'ONTRACK' COLLATE utf8mb4_general_ci AND upl.user_id = ${user.id}) as green_sch,
               (SELECT COUNT(schedule_status) 
                 FROM view_project vp
                 INNER JOIN user_project_link upl on vp.id = upl.project_id
-                WHERE schedule_status= 'BEHIND' AND upl.user_id = ${user.id}) as yellow_sch,
+                WHERE schedule_status= 'BEHIND' COLLATE utf8mb4_general_ci AND upl.user_id = ${user.id}) as yellow_sch,
               (SELECT COUNT(schedule_status) 
                 FROM view_project vp
                 INNER JOIN user_project_link upl on vp.id = upl.project_id
-                WHERE schedule_status= 'REALLY-BEHIND' AND upl.user_id = ${user.id}) as red_sch`)[0] ||
+                WHERE schedule_status= 'REALLY-BEHIND' COLLATE utf8mb4_general_ci AND upl.user_id = ${user.id}) as red_sch`)[0] ||
       null
     );
   }),
+  addMilestoneSchedule: protectedProcedure
+    .input(
+      z.object({
+        project_id: z.number(),
+        task_name: z.string(),
+        projected_start: z.date(),
+        projected_end: z.date(),
+        actual_start: z.date().optional(),
+        actual_end: z.date().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.project_milestones.create({
+        data: {
+          project_id: input.project_id,
+          task_name: input.task_name,
+          start_date: input.projected_start,
+          end_date: input.projected_end,
+          actual_start: input.actual_start,
+          actual_end: input.actual_end,
+        },
+      });
+    }),
+  updateMilestoneSchedule: protectedProcedure
+    .input(
+      z.object({
+        milestone_id: z.number(),
+        project_id: z.number(),
+        task_name: z.string(),
+        projected_start: z.date().optional(),
+        projected_end: z.date().optional(),
+        actual_start: z.date().optional(),
+        actual_end: z.date().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      return await prisma.project_milestones.update({
+        where: {
+          id: input.milestone_id,
+        },
+        data: {
+          project_id: input.project_id,
+          task_name: input.task_name,
+          start_date: input.projected_start,
+          end_date: input.projected_end,
+          actual_start: input.actual_start,
+          actual_end: input.actual_end,
+        },
+      });
+    }),
+  deleteMilestoneSchedule: protectedProcedure
+    .input(z.object({ milestone_id: z.number() }))
+    .mutation(async ({ input }) => {
+      return await prisma.project_milestones.delete({
+        where: {
+          id: input.milestone_id,
+        },
+      });
+    }),
 });

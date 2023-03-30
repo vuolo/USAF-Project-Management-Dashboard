@@ -216,10 +216,10 @@ function formatDataForCharts(data: any[]): any[] {
 
   data.forEach((info) => {
     temp.id = info.id;
-    temp.Actual = info.Actual;
-    temp["Actual Total"] = info["Actual Total"];
-    temp.Projected = info.Projected;
-    temp["Projected Total"] = info["Projected Total"];
+    temp.Actual = Number(info.Actual);
+    temp["Actual Total"] = Number(info["Actual Total"]);
+    temp.Projected = Number(info.Projected);
+    temp["Projected Total"] = Number(info["Projected Total"]);
     temp.date = format(new Date(info.date), "MM/dd/yyyy");
     retVal.push(temp);
     temp = {};

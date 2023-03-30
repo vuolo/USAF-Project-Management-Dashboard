@@ -3,27 +3,30 @@ import { useRouter } from "next/router";
 import { Dialog, Transition } from "@headlessui/react";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
-import { CalendarClock, Trash2 } from "lucide-react";
+import { CalendarClock, PlusCircle, Trash2 } from "lucide-react";
 import {
   convertDateToDayValue,
   convertDayValueToDate,
   isInvalidDate,
 } from "~/utils/date";
 import { api } from "~/utils/api";
-import type { contract_award_timeline } from "@prisma/client";
-import type { contract_award_timeline_using_day_values } from "~/types/contract_award_timeline_using_day_values";
 import DatePicker, {
   type DayValue,
 } from "@hassanmojab/react-modern-calendar-datepicker";
+import type { view_project } from "~/types/view_project";
+import type { milestone } from "~/types/milestone";
+import type { milestone_using_day_values } from "~/types/milestone_using_day_values";
 
 type ModalProps = {
-  contractAwardTimeline?: contract_award_timeline[] | null;
+  project: view_project;
+  milestoneSchedules?: milestone[] | null;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 };
 
-function ModalEditProjectContractStatus({
-  contractAwardTimeline,
+function ModalEditProjectSchedule({
+  project,
+  milestoneSchedules,
   isOpen,
   setIsOpen,
 }: ModalProps) {
@@ -31,56 +34,79 @@ function ModalEditProjectContractStatus({
 
   // Modal functionality (states)
   const [modalOpen, setModalOpen] = useState(false);
-  const [contractAwardTimeline_editState, setContractAwardTimeline_editState] =
-    useState<contract_award_timeline_using_day_values[]>([]);
+  const [editableMilestoneSchedules, setEditableMilestoneSchedules] = useState<
+    milestone_using_day_values[]
+  >([]);
   const saveButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Listen for changes in contractAwardTimeline, and update edit state (the edit state is used to render the table on the modal)
+  // Listen for changes in milestoneSchedules, and update edit state (the edit state is used to render the table on the modal)
   useEffect(() => {
-    if (!contractAwardTimeline || contractAwardTimeline_editState.length > 0)
-      return;
+    if (!milestoneSchedules || editableMilestoneSchedules.length > 0) return;
 
-    setContractAwardTimeline_editState(
-      contractAwardTimeline.map((t) =>
+    setEditableMilestoneSchedules(
+      milestoneSchedules.map((m) =>
         // Convert each date to a DayValue object (this is used by the date picker)
         ({
-          ...t,
-          requirement_plan: isInvalidDate(t.requirement_plan)
+          ...m,
+          ProjectedStart: isInvalidDate(m.ProjectedStart)
             ? null
-            : convertDateToDayValue(t.requirement_plan),
-          draft_rfp_released: isInvalidDate(t.draft_rfp_released)
+            : convertDateToDayValue(m.ProjectedStart),
+          ProjectedEnd: isInvalidDate(m.ProjectedEnd)
             ? null
-            : convertDateToDayValue(t.draft_rfp_released),
-          approved_by_acb: isInvalidDate(t.approved_by_acb)
+            : convertDateToDayValue(m.ProjectedEnd),
+          ActualStart: isInvalidDate(m.ActualStart)
             ? null
-            : convertDateToDayValue(t.approved_by_acb),
-          rfp_released: isInvalidDate(t.rfp_released)
+            : convertDateToDayValue(m.ActualStart),
+          ActualEnd: isInvalidDate(m.ActualEnd)
             ? null
-            : convertDateToDayValue(t.rfp_released),
-          proposal_received: isInvalidDate(t.proposal_received)
-            ? null
-            : convertDateToDayValue(t.proposal_received),
-          tech_eval_comp: isInvalidDate(t.tech_eval_comp)
-            ? null
-            : convertDateToDayValue(t.tech_eval_comp),
-          negotiation_comp: isInvalidDate(t.negotiation_comp)
-            ? null
-            : convertDateToDayValue(t.negotiation_comp),
-          awarded: isInvalidDate(t.awarded)
-            ? null
-            : convertDateToDayValue(t.awarded),
+            : convertDateToDayValue(m.ActualEnd),
         })
-      ) as contract_award_timeline_using_day_values[]
+      ) as milestone_using_day_values[]
     );
-  }, [contractAwardTimeline, contractAwardTimeline_editState.length]);
+  }, [milestoneSchedules, editableMilestoneSchedules.length]);
 
-  const updateContractAwardTimeline =
-    api.contract.updateContractAwardTimeline.useMutation({
+  const addMilestoneSchedule = api.milestone.addMilestoneSchedule.useMutation({
+    onError: (error) => {
+      toast.error(
+        toastMessage(
+          "Error Adding Milestone Schedule",
+          "There was an error adding the milestone schedule. Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess: () => {
+      toast.success(
+        toastMessage(
+          "Milestone Schedule Added",
+          "The milestone schedule has been added."
+        )
+      );
+
+      // Update UI to reflect new data
+      router.reload(); // For now, just reload the page instead of updating the UI (this is a bit hacky, but it works for now)
+    },
+  });
+
+  const submitAddMilestoneSchedule = useCallback(() => {
+    const today = new Date();
+    today.setDate(today.getDate() + 1); // add a day
+
+    addMilestoneSchedule.mutate({
+      project_id: project.id,
+      task_name: "",
+      projected_start: today,
+      projected_end: today,
+    });
+  }, [addMilestoneSchedule, project]);
+
+  const deleteMilestoneSchedule =
+    api.milestone.deleteMilestoneSchedule.useMutation({
       onError: (error) => {
         toast.error(
           toastMessage(
-            "Error Updating Contract Award Timeline",
-            "There was an error updating the contract award timeline. Please try again."
+            "Error Deleting Milestone Schedule",
+            "There was an error deleting the milestone schedule. Please try again."
           )
         );
         console.error(error);
@@ -88,8 +114,8 @@ function ModalEditProjectContractStatus({
       onSuccess: () => {
         toast.success(
           toastMessage(
-            "Contract Award Timeline Updated",
-            "The contract award timeline has been updated."
+            "Milestone Schedule Deleted",
+            "The milestone schedule has been deleted."
           )
         );
 
@@ -98,41 +124,134 @@ function ModalEditProjectContractStatus({
       },
     });
 
-  const submitUpdateContractAwardTimeline = useCallback(() => {
+  const submitDeleteMilestoneSchedule = useCallback(
+    (milestoneScheduleID: number) => {
+      deleteMilestoneSchedule.mutate({ milestone_id: milestoneScheduleID });
+    },
+    [deleteMilestoneSchedule]
+  );
+
+  const addDependency = api.dependency.addDependency.useMutation({
+    onError: (error) => {
+      toast.error(
+        toastMessage(
+          "Error Adding Dependency",
+          "There was an error adding the dependency. Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess: () => {
+      toast.success(
+        toastMessage("Dependency Added", "The dependency has been added.")
+      );
+
+      // Update UI to reflect new data
+      router.reload(); // For now, just reload the page instead of updating the UI (this is a bit hacky, but it works for now)
+    },
+  });
+
+  const removeAssociatedMilestoneDependencies =
+    api.dependency.removeAllAssociatedDependencies.useMutation({
+      onError: (error) => {
+        toast.error(
+          toastMessage(
+            "Error Removing Associated Dependencies",
+            "There was an error removing the associated dependencies. Please try again."
+          )
+        );
+        console.error(error);
+      },
+      onSuccess: () => {
+        toast.success(
+          toastMessage(
+            "Associated Dependencies Removed",
+            "The associated dependencies have been removed."
+          )
+        );
+      },
+    });
+
+  const updateMilestoneSchedule =
+    api.milestone.updateMilestoneSchedule.useMutation({
+      onError: (error) => {
+        toast.error(
+          toastMessage(
+            "Error Updating Milestone Schedule",
+            "There was an error updating the milestone schedule. Please try again."
+          )
+        );
+        console.error(error);
+      },
+      onSuccess: () => {
+        toast.success(
+          toastMessage(
+            "Milestone Schedule Updated",
+            "The milestone schedule has been updated."
+          )
+        );
+
+        // Update UI to reflect new data
+        router.reload(); // For now, just reload the page instead of updating the UI (this is a bit hacky, but it works for now)
+      },
+    });
+
+  const submitUpdateMilestoneSchedule = useCallback(() => {
+    if (!milestoneSchedules) return;
+
     // Convert each DayValue to a Date (this is used by the database)
-    contractAwardTimeline_editState.map(
-      (t) =>
-        t.timeline_status &&
-        t.hasBeenUpdated &&
-        updateContractAwardTimeline.mutate({
-          id: t.id,
-          contract_award_id: t.contract_award_id,
-          timeline_status: t.timeline_status,
-          requirement_plan: t.requirement_plan
-            ? convertDayValueToDate(t.requirement_plan, 1)
+    editableMilestoneSchedules.forEach((m, mIdx) => {
+      // Only update if the milestone has been updated
+      if (m.hasBeenUpdated || m.Name != milestoneSchedules[mIdx]?.Name)
+        updateMilestoneSchedule.mutate({
+          milestone_id: m.ID,
+          project_id: m.project_id,
+          task_name: m.Name,
+          projected_start: m.ProjectedStart
+            ? convertDayValueToDate(m.ProjectedStart, 1)
             : new Date("December 31, 1969"),
-          draft_rfp_released: t.draft_rfp_released
-            ? convertDayValueToDate(t.draft_rfp_released, 1)
+          projected_end: m.ProjectedEnd
+            ? convertDayValueToDate(m.ProjectedEnd, 1)
             : new Date("December 31, 1969"),
-          approved_by_acb: t.approved_by_acb
-            ? convertDayValueToDate(t.approved_by_acb, 1)
+          actual_start: m.ActualStart
+            ? convertDayValueToDate(m.ActualStart, 1)
             : new Date("December 31, 1969"),
-          rfp_released: t.rfp_released
-            ? convertDayValueToDate(t.rfp_released, 1)
+          actual_end: m.ActualEnd
+            ? convertDayValueToDate(m.ActualEnd, 1)
             : new Date("December 31, 1969"),
-          proposal_received: t.proposal_received
-            ? convertDayValueToDate(t.proposal_received, 1)
-            : new Date("December 31, 1969"),
-          tech_eval_comp: t.tech_eval_comp
-            ? convertDayValueToDate(t.tech_eval_comp, 1)
-            : new Date("December 31, 1969"),
-          negotiation_comp: t.negotiation_comp
-            ? convertDayValueToDate(t.negotiation_comp, 1)
-            : new Date("December 31, 1969"),
-          awarded: t.awarded ? convertDayValueToDate(t.awarded) : undefined,
-        })
-    );
-  }, [contractAwardTimeline_editState, updateContractAwardTimeline]);
+        });
+
+      // Update Predecessors
+      if (m.Predecessors != milestoneSchedules[mIdx]?.Predecessors) {
+        // Delete all associated milestone dependencies
+        removeAssociatedMilestoneDependencies.mutate({
+          milestone_id: m.ID,
+        });
+
+        // Add new milestone dependencies
+        m.Predecessors.split(",").forEach((p) => {
+          const predecessor_milestone_str = p.trim();
+
+          // Ensure the predecessor milestone is a number (id)
+          const predecessor_milestone = Number(predecessor_milestone_str);
+          if (isNaN(Number(predecessor_milestone))) return;
+
+          addDependency.mutate({
+            predecessor_project: m.project_id,
+            predecessor_milestone,
+            successor_project: m.project_id,
+            successor_milestone: m.ID,
+          });
+        });
+      }
+    });
+  }, [
+    editableMilestoneSchedules,
+    updateMilestoneSchedule,
+    milestoneSchedules,
+    removeAssociatedMilestoneDependencies,
+    addDependency,
+  ]);
 
   // Open modal
   const openModal = useCallback(() => {
@@ -145,14 +264,14 @@ function ModalEditProjectContractStatus({
       setModalOpen(false);
       setIsOpen(false);
 
-      if (save) submitUpdateContractAwardTimeline();
+      if (save) submitUpdateMilestoneSchedule();
 
       // Reset the edit state
       setTimeout(() => {
-        setContractAwardTimeline_editState([]);
+        setEditableMilestoneSchedules([]);
       }, 500);
     },
-    [setIsOpen, submitUpdateContractAwardTimeline]
+    [setIsOpen, submitUpdateMilestoneSchedule]
   );
 
   useEffect(() => {
@@ -160,36 +279,36 @@ function ModalEditProjectContractStatus({
   }, [isOpen, openModal]);
 
   const updateDate = useCallback(
-    (timelineIndex: number, dateType: string, date: DayValue) => {
-      setContractAwardTimeline_editState((prev) => {
-        return prev.map((t, i) => {
-          if (i === timelineIndex) {
+    (milestoneIndex: number, dateType: string, date: DayValue) => {
+      setEditableMilestoneSchedules((prev) => {
+        return prev.map((m, i) => {
+          if (i === milestoneIndex) {
             return {
-              ...t,
+              ...m,
               [dateType]: date,
               hasBeenUpdated: true,
             };
           }
 
-          return t;
+          return m;
         });
       });
     },
     []
   );
 
-  const clearDate = useCallback((timelineIndex: number, dateType: string) => {
-    setContractAwardTimeline_editState((prev) => {
-      return prev.map((t, i) => {
-        if (i === timelineIndex) {
+  const clearDate = useCallback((milestoneIndex: number, dateType: string) => {
+    setEditableMilestoneSchedules((prev) => {
+      return prev.map((m, i) => {
+        if (i === milestoneIndex) {
           return {
-            ...t,
+            ...m,
             [dateType]: null,
             hasBeenUpdated: true,
           };
         }
 
-        return t;
+        return m;
       });
     });
   }, []);
@@ -247,7 +366,7 @@ function ModalEditProjectContractStatus({
                           aria-hidden="true"
                         />
                       </div>
-                      <span>Edit Contract Award Timeline</span>
+                      <span>Edit Project Schedule</span>
                     </Dialog.Title>
 
                     <div className="mx-auto flex flex-row items-center justify-center gap-2 pt-4 pb-2 text-left sm:px-6 sm:pt-6">
@@ -256,17 +375,10 @@ function ModalEditProjectContractStatus({
                           <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
                             <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
                               <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-                                {!contractAwardTimeline ? (
+                                {!editableMilestoneSchedules ? (
                                   <div className="flex h-64 items-center justify-center px-64">
                                     <div className="italic text-gray-500">
                                       Loading...
-                                    </div>
-                                  </div>
-                                ) : contractAwardTimeline.length === 0 ? (
-                                  <div className="flex h-64 w-full items-center justify-center px-8">
-                                    <div className="italic text-gray-500">
-                                      This project has no contract award
-                                      timeline.
                                     </div>
                                   </div>
                                 ) : (
@@ -277,82 +389,103 @@ function ModalEditProjectContractStatus({
                                           scope="col"
                                           className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
                                         >
-                                          Timeline Status
+                                          ID
                                         </th>
                                         <th
                                           scope="col"
                                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                                         >
-                                          Requirements Planning
+                                          Name
                                         </th>
                                         <th
                                           scope="col"
                                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                                         >
-                                          Draft RFP Released
+                                          Projected Start
                                         </th>
                                         <th
                                           scope="col"
                                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                                         >
-                                          Approved at ABC
+                                          Projected End
                                         </th>
                                         <th
                                           scope="col"
                                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                                         >
-                                          RFP Released
+                                          Actual Start
                                         </th>
                                         <th
                                           scope="col"
                                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                                         >
-                                          Proposal Received
+                                          Actual End
                                         </th>
                                         <th
                                           scope="col"
                                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                                         >
-                                          Tech Eval Complete
-                                        </th>
-                                        <th
-                                          scope="col"
-                                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                                        >
-                                          Negotiations Complete
-                                        </th>
-                                        <th
-                                          scope="col"
-                                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                                        >
-                                          Awarded
+                                          Predecessors (IDs separated by a ,)
                                         </th>
                                       </tr>
                                     </thead>
                                     <tbody className="bg-white">
-                                      {contractAwardTimeline_editState.map(
-                                        (timeline, timelineIdx) => (
+                                      {editableMilestoneSchedules.map(
+                                        (milestone, milestoneIdx) => (
                                           <tr
-                                            key={timeline.id}
+                                            key={milestone.ID}
                                             className={
-                                              timelineIdx % 2 === 0
+                                              milestoneIdx % 2 === 0
                                                 ? undefined
                                                 : "bg-gray-50"
                                             }
                                           >
                                             <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
-                                              {timeline.timeline_status}
+                                              <div className="flex items-center justify-center gap-2">
+                                                <span>{milestone.ID}</span>
+                                                <Trash2
+                                                  onClick={() =>
+                                                    submitDeleteMilestoneSchedule(
+                                                      milestone.ID
+                                                    )
+                                                  }
+                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                />
+                                              </div>
+                                            </td>
+                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                              <input
+                                                type="text"
+                                                className="w-32 rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                placeholder="..."
+                                                value={milestone.Name}
+                                                onChange={(e) =>
+                                                  setEditableMilestoneSchedules(
+                                                    (prev) =>
+                                                      prev.map(
+                                                        (milestone, idx) =>
+                                                          idx === milestoneIdx
+                                                            ? {
+                                                                ...milestone,
+                                                                Name: e.target
+                                                                  .value,
+                                                              }
+                                                            : milestone
+                                                      )
+                                                  )
+                                                }
+                                              />
                                             </td>
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                               <div className="z-50 flex items-center gap-2">
                                                 <DatePicker
                                                   value={
-                                                    timeline.requirement_plan
+                                                    milestone.ProjectedStart
                                                   }
                                                   onChange={(date) =>
                                                     updateDate(
-                                                      timelineIdx,
-                                                      "requirement_plan",
+                                                      milestoneIdx,
+                                                      "ProjectedStart",
                                                       date
                                                     )
                                                   }
@@ -364,8 +497,8 @@ function ModalEditProjectContractStatus({
                                                 <Trash2
                                                   onClick={() =>
                                                     clearDate(
-                                                      timelineIdx,
-                                                      "requirement_plan"
+                                                      milestoneIdx,
+                                                      "ProjectedStart"
                                                     )
                                                   }
                                                   className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
@@ -375,13 +508,11 @@ function ModalEditProjectContractStatus({
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                               <div className="flex items-center gap-2">
                                                 <DatePicker
-                                                  value={
-                                                    timeline.draft_rfp_released
-                                                  }
+                                                  value={milestone.ProjectedEnd}
                                                   onChange={(date) =>
                                                     updateDate(
-                                                      timelineIdx,
-                                                      "draft_rfp_released",
+                                                      milestoneIdx,
+                                                      "ProjectedEnd",
                                                       date
                                                     )
                                                   }
@@ -392,8 +523,8 @@ function ModalEditProjectContractStatus({
                                                 <Trash2
                                                   onClick={() =>
                                                     clearDate(
-                                                      timelineIdx,
-                                                      "draft_rfp_released"
+                                                      milestoneIdx,
+                                                      "ProjectedEnd"
                                                     )
                                                   }
                                                   className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
@@ -403,13 +534,11 @@ function ModalEditProjectContractStatus({
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                               <div className="flex items-center gap-2">
                                                 <DatePicker
-                                                  value={
-                                                    timeline.approved_by_acb
-                                                  }
+                                                  value={milestone.ActualStart}
                                                   onChange={(date) =>
                                                     updateDate(
-                                                      timelineIdx,
-                                                      "approved_by_acb",
+                                                      milestoneIdx,
+                                                      "ActualStart",
                                                       date
                                                     )
                                                   }
@@ -420,8 +549,8 @@ function ModalEditProjectContractStatus({
                                                 <Trash2
                                                   onClick={() =>
                                                     clearDate(
-                                                      timelineIdx,
-                                                      "approved_by_acb"
+                                                      milestoneIdx,
+                                                      "ActualStart"
                                                     )
                                                   }
                                                   className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
@@ -431,11 +560,11 @@ function ModalEditProjectContractStatus({
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                                               <div className="flex items-center gap-2">
                                                 <DatePicker
-                                                  value={timeline.rfp_released}
+                                                  value={milestone.ActualEnd}
                                                   onChange={(date) =>
                                                     updateDate(
-                                                      timelineIdx,
-                                                      "rfp_released",
+                                                      milestoneIdx,
+                                                      "ActualEnd",
                                                       date
                                                     )
                                                   }
@@ -446,8 +575,8 @@ function ModalEditProjectContractStatus({
                                                 <Trash2
                                                   onClick={() =>
                                                     clearDate(
-                                                      timelineIdx,
-                                                      "rfp_released"
+                                                      milestoneIdx,
+                                                      "ActualEnd"
                                                     )
                                                   }
                                                   className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
@@ -455,118 +584,62 @@ function ModalEditProjectContractStatus({
                                               </div>
                                             </td>
                                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                              <div className="flex items-center gap-2">
-                                                <DatePicker
-                                                  value={
-                                                    timeline.proposal_received
-                                                  }
-                                                  onChange={(date) =>
-                                                    updateDate(
-                                                      timelineIdx,
-                                                      "proposal_received",
-                                                      date
-                                                    )
-                                                  }
-                                                  inputPlaceholder="No Date"
-                                                  inputClassName="w-[5.5rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                                  calendarClassName="z-50"
-                                                />
-                                                <Trash2
-                                                  onClick={() =>
-                                                    clearDate(
-                                                      timelineIdx,
-                                                      "proposal_received"
-                                                    )
-                                                  }
-                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
-                                                />
-                                              </div>
-                                            </td>
-                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                              <div className="flex items-center gap-2">
-                                                <DatePicker
-                                                  value={
-                                                    timeline.tech_eval_comp
-                                                  }
-                                                  onChange={(date) =>
-                                                    updateDate(
-                                                      timelineIdx,
-                                                      "tech_eval_comp",
-                                                      date
-                                                    )
-                                                  }
-                                                  inputPlaceholder="No Date"
-                                                  inputClassName="w-[5.5rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                                  calendarClassName="z-50"
-                                                />
-                                                <Trash2
-                                                  onClick={() =>
-                                                    clearDate(
-                                                      timelineIdx,
-                                                      "tech_eval_comp"
-                                                    )
-                                                  }
-                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
-                                                />
-                                              </div>
-                                            </td>
-                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                              <div className="flex items-center gap-2">
-                                                <DatePicker
-                                                  value={
-                                                    timeline.negotiation_comp
-                                                  }
-                                                  onChange={(date) =>
-                                                    updateDate(
-                                                      timelineIdx,
-                                                      "negotiation_comp",
-                                                      date
-                                                    )
-                                                  }
-                                                  inputPlaceholder="No Date"
-                                                  inputClassName="w-[5.5rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                                  calendarClassName="z-50"
-                                                />
-                                                <Trash2
-                                                  onClick={() =>
-                                                    clearDate(
-                                                      timelineIdx,
-                                                      "negotiation_comp"
-                                                    )
-                                                  }
-                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
-                                                />
-                                              </div>
-                                            </td>
-                                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                                              <div className="flex items-center gap-2">
-                                                <DatePicker
-                                                  value={timeline.awarded}
-                                                  onChange={(date) =>
-                                                    updateDate(
-                                                      timelineIdx,
-                                                      "awarded",
-                                                      date
-                                                    )
-                                                  }
-                                                  inputPlaceholder="No Date"
-                                                  inputClassName="w-[5.5rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                                  calendarClassName="z-50"
-                                                />
-                                                <Trash2
-                                                  onClick={() =>
-                                                    clearDate(
-                                                      timelineIdx,
-                                                      "awarded"
-                                                    )
-                                                  }
-                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
-                                                />
-                                              </div>
+                                              <input
+                                                type="text"
+                                                className="w-32 rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                placeholder="1,2,3..."
+                                                value={milestone.Predecessors}
+                                                onChange={(e) =>
+                                                  setEditableMilestoneSchedules(
+                                                    (prev) =>
+                                                      prev.map(
+                                                        (milestone, idx) => {
+                                                          if (
+                                                            idx === milestoneIdx
+                                                          ) {
+                                                            return {
+                                                              ...milestone,
+                                                              Predecessors:
+                                                                e.target.value,
+                                                            };
+                                                          }
+                                                          return milestone;
+                                                        }
+                                                      )
+                                                  )
+                                                }
+                                              />
                                             </td>
                                           </tr>
                                         )
                                       )}
+                                      <tr
+                                        className={
+                                          editableMilestoneSchedules.length %
+                                            2 ===
+                                          0
+                                            ? undefined
+                                            : "bg-gray-50"
+                                        }
+                                      >
+                                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
+                                          <div className="flex items-center justify-center gap-2">
+                                            <span>Add Milestone</span>
+                                            <PlusCircle
+                                              onClick={
+                                                submitAddMilestoneSchedule
+                                              }
+                                              className="h-4 w-4 cursor-pointer text-gray-400 hover:text-green-500"
+                                            />
+                                          </div>
+                                        </td>
+                                        <td />
+                                        <td />
+                                        <td />
+                                        <td />
+                                        <td />
+                                        <td />
+                                      </tr>
                                     </tbody>
                                   </table>
                                 )}
@@ -578,6 +651,8 @@ function ModalEditProjectContractStatus({
                     </div>
                   </div>
                 </div>
+
+                {/* TODO: Upload Project Schedule */}
 
                 <div className="mt-4 gap-2 rounded-lg bg-gray-50 px-4 py-3 sm:flex sm:px-6">
                   <button
@@ -605,4 +680,4 @@ function ModalEditProjectContractStatus({
   );
 }
 
-export default ModalEditProjectContractStatus;
+export default ModalEditProjectSchedule;
