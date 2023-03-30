@@ -9,15 +9,12 @@ const Clin: NextPage = () => {
   const project_id = parseInt(router.query.id as string);
 
   return (
-    <>
-      <NavBar />
-      <main>
-        {/* Main Section */}
-        <div className="px-4 pt-2 pb-2 sm:px-6 sm:pt-6">
-          <ProjectClin project_id={project_id} />
-        </div>
-      </main>
-    </>
+    <main>
+      {/* Main Section */}
+      <div className="px-4 pt-2 pb-2 sm:px-6 sm:pt-6">
+        <ProjectClin project_id={project_id} />
+      </div>
+    </main>
   );
 };
 

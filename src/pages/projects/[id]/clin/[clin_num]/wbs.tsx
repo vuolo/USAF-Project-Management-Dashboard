@@ -10,15 +10,12 @@ const WBS: NextPage = () => {
   const clin_num = parseInt(router.query.clin_num as string);
 
   return (
-    <>
-      <NavBar />
-      <main>
-        {/* Main Section */}
-        <div className="px-4 pt-2 pb-2 sm:px-6 sm:pt-6">
-          <ProjectClinWBS project_id={project_id} clin_num={clin_num} />
-        </div>
-      </main>
-    </>
+    <main>
+      {/* Main Section */}
+      <div className="px-4 pt-2 pb-2 sm:px-6 sm:pt-6">
+        <ProjectClinWBS project_id={project_id} clin_num={clin_num} />
+      </div>
+    </main>
   );
 };
 

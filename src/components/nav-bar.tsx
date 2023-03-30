@@ -26,32 +26,6 @@ function NavBar({ title }: { title?: string }) {
       )}
 
       <div className="flex items-center gap-4 text-white">
-        {/* Admin Page */}
-        {user?.user_role === "Admin" && (
-          <>
-            <Link
-              href="/admin"
-              data-tooltip-id="admin-tooltip"
-              data-tooltip-content="Admin Page"
-              className="hover:text-white/80"
-            >
-              <Cog />
-            </Link>
-            <Tooltip id="admin-tooltip" style={{ opacity: 80 }} />
-          </>
-        )}
-
-        {/* Home */}
-        <Link
-          href="/"
-          data-tooltip-id="home-tooltip"
-          data-tooltip-content="Home"
-          className="hover:text-white/80"
-        >
-          <Home />
-        </Link>
-        <Tooltip id="home-tooltip" style={{ opacity: 80 }} />
-
         {/* Sign Out */}
         <Link
           href="/api/auth/signout"

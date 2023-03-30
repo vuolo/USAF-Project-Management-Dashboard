@@ -2,10 +2,12 @@ import { useRouter } from "next/router";
 import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider, useSession } from "next-auth/react";
+import { ProSidebarProvider } from "react-pro-sidebar";
 import { ToastContainer } from "react-toastify";
 import { UserX } from "lucide-react";
 
 import DynamicHead from "~/components/dynamic-head";
+import Layout from "~/components/layout"
 
 import { api } from "~/utils/api";
 
@@ -21,26 +23,28 @@ const MyApp: AppType<{ session: Session | null }> = ({
 }) => {
   return (
     <SessionProvider session={session}>
-      <DynamicHead />
-      <Auth>
-        <>
-          <Component {...pageProps} />
-          <ToastContainer
-            position="bottom-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss={false}
-            draggable
-            pauseOnHover
-            theme="light"
-            bodyClassName="text-gray-500 text-sm"
-            className="w-screen md:w-[375px]"
-          />
-        </>
-      </Auth>
+      <ProSidebarProvider>
+        <DynamicHead />
+        <Auth>
+          <>
+            <Component {...pageProps} />
+            <ToastContainer
+              position="bottom-right"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss={false}
+              draggable
+              pauseOnHover
+              theme="light"
+              bodyClassName="text-gray-500 text-sm"
+              className="w-screen md:w-[375px]"
+            />
+          </>
+        </Auth>
+      </ProSidebarProvider>
     </SessionProvider>
   );
 };
@@ -105,6 +109,8 @@ function Auth({ children }: AuthProps) {
     <div className="flex h-screen w-screen items-center justify-center">
       Loading...
     </div>
+  ) : router.pathname !=="/auth/sign-in" ? (
+    <Layout>{children}</Layout>
   ) : (
     children
   );
