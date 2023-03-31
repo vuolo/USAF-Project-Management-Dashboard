@@ -34,36 +34,44 @@ export const expenditureRouter = createTRPCRouter({
             input.project_ids && input.project_ids.length > 0
             ? await prisma.$queryRaw<expenditure[]>`
               SELECT 
-                SUM(expen_projected) as expen_projected,
-                SUM(expen_actual) as expen_actual
+                SUM(CASE WHEN DATEDIFF((SELECT CURDATE()), ve.expen_funding_date) >= 0 THEN expen_projected ELSE 0 END) as expen_projected,
+                SUM(CASE WHEN DATEDIFF((SELECT CURDATE()), ve.expen_funding_date) >= 0 THEN expen_actual ELSE 0 END) as expen_actual,
+                SUM(expen_projected) as expen_projected_total
               FROM view_expenditure ve
               JOIN contract_award ca on ve.project_id = ca.project_id
               WHERE ca.contract_status = 2
-              AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0
+              -- AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0
               AND ve.project_id IN (${Prisma.join(input.project_ids)})`
             : await prisma.$queryRaw<expenditure[]>`
               SELECT 
-                SUM(expen_projected) as expen_projected,
-                SUM(expen_actual) as expen_actual
+                SUM(CASE WHEN DATEDIFF((SELECT CURDATE()), ve.expen_funding_date) >= 0 THEN expen_projected ELSE 0 END) as expen_projected,
+                SUM(CASE WHEN DATEDIFF((SELECT CURDATE()), ve.expen_funding_date) >= 0 THEN expen_actual ELSE 0 END) as expen_actual,
+                SUM(expen_projected) as expen_projected_total
               FROM view_expenditure ve
               JOIN contract_award ca on ve.project_id = ca.project_id
-              WHERE ca.contract_status = 2 AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0`
-            // Contractors
-          : // TODO: add project_id filtering for non-admins
+              WHERE ca.contract_status = 2
+              -- AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0
+              `
+          : // Contractors
+            // TODO: add project_id filtering for non-admins
             await prisma.$queryRaw<expenditure[]>`
               SELECT 
-                SUM(expen_projected) as expen_projected,
-                SUM(expen_actual) as expen_actual
+                SUM(CASE WHEN DATEDIFF((SELECT CURDATE()), ve.expen_funding_date) >= 0 THEN expen_projected ELSE 0 END) as expen_projected,
+                SUM(CASE WHEN DATEDIFF((SELECT CURDATE()), ve.expen_funding_date) >= 0 THEN expen_actual ELSE 0 END) as expen_actual,
+                SUM(expen_projected) as expen_projected_total
               FROM view_expenditure ve
               JOIN user_project_link upl on ve.project_id = upl.project_id
               JOIN contract_award ca on upl.project_id = ca.project_id
               JOIN users u on upl.user_id = u.id
-              WHERE u.id = ${user.id} AND ca.contract_status = 2 AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0`
+              WHERE u.id = ${user.id} AND ca.contract_status = 2
+              -- AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0
+              `
         ).map((expen) => {
           // Map the query result to numbers (for some reason, the query result is a string)
           return {
             expen_actual: Number(expen.expen_actual || 0),
             expen_projected: Number(expen.expen_projected || 0),
+            expen_projected_total: Number(expen.expen_projected_total || 0),
           };
         })[0] || null
       );

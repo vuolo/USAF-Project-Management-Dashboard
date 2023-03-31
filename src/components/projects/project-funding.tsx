@@ -6,8 +6,8 @@ import { useSession } from "next-auth/react";
 import { format } from "date-fns";
 import { api } from "~/utils/api";
 
-import BarGraph from "./graphs/bar-graph";
-import LineGraph from "./graphs/line-graph";
+import BarGraph from "~/components/graphs/bar-graph";
+import LineGraph from "~/components/graphs/line-graph";
 
 import type { view_project } from "~/types/view_project";
 import { formatCurrency } from "~/utils/currency";

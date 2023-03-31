@@ -27,7 +27,8 @@
     "**/*.ts",
     "**/*.tsx",
     "**/*.cjs",
-    "**/*.mjs"
-, "src/components/projects/sidebar/sidebar-nav.js"  ],
+    "**/*.mjs",
+    "src/components/sidebar/sidebar-nav.js"
+  ],
   "exclude": ["node_modules"]
 }

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 
-import NavBar from "~/components/nav-bar";
 import ProjectContractStatus from "~/components/projects/project-contract-status";
 import ProjectDependencies from "~/components/projects/project-dependencies";
 import ProjectDetails from "~/components/projects/project-details";
