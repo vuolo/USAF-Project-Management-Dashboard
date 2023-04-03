@@ -84,6 +84,7 @@ function ProjectAdd() {
   });
 
   const submitAddProject = () => {
+
     if (
       typeof selectedContractor !== "object" ||
       typeof selectedBranch !== "object" ||
@@ -102,6 +103,30 @@ function ProjectAdd() {
       );
       return;
     }
+
+    const sgMail = require('@sendgrid/mail')
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY)
+    const msg = {
+      to: 'sjcaffery01@gmail.com', // Change to your recipient
+      from: 'usafprojectmanagementdashboard@gmail.com', // Change to your verified sender
+      subject: 'New Project Added',
+      text: 'New project added in METIS dashboard.',
+    }
+
+    sgMail
+    .send(msg)
+    .then(() => {
+      toast.success(
+        toastMessage("Email Sent", "NICE")
+      )
+      console.log('Email sent')
+    })
+    .catch((error: any) => {
+      toast.error(
+        toastMessage("Email FAILED", "FAILURE")
+      )
+      console.error(error)
+    })
 
     addProject.mutate({
       project_name: projectName,
@@ -293,7 +318,7 @@ function ProjectAdd() {
         </div>
 
         <button
-          onClick={submitAddProject}
+          onClick={submitAddProject} 
           className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
         >
           Add New Project
