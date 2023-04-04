@@ -4,11 +4,21 @@ import StatusIcon from "./icons/status-icon";
 
 import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
+import { useState } from "react";
+
+type FilterType = "project_name" | "contract_number" | "contract_value" | "contract_status" | "dependency_status" | "financial_status" | "schedule_status";
 
 function ProjectsOverview() {
   const user = useSession().data?.db_user;
-  const { data: projects } = api.project.list_view.useQuery();
+  const [filterQuery, setFilterQuery] = useState("");
+  const [filterType, setFilterType] = useState<FilterType>("project_name");
 
+  const { data: projects, refetch } = api.project.search.useQuery({
+    filterQuery,
+    filterType,
+  });
+
+  
   return (
     <>
       <div className="sm:flex sm:items-center">
@@ -25,6 +35,80 @@ function ProjectsOverview() {
           </Link>
         </div>
       </div>
+
+      {/*Search*/}
+      <div className="mt-4 flex w-fit gap-2 px-2">
+
+        {filterType === "dependency_status" || filterType === "financial_status" || filterType === "schedule_status" ?
+          // Icon Dropdown search
+          <select
+            id="filter-select"
+            name="filter-select"
+            className="block flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+            value={filterQuery}
+            onChange={(e) => {
+              setFilterQuery(e.target.value);
+              void refetch();
+            }}>
+              <option value="">No Filter</option>
+              <option value="ONTRACK">On-Track</option>
+              <option value="BEHIND">Behind</option>
+              <option value="REALLY-BEHIND">Really-Behind</option>
+          </select>
+
+          // Contract Status Dropdown search
+          : filterType === "contract_status" ?
+          <select
+            id="filter-select"
+            name="filter-select"
+            className="block flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+            value={filterQuery}
+            onChange={(e) => {
+              setFilterQuery(e.target.value);
+              void refetch();
+            }}>
+              <option value="">No Filter</option>
+              <option value="Closed">Closed</option>
+              <option value="Awarded">Awarded</option>
+              <option value="Pre-Award">Pre-Award</option>
+          </select>
+
+          : // Text search
+          <input
+            type="text"
+            name="filter-text"
+            id="filter-text"
+            className="block w-full flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:min-w-full sm:text-sm"
+            placeholder="Search..."
+            onChange={(e) => {
+              setFilterQuery(e.target.value);
+              void refetch();
+            }}
+          />
+        }
+
+        {/*Search Field Dropdown*/}
+        <select
+          id="filter-select"
+          name="filter-select"
+          className="block flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+          value={filterType}
+          onChange={(e) => {
+            setFilterQuery("");
+            setFilterType(e.target.value as FilterType);
+          }}
+        >
+          <option value="project_name">Project Name</option>
+          <option value="contract_number">Contract Number</option>
+          <option value="contract_value">Contract Value</option>
+          <option value="contract_status">Contract Status</option>
+          <option value="dependency_status">Dependency Status</option>
+          <option value="financial_status">Financial Status</option>
+          <option value="schedule_status">Schedule Status</option>
+        </select>
+      </div>
+      
+      {/*Projects Table*/}
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
