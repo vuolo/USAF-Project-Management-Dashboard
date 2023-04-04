@@ -46,7 +46,7 @@ function AdminListUsers() {
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
       <div className="rounded-t-md bg-brand-dark px-8 py-2 text-center font-medium text-white">
-        <h1>Users</h1>
+        <h1>All Users</h1>
       </div>
 
       <div className="flex flex-col justify-center gap-2 px-4 pt-4 pb-2 text-center sm:px-6 sm:pt-6">

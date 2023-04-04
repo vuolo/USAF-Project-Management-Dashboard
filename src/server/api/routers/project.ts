@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 import type { view_project } from "~/types/view_project";
+import { sendEmail } from "~/utils/email";
 
 export const projectRouter = createTRPCRouter({
   list_view: protectedProcedure.query(async ({ ctx }) => {
@@ -39,8 +40,14 @@ export const projectRouter = createTRPCRouter({
         ccar_num: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
-      return await prisma.project.create({ data: { ...input } });
+    .mutation(async ({ input, ctx }) => {
+      const user = ctx.session.db_user;
+      if (!user) return null;
+      const new_project = await prisma.project.create({ data: { ...input } });
+      if(!user.user_email)
+      return new_project;
+      await sendEmail(user.user_email, `${input.project_name} has been created`,  `${input.project_name} has been created with ${input.project_type} project type and ${input.summary}. ccarnum: ${input.ccar_num}`)
+      return new_project;
     }),
   update: protectedProcedure
     .input(

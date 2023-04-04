@@ -102,7 +102,7 @@ const Admin: NextPage = () => {
                 >
                   Users
                 </p>
-                <p
+                {/* <p
                   onClick={() => setSelectedOption("list-users")}
                   className={`rounded-md px-4 py-2 text-white hover:bg-brand-dark/80 ${
                     selectedOption === "list-users"
@@ -111,7 +111,7 @@ const Admin: NextPage = () => {
                   }`}
                 >
                   List Users
-                </p>
+                </p> */}
                 <p
                   onClick={() => setSelectedOption("projects")}
                   className={`rounded-md px-4 py-2 text-white hover:bg-brand-dark/80 ${
@@ -159,9 +159,13 @@ const renderSettingsDetails = (selectedOption: string) => {
     case "military-job-titles":
       return <AdminMilitaryJobTitles />;
     case "users":
-      return <AdminUsers />;
-    case "list-users":
-      return <AdminListUsers />;
+      return <>
+        <AdminUsers />
+        <AdminListUsers />
+      </>
+      // return <AdminUsers />;
+    // case "list-users":
+    //   return <AdminListUsers />;
     case "projects":
       return <AdminProjects />;
     default:

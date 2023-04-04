@@ -432,7 +432,7 @@ const DonutChart = ({
       "Projected (Total)",
       projectedTotal,
       styledTooltip(
-        "Total (Total)",
+        "Projected (Total)",
         projectedTotal,
         projectedToDate / projectedTotal
       ),
