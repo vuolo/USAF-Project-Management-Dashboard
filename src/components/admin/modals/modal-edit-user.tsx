@@ -14,7 +14,13 @@ type ModalProps = {
   setIsOpen: (isOpen: boolean) => void;
 };
 
-function ModalEditUserDetails({ user, contractors, refetch, isOpen, setIsOpen }: ModalProps) {
+function ModalEditUserDetails({
+  user,
+  contractors,
+  refetch,
+  isOpen,
+  setIsOpen,
+}: ModalProps) {
   // Modal functionality (states)
   const [modalOpen, setModalOpen] = useState(false);
   const [userName, set_userName] = useState("");
@@ -69,16 +75,28 @@ function ModalEditUserDetails({ user, contractors, refetch, isOpen, setIsOpen }:
       user_email: userEmail,
       user_role: userRole,
     });
-  }, [userName, userRole, userEmail, updateUser, selectedContractor, setIsOpen]);
+  }, [
+    userName,
+    userRole,
+    user?.id,
+    userEmail,
+    updateUser,
+    selectedContractor,
+    setIsOpen,
+  ]);
 
   // Open modal
   const openModal = useCallback(() => {
     set_userName(user.user_name || "");
-    set_userRole(user.user_role || undefined);
+    set_userRole(
+      (user.user_role.replace("IPT Member", "IPT_Member") as users_user_role) ||
+        ""
+    );
     set_userEmail(user.user_email || "");
     set_selectedContractor(
-      contractors.find((contractor) => contractor.id === Number(user.contractor_id)) ||
-        undefined
+      contractors.find(
+        (contractor) => contractor.id === Number(user.contractor_id)
+      ) || undefined
     );
     setModalOpen(true);
   }, [user, contractors]);
@@ -117,7 +135,14 @@ function ModalEditUserDetails({ user, contractors, refetch, isOpen, setIsOpen }:
         setIsOpen(false);
       }, 500);
     },
-    [userName, userRole, userEmail, submitUpdateUser, selectedContractor, setIsOpen]
+    [
+      userName,
+      userRole,
+      userEmail,
+      submitUpdateUser,
+      selectedContractor,
+      setIsOpen,
+    ]
   );
 
   useEffect(() => {
@@ -261,7 +286,7 @@ function ModalEditUserDetails({ user, contractors, refetch, isOpen, setIsOpen }:
                           <label htmlFor="contractor-select">Contractor</label>
                           <select
                             id="contractor-select"
-                            name="contractor-select" 
+                            name="contractor-select"
                             className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
                             value={selectedContractor?.id}
                             onChange={(e) => {
@@ -269,7 +294,7 @@ function ModalEditUserDetails({ user, contractors, refetch, isOpen, setIsOpen }:
                                 contractors?.find(
                                   (contractor) =>
                                     contractor.id === Number(e.target.value)
-                                )  
+                                )
                               );
                             }}
                           >
@@ -277,7 +302,7 @@ function ModalEditUserDetails({ user, contractors, refetch, isOpen, setIsOpen }:
                             {contractors.map((contractor, contractorIdx) => (
                               <option key={contractorIdx} value={contractor.id}>
                                 {contractor.contractor_name}
-                              </option> 
+                              </option>
                             ))}
                           </select>
                         </form>
