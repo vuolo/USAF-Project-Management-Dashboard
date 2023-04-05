@@ -20,6 +20,16 @@ function AdminProjects() {
       console.error(error);
     },
     onSuccess(data) {
+      if (!data)
+      {
+        toast.error(
+          toastMessage(
+            "Error Removing Project",
+            "Please try again later. If the problem persists, please contact support."
+          )
+        );
+        return 
+      }
       toast.success(
         toastMessage("Project Removed", "The project was removed successfully.")
       );
