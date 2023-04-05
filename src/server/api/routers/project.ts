@@ -46,7 +46,7 @@ export const projectRouter = createTRPCRouter({
       const new_project = await prisma.project.create({ data: { ...input } });
       if(!user.user_email)
       return new_project;
-      await sendEmail(user.user_email, `${input.project_name} has been created`,  `${input.project_name} has been created with ${input.project_type} project type and ${input.summary}. ccarnum: ${input.ccar_num}`)
+      await sendEmail(user.user_email, `METIS - ${input.project_name} has been created`,  `You created the following project in METIS: \n\nProject name: ${input.project_name} \nProject type: ${input.project_type} \nContractor: ${input.contractor_id} \nBranch: ${input.branch_id} \nRequirement type: ${input.requirement_type_id} \nSummary: ${input.summary} \nCCAR number: ${input.ccar_num} \n\n\nView more details on the METIS dashboard.`)
       return new_project;
     }),
   update: protectedProcedure
@@ -68,9 +68,16 @@ export const projectRouter = createTRPCRouter({
         data: { ...input },
       });
     }),
+
   delete: protectedProcedure
     .input(z.object({ id: z.number() }))
-    .mutation(async ({ input }) => {
-      return await prisma.project.delete({ where: { id: input.id } });
+    .mutation(async ({ input, ctx}) => {
+      const user = ctx.session.db_user;
+      if (!user) return null;
+      const del_project = await prisma.project.delete({ where: { id: input.id } });
+      if(!user.user_email)
+      return del_project;
+      await sendEmail(user.user_email, `${input.id} has been deleted`, 'This project has been deleted')
+      return del_project;
     }),
 });
