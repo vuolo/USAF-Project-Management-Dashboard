@@ -46,7 +46,7 @@ export const projectRouter = createTRPCRouter({
       const new_project = await prisma.project.create({ data: { ...input } });
       if(!user.user_email)
       return new_project;
-      await sendEmail(user.user_email, `METIS - ${input.project_name} has been created`,  `You created the following project in METIS: \n\nProject name: ${input.project_name} \nProject type: ${input.project_type} \nContractor: ${input.contractor_id} \nBranch: ${input.branch_id} \nRequirement type: ${input.requirement_type_id} \nSummary: ${input.summary} \nCCAR number: ${input.ccar_num} \n\n\nView more details on the METIS dashboard.`)
+      await sendEmail(user.user_email, `METIS - ${input.project_name} has been created`,  `You created the following project in METIS: \n\n\tProject name: ${input.project_name} \n\tProject type: ${input.project_type} \n\tContractor: ${input.contractor_id} \n\tBranch: ${input.branch_id} \n\tRequirement type: ${input.requirement_type_id} \n\tSummary: ${input.summary} \n\tCCAR number: ${input.ccar_num} \n\n\nLog into the METIS dashboard to view more detials.`)
       return new_project;
     }),
   update: protectedProcedure
@@ -62,11 +62,17 @@ export const projectRouter = createTRPCRouter({
         ccar_num: z.string(),
       })
     )
-    .mutation(async ({ input }) => {
-      return await prisma.project.update({
+    .mutation(async ({ input, ctx }) => {
+      const user = ctx.session.db_user;
+      if (!user) return null;
+      const update_project = await prisma.project.update({
         where: { id: input.id },
         data: { ...input },
       });
+      if(!user.user_email)
+      return update_project;
+      await sendEmail(user.user_email, `METIS - ${input.project_name} has been updated`,  `You updated the following project in METIS. New details: \n\n\tProject name: ${input.project_name} \n\tProject type: ${input.project_type} \n\tContractor: ${input.contractor_id} \n\tBranch: ${input.branch_id} \n\tRequirement type: ${input.requirement_type_id} \n\tSummary: ${input.summary} \n\tCCAR number: ${input.ccar_num} \n\n\nLog into the METIS dashboard to view more detials.`)
+      return update_project;
     }),
 
   delete: protectedProcedure
@@ -77,7 +83,7 @@ export const projectRouter = createTRPCRouter({
       const del_project = await prisma.project.delete({ where: { id: input.id } });
       if(!user.user_email)
       return del_project;
-      await sendEmail(user.user_email, `${input.id} has been deleted`, 'This project has been deleted')
+      await sendEmail(user.user_email, `${input.id} has been deleted`,  `The following project has been deleted from METIS dashboard: \n\n ${input.id} `)
       return del_project;
     }),
   search: protectedProcedure.input(z.object({
