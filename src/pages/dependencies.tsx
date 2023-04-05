@@ -1,6 +1,5 @@
 import { type NextPage } from "next";
 
-import NavBar from "~/components/nav-bar";
 import DependencyGraph from "~/components/summaries/dependency-graph";
 import DependencyOverview from "~/components/summaries/dependency-overview";
 import DependencySummary from "~/components/summaries/dependency-summary";

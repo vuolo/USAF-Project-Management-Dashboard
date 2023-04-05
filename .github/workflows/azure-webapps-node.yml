@@ -53,6 +53,7 @@ jobs:
         echo AZURE_AD_CLIENT_ID=${{ secrets.AZURE_AD_CLIENT_ID }} >> .env
         echo AZURE_AD_CLIENT_SECRET=${{ secrets.AZURE_AD_CLIENT_SECRET }} >> .env
         echo AZURE_AD_TENANT_ID=${{ secrets.AZURE_AD_TENANT_ID }} >> .env
+        echo SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }} >> .env
 
     - name: npm install, build, and test
       run: |

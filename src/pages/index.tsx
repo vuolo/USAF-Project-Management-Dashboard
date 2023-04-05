@@ -1,15 +1,11 @@
 import { type NextPage } from "next";
 import { useSession } from "next-auth/react";
 
-import NavBar from "~/components/nav-bar";
 import DependencySummary from "~/components/summaries/dependency-summary";
 import ScheduleSummary from "~/components/summaries/schedule-summary";
 import FinancialSummary from "~/components/summaries/financial-summary";
 import ProjectsOverview from "~/components/summaries/projects-overview";
-import SideBarNav from "~/components/projects/sidebar/sidebar-nav";
 import React from "react";
-import { ProSidebarProvider } from "react-pro-sidebar";
-
 
 const Home: NextPage = () => {
   const user = useSession().data?.db_user;

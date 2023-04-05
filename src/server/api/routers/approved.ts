@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 import type { approved_estimates } from "~/types/approved_estimates";
+import { sendEmail } from "~/utils/email";
 
 export const approvedRouter = createTRPCRouter({
   getApprovedFunding: protectedProcedure
@@ -25,6 +26,22 @@ export const approvedRouter = createTRPCRouter({
         approved_amount: z.number(),
       })
     )
+    // .mutation(async ({ input, ctx }) => {
+    //   const user = ctx.session.db_user;
+    //   if (!user) return null;
+    //   const new_funding = await prisma.project.create({
+    //     data: {
+    //       project_id: input.projectID,
+    //       appro_funding_type: input.appro_funding_type,
+    //       appro_fiscal_year: input.appro_fiscal_year,
+    //       approved_amount: input.approved_amount,
+    //     },
+    //   });
+    //   if(!user.user_email)
+    //   return new_funding;
+    //   await sendEmail(user.user_email, `METIS - Funding has been added to ${input.projectID}`, `METIS - ${input.projectID} has been created` )
+    //   return new_funding;
+    // }),
     .mutation(async ({ input }) => {
       return await prisma.approved_funding.create({
         data: {
@@ -35,6 +52,7 @@ export const approvedRouter = createTRPCRouter({
         },
       });
     }),
+
   updateApprovedFunding: protectedProcedure
     .input(
       z.object({

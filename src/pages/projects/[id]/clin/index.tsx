@@ -1,7 +1,6 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 
-import NavBar from "~/components/nav-bar";
 import ProjectClin from "~/components/projects/project-clin";
 
 const Clin: NextPage = () => {

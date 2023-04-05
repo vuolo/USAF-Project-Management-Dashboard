@@ -1,7 +1,6 @@
 import { type NextPage } from "next";
 import { useRouter } from "next/router";
 
-import NavBar from "~/components/nav-bar";
 import ProjectClinWBS from "~/components/projects/project-clin-wbs";
 
 const WBS: NextPage = () => {
