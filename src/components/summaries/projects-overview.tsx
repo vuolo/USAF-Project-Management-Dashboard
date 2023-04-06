@@ -22,7 +22,7 @@ function ProjectsOverview() {
   function convertBranches() {
     if(!branches) return null;
     return branches.map((branch) => (
-      <option value={branch.branch_name}>{branch.branch_name}</option>
+      <option key={branch.id} value={branch.branch_name}>{branch.branch_name}</option>
     ));
   }
   
