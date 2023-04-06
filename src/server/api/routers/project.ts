@@ -88,7 +88,7 @@ export const projectRouter = createTRPCRouter({
     }),
   search: protectedProcedure.input(z.object({
     filterQuery: z.string().optional(),
-    filterType: z.enum(["project_name", "contract_number", "contract_value", "contract_status", "dependency_status", "financial_status", "schedule_status"])
+    filterType: z.enum(["project_name", "contract_number", "contract_value", "contract_status", "dependency_status", "financial_status", "schedule_status", "branch", "contractor"])
   })
   ).query(async ({ ctx, input }) => {
     const user = ctx.session.db_user;
@@ -107,6 +107,10 @@ export const projectRouter = createTRPCRouter({
                   `SELECT * FROM view_project
                   WHERE contract_value LIKE ${"%" + input.filterQuery + "%"}` :
 
+                  input.filterQuery && input.filterType === "contractor" ? await prisma.$queryRaw<view_project[]>
+                  `SELECT * FROM view_project
+                  WHERE contractor_name LIKE ${"%" + input.filterQuery + "%"}` :
+
                   input.filterQuery && input.filterType === "contract_status" ? await prisma.$queryRaw<view_project[]>
                   `SELECT * FROM view_project
                   WHERE contract_status = ${input.filterQuery}` :
@@ -122,6 +126,10 @@ export const projectRouter = createTRPCRouter({
                   input.filterQuery && input.filterType === "schedule_status" ? await prisma.$queryRaw<view_project[]>
                   `SELECT * FROM view_project
                   WHERE schedule_status = ${input.filterQuery}` :
+
+                  input.filterQuery && input.filterType === "branch" ? await prisma.$queryRaw<view_project[]>
+                  `SELECT * FROM view_project
+                  WHERE branch = ${input.filterQuery}` :
 
                 await prisma.$queryRaw<view_project[]>`SELECT * FROM view_project`
     }
@@ -140,6 +148,10 @@ export const projectRouter = createTRPCRouter({
                   `SELECT * FROM view_project
                   WHERE contract_value LIKE ${"%" + input.filterQuery + "%"} AND contractor_id = ${current_id}` :
 
+                  input.filterQuery && input.filterType === "contractor" ? await prisma.$queryRaw<view_project[]>
+                  `SELECT * FROM view_project
+                  WHERE contractor_name LIKE ${"%" + input.filterQuery + "%"} AND contractor_id = ${current_id}` :
+
                   input.filterQuery && input.filterType === "contract_status" ? await prisma.$queryRaw<view_project[]>
                   `SELECT * FROM view_project
                   WHERE contract_status = ${input.filterQuery} AND contractor_id = ${current_id}` :
@@ -154,7 +166,11 @@ export const projectRouter = createTRPCRouter({
 
                   input.filterQuery && input.filterType === "schedule_status" ? await prisma.$queryRaw<view_project[]>
                   `SELECT * FROM view_project
-                  WHERE schedule_status = ${input.filterQuery} AND contractor_id = ${current_id} ` :
+                  WHERE schedule_status = ${input.filterQuery} AND contractor_id = ${current_id}` :
+
+                  input.filterQuery && input.filterType === "branch" ? await prisma.$queryRaw<view_project[]>
+                  `SELECT * FROM view_project
+                  WHERE branch = ${input.filterQuery} AND contractor_id = ${current_id}` :
 
                 await prisma.$queryRaw<view_project[]>`SELECT * FROM view_project WHERE contractor_id = ${current_id}`
     }

@@ -6,18 +6,25 @@ import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
 import { useState } from "react";
 
-type FilterType = "project_name" | "contract_number" | "contract_value" | "contract_status" | "dependency_status" | "financial_status" | "schedule_status";
+type FilterType = "project_name" | "contract_number" | "contract_value" | "contract_status" | "dependency_status" | "financial_status" | "schedule_status" | "branch" | "contractor";
 
 function ProjectsOverview() {
   const user = useSession().data?.db_user;
   const [filterQuery, setFilterQuery] = useState("");
   const [filterType, setFilterType] = useState<FilterType>("project_name");
+  const { data: branches } = api.branch.getAll.useQuery();
 
   const { data: projects, refetch } = api.project.search.useQuery({
     filterQuery,
     filterType,
   });
 
+  function convertBranches() {
+    if(!branches) return null;
+    return branches.map((branch) => (
+      <option value={branch.branch_name}>{branch.branch_name}</option>
+    ));
+  }
   
   return (
     <>
@@ -73,6 +80,21 @@ function ProjectsOverview() {
               <option value="Pre-Award">Pre-Award</option>
           </select>
 
+          // Branch dropdown search
+          : filterType === "branch" ?
+          <select
+            id="filter-select"
+            name="filter-select"
+            className="block flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+            value={filterQuery}
+            onChange={(e) => {
+              setFilterQuery(e.target.value);
+              void refetch();
+            }}>
+              <option value="">No Filter</option>
+              {convertBranches()}
+          </select>
+
           : // Text search
           <input
             type="text"
@@ -100,11 +122,13 @@ function ProjectsOverview() {
         >
           <option value="project_name">Project Name</option>
           <option value="contract_number">Contract Number</option>
-          <option value="contract_value">Contract Value</option>
           <option value="contract_status">Contract Status</option>
+          <option value="contract_value">Contract Value</option>
+          <option value="branch">Organization/Branch</option>
           <option value="dependency_status">Dependency Status</option>
           <option value="financial_status">Financial Status</option>
           <option value="schedule_status">Schedule Status</option>
+          {user?.user_role !== "Contractor" ? <option value="contractor">Contractor</option> : <></>}
         </select>
       </div>
       
