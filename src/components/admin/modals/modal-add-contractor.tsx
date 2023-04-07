@@ -147,7 +147,7 @@ function ModalAddContractor({ refetch, isOpen, setIsOpen }: ModalProps) {
                       as="h3"
                       className="text-lg font-medium leading-6 text-gray-900"
                     >
-                      IPT Member Details
+                      Contractor Details
                     </Dialog.Title>
                     <div className="mt-2 flex min-w-full flex-col gap-2">
                       {/* Username */}
