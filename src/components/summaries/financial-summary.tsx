@@ -484,7 +484,7 @@ const DonutChart = ({
   };
 
   return (
-    <div className="relative m-2 h-80 overflow-visible">
+    <div className="relative my-2 h-80 overflow-visible lg:-my-4">
       {/* Outer Ring */}
       <Chart
         className="absolute top-0 left-0 z-[2] h-full w-full overflow-visible rounded-full"
