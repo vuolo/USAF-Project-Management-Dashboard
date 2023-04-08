@@ -7,7 +7,7 @@ import { ToastContainer } from "react-toastify";
 import { UserX } from "lucide-react";
 
 import DynamicHead from "~/components/dynamic-head";
-import Layout from "~/components/layout"
+import Layout from "~/components/layout";
 
 import { api } from "~/utils/api";
 
@@ -109,7 +109,7 @@ function Auth({ children }: AuthProps) {
     <div className="flex h-screen w-screen items-center justify-center">
       Loading...
     </div>
-  ) : router.pathname !=="/auth/sign-in" ? (
+  ) : router.pathname !== "/auth/sign-in" ? (
     <Layout>{children}</Layout>
   ) : (
     children

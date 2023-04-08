@@ -13,14 +13,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-function App() {
+function SidebarNav() {
   const { collapsed, collapseSidebar } = useProSidebar();
   const user = useSession().data?.db_user;
   const route = usePathname();
 
   return (
     <div
-      id="app"
       className="absolute hidden sm:block"
       style={{
         zIndex: "1",
@@ -51,17 +50,17 @@ function App() {
               },
             },
           }}
-          className="h-full justify-items-start hover:[&_#selected-menu-item]:bg-indigo-200 [&_ul]:h-full"
+          className="h-full justify-items-start [&_#selected-menu-item]:font-medium hover:[&_#selected-menu-item]:bg-blue-200 [&_ul]:h-full"
         >
           <div className="flex h-full flex-col justify-between">
             <div>
-              <div className="ml-4 mt-2 mb-2 font-semibold leading-5">
+              <div className="ml-4 mt-2 mb-2 font-semibold leading-5 tracking-wider text-[#1C1C1C]">
                 {collapsed ? (
                   <div className="flex w-full items-center justify-center pr-3.5">
                     <h1 className="opacity-60">•</h1>
                   </div>
                 ) : (
-                  <h1 className="opacity-60">Overview</h1>
+                  <h1>Overview</h1>
                 )}
               </div>
               <Link href={"/"}>
@@ -73,7 +72,7 @@ function App() {
                   }}
                   className={
                     route == "/"
-                      ? "border-indigo-600 bg-indigo-100 text-indigo-600"
+                      ? "border-blue-600 bg-blue-100 text-blue-600"
                       : ""
                   }
                   icon={<HomeIcon />}
@@ -90,7 +89,7 @@ function App() {
                   }}
                   className={
                     route == "/dependencies"
-                      ? "border-indigo-600 bg-indigo-100 text-indigo-600"
+                      ? "border-blue-600 bg-blue-100 text-blue-600"
                       : ""
                   }
                   icon={<ClipboardListIcon />}
@@ -98,13 +97,13 @@ function App() {
                   Dependencies
                 </MenuItem>
               </Link>
-              <div className="ml-4 mt-2 mb-2 font-semibold leading-5">
+              <div className="ml-4 mt-2 mb-2 font-semibold leading-5 tracking-wide text-[#1C1C1C]">
                 {collapsed ? (
                   <div className="flex w-full items-center justify-center pr-3.5">
                     <h1 className="opacity-60">•</h1>
                   </div>
                 ) : (
-                  <h1 className="opacity-60">Project</h1>
+                  <h1>Project</h1>
                 )}
               </div>
               {/* Disabled Icons, NO USE OF THEM YET */}
@@ -126,7 +125,7 @@ function App() {
                   }}
                   className={
                     route == "/add-project"
-                      ? "border-indigo-600 bg-indigo-100 text-indigo-600"
+                      ? "border-blue-600 bg-blue-100 text-blue-600"
                       : ""
                   }
                   icon={<FolderPlusIcon />}
@@ -155,7 +154,7 @@ function App() {
                     }}
                     className={
                       route == "/admin"
-                        ? "border-indigo-600 bg-indigo-100 text-indigo-600"
+                        ? "border-blue-600 bg-blue-100 text-blue-600"
                         : ""
                     }
                     icon={<CogIcon />}
@@ -172,4 +171,4 @@ function App() {
   );
 }
 
-export default App;
+export default SidebarNav;

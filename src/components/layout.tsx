@@ -1,6 +1,6 @@
 import { type ReactNode } from "react";
-import NavBar from "./nav-bar";
-import SideBarNav from "~/components/sidebar/sidebar-nav";
+import NavBar from "./nav/nav-bar";
+import SideBarNav from "~/components/nav/sidebar-nav";
 
 interface Props {
   children: ReactNode;
