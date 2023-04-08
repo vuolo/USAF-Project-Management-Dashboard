@@ -5,7 +5,7 @@ import { Chart, type ReactGoogleChartProps } from "react-google-charts";
 import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
 import useBreakpointChange from "~/hooks/useBreakpointChange";
-import MultiSelectBox from "../ui/multi-select-box";
+import MultiSelectBox from "../../ui/multi-select-box";
 import type { view_project } from "~/types/view_project";
 
 function FinancialSummary() {
@@ -34,7 +34,7 @@ function FinancialSummary() {
   useBreakpointChange(breakpointChanged);
 
   return (
-    <div className="rounded-md bg-white text-center shadow-md">
+    <div className="overflow-hidden rounded-md bg-white text-center shadow-md">
       <div className="rounded-t-md bg-brand-dark px-8 py-2 text-center font-medium text-white">
         <h1>Financial Summary</h1>
       </div>
@@ -42,25 +42,22 @@ function FinancialSummary() {
       <div className="flex h-fit flex-col justify-between gap-6 px-8 pt-4 pb-6">
         {obligation && expenditure && breakpoints ? (
           <>
-            <div className="flex h-full flex-col justify-evenly gap-6 overflow-hidden xl:flex-row">
+            <div className="flex h-full flex-col justify-evenly gap-6 xl:flex-row">
               {/* Obligation Status */}
-              <div className="flex h-full flex-1 flex-col bg-[#F7F7F7] px-4 pt-2 pb-4 shadow-md">
+              <div className="flex h-full flex-col bg-[#F7F7F7] px-4 pt-2 pb-4 shadow-md">
                 {/* Header */}
-                <div className="flex items-center justify-between gap-1">
-                  <h2 className="text-md">Obligation</h2>
+                <div className="flex items-center justify-between gap-20">
+                  <h2 className="text-md">Obligation Status</h2>
                   <div className="flex items-center justify-center gap-2">
                     {/* Status Icon */}
-                    <div
-                      style={{
-                        backgroundColor: getPieColor(
-                          obligation.obli_actual,
-                          obligation.obli_projected,
-                          breakpoints.obli_red_breakpoint,
-                          breakpoints.obli_yellow_breakpoint
-                        ),
-                      }}
-                      className="h-2.5 w-2.5 rounded-full ring-1 ring-gray-500"
-                    />
+                    {/* <div
+                      className={`h-2.5 w-2.5 rounded-full bg-[${getPieColor(
+                        obligation.obli_actual,
+                        obligation.obli_projected,
+                        breakpoints.obli_red_breakpoint,
+                        breakpoints.obli_yellow_breakpoint
+                      )}] ring-1 ring-gray-500`}
+                    /> */}
 
                     {/* Percentage of Obligation Fulfilled */}
                     <h3 className="text-sm font-bold">
@@ -70,8 +67,7 @@ function FinancialSummary() {
                             (obligation.obli_actual /
                               obligation.obli_projected) *
                             100
-                          ).toFixed(2)}%`}{" "}
-                      to Date
+                          ).toFixed(2)}%`}
                     </h3>
                   </div>
                 </div>
@@ -139,7 +135,20 @@ function FinancialSummary() {
                   {/* Remaining (to Date) Obligation */}
                   <div className="flex w-full items-center justify-evenly gap-3 xl:justify-between">
                     <div className="flex items-center gap-2 whitespace-nowrap text-left">
-                      <div className="h-3 w-3 rounded-sm bg-brand-dark ring-1 ring-gray-500" />
+                      <div
+                        style={{
+                          backgroundColor: lightenHexColor(
+                            getPieColor(
+                              obligation.obli_actual,
+                              obligation.obli_projected,
+                              breakpoints.obli_red_breakpoint,
+                              breakpoints.obli_yellow_breakpoint
+                            ),
+                            85
+                          ),
+                        }}
+                        className={`h-3 w-3 rounded-sm ring-1 ring-gray-500`}
+                      />
                       <h3 className="text-sm">Remaining (to Date)</h3>
                     </div>
                     <h3 className="text-sm font-bold">
@@ -152,17 +161,7 @@ function FinancialSummary() {
                   {/* Projected (to Date) Obligation */}
                   <div className="flex w-full items-center justify-evenly gap-3 xl:justify-between">
                     <div className="flex items-center gap-2 whitespace-nowrap text-left">
-                      <div
-                        style={{
-                          backgroundImage: `linear-gradient(to right, ${getPieColor(
-                            obligation.obli_actual,
-                            obligation.obli_projected,
-                            breakpoints.obli_red_breakpoint,
-                            breakpoints.obli_yellow_breakpoint
-                          )} 50%, rgb(0 51 160) 50%)`,
-                        }}
-                        className="h-3 w-3 rounded-sm ring-1 ring-gray-500"
-                      />
+                      <div className="h-3 w-3 rounded-sm bg-brand-dark ring-1 ring-gray-500" />
                       <h3 className="text-sm">Projected (to Date)</h3>
                     </div>
                     <h3 className="text-sm font-bold">
@@ -174,30 +173,6 @@ function FinancialSummary() {
                   <div className="flex w-full items-center justify-evenly gap-3 xl:justify-between">
                     <div className="flex items-center gap-2 whitespace-nowrap text-left">
                       <div className="h-3 w-3 rounded-sm bg-[#1C1C1C] ring-1 ring-gray-500" />
-                      <h3 className="text-sm">Remaining (Total)</h3>
-                    </div>
-                    <h3 className="text-sm font-bold">
-                      {formatCurrency(
-                        obligation.obli_projected_total -
-                          obligation.obli_projected
-                      )}
-                    </h3>
-                  </div>
-
-                  {/* Projected (Total) Obligation */}
-                  <div className="flex w-full items-center justify-evenly gap-3 xl:justify-between">
-                    <div className="flex items-center gap-2 whitespace-nowrap text-left">
-                      <div
-                        style={{
-                          backgroundImage: `linear-gradient(to right, ${getPieColor(
-                            obligation.obli_actual,
-                            obligation.obli_projected,
-                            breakpoints.obli_red_breakpoint,
-                            breakpoints.obli_yellow_breakpoint
-                          )} 33.3%, rgb(0 51 160) 33.33%, rgb(0 51 160) 66.66%, #1C1C1C 66.66%)`,
-                        }}
-                        className="h-3 w-3 rounded-sm ring-1 ring-gray-500"
-                      />
                       <h3 className="text-sm">Projected (Total)</h3>
                     </div>
                     <h3 className="text-sm font-bold">
@@ -208,23 +183,20 @@ function FinancialSummary() {
               </div>
 
               {/* Expenditure Status */}
-              <div className="flex h-full flex-1 flex-col bg-[#F7F7F7] px-4 pt-2 pb-4 shadow-md">
+              <div className="flex h-full flex-col bg-[#F7F7F7] px-4 pt-2 pb-4 shadow-md">
                 {/* Header */}
-                <div className="flex items-center justify-between gap-1">
-                  <h2 className="text-md">Expenditure</h2>
+                <div className="flex items-center justify-between gap-20">
+                  <h2 className="text-md">Expenditure Status</h2>
                   <div className="flex items-center justify-center gap-2">
                     {/* Status Icon */}
-                    <div
-                      style={{
-                        backgroundColor: getPieColor(
-                          expenditure.expen_actual,
-                          expenditure.expen_projected,
-                          breakpoints.expen_red_breakpoint,
-                          breakpoints.expen_yellow_breakpoint
-                        ),
-                      }}
-                      className="h-2.5 w-2.5 rounded-full ring-1 ring-gray-500"
-                    />
+                    {/* <div
+                      className={`h-2.5 w-2.5 rounded-full bg-[${getPieColor(
+                        expenditure.expen_actual,
+                        expenditure.expen_projected,
+                        breakpoints.expen_red_breakpoint,
+                        breakpoints.expen_yellow_breakpoint
+                      )}] ring-1 ring-gray-500`}
+                    /> */}
 
                     {/* Percentage of Expenditure Fulfilled */}
                     <h3 className="text-sm font-bold">
@@ -234,8 +206,7 @@ function FinancialSummary() {
                             (expenditure.expen_actual /
                               expenditure.expen_projected) *
                             100
-                          ).toFixed(2)}%`}{" "}
-                      to Date
+                          ).toFixed(2)}%`}
                     </h3>
                   </div>
                 </div>
@@ -304,7 +275,20 @@ function FinancialSummary() {
                   {/* Remaining (to Date) Expenditure */}
                   <div className="flex w-full items-center justify-evenly gap-3 xl:justify-between">
                     <div className="flex items-center gap-2 whitespace-nowrap text-left">
-                      <div className="h-3 w-3 rounded-sm bg-brand-dark ring-1 ring-gray-500" />
+                      <div
+                        style={{
+                          backgroundColor: lightenHexColor(
+                            getPieColor(
+                              expenditure.expen_actual,
+                              expenditure.expen_projected,
+                              breakpoints.expen_red_breakpoint,
+                              breakpoints.expen_yellow_breakpoint
+                            ),
+                            85
+                          ),
+                        }}
+                        className={`h-3 w-3 rounded-sm ring-1 ring-gray-500`}
+                      />
                       <h3 className="text-sm">Remaining (to Date)</h3>
                     </div>
                     <h3 className="text-sm font-bold">
@@ -317,17 +301,7 @@ function FinancialSummary() {
                   {/* Projected (to Date) Expenditure */}
                   <div className="flex w-full items-center justify-evenly gap-4 xl:justify-between">
                     <div className="flex items-center gap-2 whitespace-nowrap text-left">
-                      <div
-                        style={{
-                          backgroundImage: `linear-gradient(to right, ${getPieColor(
-                            expenditure.expen_actual,
-                            expenditure.expen_projected,
-                            breakpoints.expen_red_breakpoint,
-                            breakpoints.expen_yellow_breakpoint
-                          )} 50%, rgb(0 51 160) 50%)`,
-                        }}
-                        className="h-3 w-3 rounded-sm ring-1 ring-gray-500"
-                      />
+                      <div className="h-3 w-3 rounded-sm bg-brand-dark ring-1 ring-gray-500" />
                       <h3 className="text-sm">Projected (to Date)</h3>
                     </div>
                     <h3 className="text-sm font-bold">
@@ -335,34 +309,10 @@ function FinancialSummary() {
                     </h3>
                   </div>
 
-                  {/* Remaining (Total) Expenditure */}
+                  {/* Projected (Total) Expenditure */}
                   <div className="flex w-full items-center justify-evenly gap-4 xl:justify-between">
                     <div className="flex items-center gap-2 whitespace-nowrap text-left">
                       <div className="h-3 w-3 rounded-sm bg-[#1C1C1C] ring-1 ring-gray-500" />
-                      <h3 className="text-sm">Remaining (Total)</h3>
-                    </div>
-                    <h3 className="text-sm font-bold">
-                      {formatCurrency(
-                        expenditure.expen_projected_total -
-                          expenditure.expen_projected
-                      )}
-                    </h3>
-                  </div>
-
-                  {/* Projected (Total) Obligation */}
-                  <div className="flex w-full items-center justify-evenly gap-3 xl:justify-between">
-                    <div className="flex items-center gap-2 whitespace-nowrap text-left">
-                      <div
-                        style={{
-                          backgroundImage: `linear-gradient(to right, ${getPieColor(
-                            expenditure.expen_actual,
-                            expenditure.expen_projected,
-                            breakpoints.expen_red_breakpoint,
-                            breakpoints.expen_yellow_breakpoint
-                          )} 33.3%, rgb(0 51 160) 33.33%, rgb(0 51 160) 66.66%, #1C1C1C 66.66%)`,
-                        }}
-                        className="h-3 w-3 rounded-sm ring-1 ring-gray-500"
-                      />
                       <h3 className="text-sm">Projected (Total)</h3>
                     </div>
                     <h3 className="text-sm font-bold">
@@ -429,14 +379,7 @@ const DonutChart = ({
   yellowBreakpoint,
   type,
 }: DonutChartProps) => {
-  const statusColor = getPieColor(
-    actualToDate,
-    projectedToDate,
-    redBreakpoint,
-    yellowBreakpoint
-  );
-
-  const outerRingData = [
+  const innerRingData = [
     ["Label", "Value", { role: "tooltip", type: "string", p: { html: true } }],
     [
       "Actual (to Date)",
@@ -444,7 +387,8 @@ const DonutChart = ({
       styledTooltip(
         "Actual (to Date)",
         actualToDate,
-        actualToDate / projectedTotal
+        actualToDate / projectedToDate,
+        true
       ),
     ],
     [
@@ -453,22 +397,21 @@ const DonutChart = ({
       styledTooltip(
         "Remaining (to Date)",
         projectedToDate - actualToDate,
-        (projectedToDate - actualToDate) / projectedTotal
-      ),
-    ],
-    [
-      "Remaining (Total)",
-      projectedTotal - projectedToDate,
-      styledTooltip(
-        "Remaining (Total)",
-        projectedTotal - projectedToDate,
-        1 - projectedToDate / projectedTotal
+        1 - actualToDate / projectedToDate,
+        true
       ),
     ],
   ];
 
-  const outerRingOptions: ReactGoogleChartProps["options"] = {
-    pieHole: 0.75,
+  const innerRingColor = getPieColor(
+    actualToDate,
+    projectedToDate,
+    redBreakpoint,
+    yellowBreakpoint
+  );
+
+  const innerRingOptions: ReactGoogleChartProps["options"] = {
+    pieHole: 0.8,
     pieSliceTextStyle: {
       color: "transparent",
     },
@@ -476,7 +419,45 @@ const DonutChart = ({
     pieStartAngle: -90,
     legend: "none",
     backgroundColor: "transparent",
-    colors: [statusColor, "#0033a0", "#1C1C1C"],
+    colors: [innerRingColor, lightenHexColor(innerRingColor, 85)],
+    pieSliceText: "none",
+    tooltip: { trigger: "visible", isHtml: true },
+    chartArea: { left: 0, top: 0, width: "100%", height: "100%" },
+    enableInteractivity: true,
+  };
+
+  const outerRingData = [
+    ["Label", "Value", { role: "tooltip", type: "string", p: { html: true } }],
+    [
+      "Projected (Total)",
+      projectedTotal,
+      styledTooltip(
+        "Projected (Total)",
+        projectedTotal,
+        projectedToDate / projectedTotal
+      ),
+    ],
+    [
+      "Projected (to Date)",
+      projectedToDate,
+      styledTooltip(
+        "Projected (to Date)",
+        projectedToDate,
+        1 - projectedToDate / projectedTotal
+      ),
+    ],
+  ];
+
+  const outerRingOptions: ReactGoogleChartProps["options"] = {
+    pieHole: 0.8,
+    pieSliceTextStyle: {
+      color: "transparent",
+    },
+    pieSliceBorderColor: "transparent",
+    pieStartAngle: -90,
+    legend: "none",
+    backgroundColor: "transparent",
+    colors: ["#0033a0", "#1C1C1C"],
     pieSliceText: "none",
     tooltip: { trigger: "visible", isHtml: true },
     chartArea: { left: 0, top: 0, width: "100%", height: "100%" },
@@ -484,7 +465,7 @@ const DonutChart = ({
   };
 
   return (
-    <div className="relative m-2 h-80 overflow-visible">
+    <div className="relative h-80 overflow-visible">
       {/* Outer Ring */}
       <Chart
         className="absolute top-0 left-0 z-[2] h-full w-full overflow-visible rounded-full"
@@ -493,6 +474,16 @@ const DonutChart = ({
         height="100%"
         data={outerRingData}
         options={outerRingOptions}
+      />
+
+      {/* Inner Ring */}
+      <Chart
+        className="absolute top-0 left-0 z-[3] scale-[85%] overflow-visible rounded-full"
+        chartType="PieChart"
+        width="100%"
+        height="100%"
+        data={innerRingData}
+        options={innerRingOptions}
       />
 
       <div className="absolute top-1/2 left-1/2 z-[1] mx-auto -translate-x-1/2 -translate-y-1/2 transform text-center">
@@ -504,7 +495,6 @@ const DonutChart = ({
           Remaining
           {type === "obligation" ? " Obligation" : " Expenditure"}
         </h3>
-        <h3 className="text-[0.95rem] leading-4 text-gray-700">(to Date)</h3>
       </div>
     </div>
   );
@@ -535,12 +525,12 @@ function styledTooltip(
 ) {
   return `<p style="${
     scale
-      ? "margin: 12px 10px; transform: scale(1.35) !important; width: 100%;"
-      : "padding: 4px 8px; width: 100%; white-space: nowrap;"
+      ? "margin: 12px 10px; transform: scale(1.35) !important;"
+      : "margin: 3px 0px;"
   }">
-            <b style="text-decoration: underline; font-size: 0.85rem;">${title}</b>
+            <b>${title}</b>
             <br>
-            <b>${formatCurrency(currencyValue)}</b>
+            <span>${formatCurrency(currencyValue)}</span>
             <span>(${formatPercentage(percentageValue)})</span>
           </p>`;
 }

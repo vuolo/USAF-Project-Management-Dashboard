@@ -11,7 +11,6 @@ import type { view_project } from "~/types/view_project";
 function FinancialSummary() {
   const [selectedProjects, setSelectedProjects] = useState<view_project[]>([]);
 
-  // TODO: use projects to create a multi-select dropdown to filter project_ids
   const { data: projects } = api.project.list_view.useQuery();
   const { data: obligation } = api.obligation.getTotalObligation.useQuery({
     project_ids: selectedProjects.map((project) => project.id),
