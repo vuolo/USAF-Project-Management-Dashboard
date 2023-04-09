@@ -13,6 +13,8 @@ function StatusIcon({ status }: { status: string }) {
     case "BEHIND":
     case "UNDER":
     case "yellow":
+    case "OVERBUDGET":
+    case "UNDERBUDGET":
       return (<div><Square style={{ fill: "orange", color: "orange" }}
         data-tooltip-id="icon-tooltip"
         data-tooltip-content={status} />
@@ -20,6 +22,8 @@ function StatusIcon({ status }: { status: string }) {
     case "REALLY-BEHIND":
     case "OVER":
     case "red":
+    case "REALLY-OVERBUDGET":
+    case "REALLY-UNDERBUDGET":
       return (<div><AlertTriangle style={{ fill: "red", color: "red" }}
         data-tooltip-id="icon-tooltip"
         data-tooltip-content={status} />
