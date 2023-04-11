@@ -18,6 +18,11 @@ main {
   overflow: auto;
 }
 
+.default-font {
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Helvetica Neue",
+    "Helvetica", sans-serif !important;
+}
+
 /* react-google-charts */
 .google-visualization-tooltip {
   z-index: 100 !important;
@@ -43,7 +48,6 @@ main {
     "Helvetica", sans-serif;
 }
 
-.default-font {
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Helvetica Neue",
-    "Helvetica", sans-serif !important;
+.Toastify {
+  z-index: 200000;
 }

@@ -64,6 +64,7 @@ function ProjectDetails({ project }: { project: view_project }) {
         >
           See CLIN Data
         </Link>
+
         {project.contract_status !== "Closed" && (
           <button
             onClick={() => setUploadModalOpen(true)}

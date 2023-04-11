@@ -5,6 +5,8 @@ import { toastMessage } from "~/utils/toast";
 import { Award, FilePlus2 } from "lucide-react";
 import { api } from "~/utils/api";
 import type { view_project } from "~/types/view_project";
+import { parseProPricerFile } from "~/utils/file";
+import { task_resource_table } from "@prisma/client";
 
 type ModalProps = {
   project: view_project;
@@ -17,6 +19,83 @@ function ModalUploadProjectProPricer({
   isOpen,
   setIsOpen,
 }: ModalProps) {
+  const createManyWBS = api.wbs.createMany.useMutation({
+    onSuccess: () => {
+      toast.success(
+        toastMessage(
+          "Successfully uploaded WBS",
+          "The WBS has been successfully uploaded."
+        )
+      );
+
+      // Close modal
+      closeModal();
+    },
+    onError: (error) => {
+      toast.error(
+        toastMessage(
+          "There was an error uploading the WBS",
+          "If you are having trouble uploading a WBS, please contact your system administrator."
+        )
+      );
+      console.error(error);
+    },
+  });
+
+  const submitFileUpload = (e: React.FormEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+
+    // Get file from input with id="file"
+    const file = (document.getElementById("file") as HTMLInputElement)
+      ?.files?.[0];
+
+    // If no file is selected, show error toast
+    if (!file) {
+      toast.error(
+        toastMessage(
+          "Please select a file to upload",
+          "If you are having trouble uploading a file, please contact your system administrator."
+        )
+      );
+      return;
+    }
+
+    // Process the file on the client side
+    void (async (file) => {
+      try {
+        const wbsArray = await parseProPricerFile(file, project.id);
+        createManyWBS.mutate(
+          (wbsArray as task_resource_table[]).map((wbs) => ({
+            project_id: project.id,
+            task_id: wbs.task_id,
+            task_description: wbs.task_description,
+            month: wbs.month || undefined,
+            clin_num: Number(wbs.clin_num) || undefined,
+            wbs: wbs.wbs || undefined,
+            source_type: wbs.source_type || undefined,
+            resource_code: wbs.resource_code || undefined,
+            resource_description: wbs.resource_description || undefined,
+            resource_type: wbs.resource_type || undefined,
+            rate: Number(wbs.rate) || undefined,
+            hours_worked: Number(wbs.hours_worked) || undefined,
+            units: Number(wbs.units) || undefined,
+            cost: Number(wbs.cost) || undefined,
+            base_cost: Number(wbs.base_cost) || undefined,
+            direct_cost: Number(wbs.direct_cost) || undefined,
+            total_price: Number(wbs.total_price) || undefined,
+          }))
+        );
+      } catch (error) {
+        toast.error(
+          toastMessage(
+            "There was an error uploading your file",
+            (error as Error).message
+          )
+        );
+      }
+    })(file);
+  };
+
   // Modal functionality (states)
   const [modalOpen, setModalOpen] = useState(false);
 
@@ -94,12 +173,34 @@ function ModalUploadProjectProPricer({
                         data.
                       </p>
 
-                      {/* TODO: finish this feature and remove this section after: */}
-                      <p className="mt-2 font-bold italic">
-                        This feature is currently under construction for
-                        security reasons. Please be patient while we work on it,
-                        or contact us if you need this feature urgently.
-                      </p>
+                      <div className="flex flex-col gap-2">
+                        {/* <label
+                          htmlFor="file"
+                          className="block text-sm font-medium text-gray-700"
+                        >
+                          Upload ProPricer
+                        </label> */}
+
+                        <div className="mt-1 flex flex-col items-center gap-3 sm:flex-row">
+                          <span className="inline-block h-12 w-full rounded-md">
+                            <input
+                              type="file"
+                              name="file"
+                              id="file"
+                              accept=".xlsx"
+                              className="block h-full w-full rounded-md border-gray-300 pt-2 pl-7 pr-12 focus:border-blue-500 focus:ring-blue-500 sm:pt-3 sm:text-sm"
+                            />
+                          </span>
+
+                          <button
+                            type="button"
+                            onClick={submitFileUpload}
+                            className="ml-3 inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                          >
+                            Upload
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
