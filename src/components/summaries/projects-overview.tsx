@@ -46,7 +46,7 @@ function ProjectsOverview() {
       {/*Search*/}
       <div className="mt-4 flex w-fit gap-2 px-2">
 
-        {filterType === "dependency_status" || filterType === "financial_status" || filterType === "schedule_status" ?
+        {filterType === "dependency_status" || filterType === "schedule_status" ?
           // Icon Dropdown search
           <select
             id="filter-select"
@@ -62,6 +62,24 @@ function ProjectsOverview() {
               <option value="BEHIND">Behind</option>
               <option value="REALLY-BEHIND">Really-Behind</option>
           </select>
+
+          : filterType === "financial_status" ?
+            <select
+              id="filter-select"
+              name="filter-select"
+              className="block flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+              value={filterQuery}
+              onChange={(e) => {
+                setFilterQuery(e.target.value);
+                void refetch();
+              }}>
+                <option value="">No Filter</option>
+                <option value="ON-BUDGET">ON-BUDGET</option>
+                <option value="UNDERBUDGET">UNDERBUDGET</option>
+                <option value="OVERBUDGET">OVERBUDGET</option>
+                <option value="REALLY-UNDERBUDGET">REALLY-UNDERBUDGET</option>
+                <option value="REALLY-OVERBUDGET">REALLY-OVERBUDGET</option>
+            </select>
 
           // Contract Status Dropdown search
           : filterType === "contract_status" ?
