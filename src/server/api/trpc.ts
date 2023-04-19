@@ -65,6 +65,9 @@ export const createTRPCContext = async (opts: CreateNextContextOptions) => {
  */
 import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
+import { auditlog } from "@prisma/client";
+import { z } from "zod";
+import { json } from "node:stream/consumers";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
@@ -109,6 +112,48 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   });
 });
 
+
+
+const loggerMiddleware = t.middleware(async ({ ctx, path, type, next, input, rawInput }) => {
+  const result = await next();
+
+  if (type == "mutation") {
+    const inputdata = {
+      user: ctx.session?.db_user?.user_email ? ctx.session.db_user.user_email : "N/A",
+      endpoint: path,
+      succeeded: result.ok ? true : false,
+      time: new Date(),
+      query: JSON.stringify(rawInput)
+    }
+
+    try {
+      if (z.object({
+        user: z.string(),
+        endpoint: z.string(),
+        succeeded: z.boolean(),
+        time: z.date(),
+        query: z.string()
+      }).parse(inputdata)) {
+        await prisma.auditlog.create({
+          data: {
+            user: inputdata.user,
+            endpoint: inputdata.endpoint,
+            succeeded: inputdata.succeeded,
+            time: inputdata.time,
+            query: inputdata.query
+          }
+        });
+      }
+    }
+    catch (e) {
+      console.log(e);
+    }
+
+  }
+
+  return result;
+});
+
 /**
  * Protected (authenticated) procedure
  *
@@ -117,4 +162,4 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const protectedProcedure = t.procedure.use(enforceUserIsAuthed).use(loggerMiddleware);

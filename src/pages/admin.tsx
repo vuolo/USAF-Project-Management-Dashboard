@@ -11,6 +11,7 @@ import AdminMilitaryJobTitles from "~/components/admin/admin-military-job-titles
 import AdminProjects from "~/components/admin/admin-projects";
 import AdminUsers from "~/components/admin/admin-users";
 import AdminListUsers from "~/components/admin/admin-list-users";
+import AdminAuditLog from "~/components/admin/admin-audit-log";
 
 const Admin: NextPage = () => {
   const user = useSession().data?.db_user;
@@ -103,6 +104,16 @@ const Admin: NextPage = () => {
                   Users
                 </p>
                 <p
+                  onClick={() => setSelectedOption("auditlog")}
+                  className={`rounded-md px-4 py-2 text-white hover:bg-brand-dark/80 ${
+                    selectedOption === "auditlog"
+                      ? "cursor-not-allowed bg-brand-dark/80 ring-2 ring-yellow-500"
+                      : "cursor-pointer bg-brand-dark"
+                  }`}
+                >
+                  Audit Log
+                </p>
+                <p
                   onClick={() => setSelectedOption("projects")}
                   className={`rounded-md px-4 py-2 text-white hover:bg-brand-dark/80 ${
                     selectedOption === "projects"
@@ -149,13 +160,9 @@ const renderSettingsDetails = (selectedOption: string) => {
     case "military-job-titles":
       return <AdminMilitaryJobTitles />;
     case "users":
-      return <>
-        {/* <AdminUsers /> */}
-        <AdminListUsers />
-      </>
-      // return <AdminUsers />;
-    // case "list-users":
-    //   return <AdminListUsers />;
+      return <AdminListUsers />
+    case "auditlog":
+      return <AdminAuditLog />
     case "projects":
       return <AdminProjects />;
     default:

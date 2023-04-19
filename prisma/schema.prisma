@@ -397,3 +397,12 @@ model VerificationToken {
 
     @@unique([identifier, token])
 }
+
+model auditlog {
+    id Int @id @default(autoincrement())
+    user String
+    endpoint String
+    succeeded Boolean
+    time DateTime
+    query String
+}
