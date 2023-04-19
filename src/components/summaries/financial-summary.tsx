@@ -140,7 +140,7 @@ function FinancialSummary() {
                   <div className="flex w-full items-center justify-evenly gap-3 xl:justify-between">
                     <div className="flex items-center gap-2 whitespace-nowrap text-left">
                       <div className="h-3 w-3 rounded-sm bg-brand-dark ring-1 ring-gray-500" />
-                      <h3 className="text-sm">Remaining (to Date)</h3>
+                      <h3 className="text-sm">Difference (to Date)</h3>
                     </div>
                     <h3 className="text-sm font-bold">
                       {formatCurrency(
@@ -305,7 +305,7 @@ function FinancialSummary() {
                   <div className="flex w-full items-center justify-evenly gap-3 xl:justify-between">
                     <div className="flex items-center gap-2 whitespace-nowrap text-left">
                       <div className="h-3 w-3 rounded-sm bg-brand-dark ring-1 ring-gray-500" />
-                      <h3 className="text-sm">Remaining (to Date)</h3>
+                      <h3 className="text-sm">Difference (to Date)</h3>
                     </div>
                     <h3 className="text-sm font-bold">
                       {formatCurrency(
@@ -448,10 +448,10 @@ const DonutChart = ({
       ),
     ],
     [
-      "Remaining (to Date)",
+      "Difference (to Date)",
       projectedToDate - actualToDate,
       styledTooltip(
-        "Remaining (to Date)",
+        "Difference (to Date)",
         projectedToDate - actualToDate,
         (projectedToDate - actualToDate) / projectedTotal
       ),
