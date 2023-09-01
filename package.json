@@ -10,7 +10,7 @@
     "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "next start"
+    "start": "/node_modules/next/dist/bin/next start"
   },
   "dependencies": {
     "@emotion/react": "^11.10.6",
