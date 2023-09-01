@@ -115,7 +115,11 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
 
 
 const loggerMiddleware = t.middleware(async ({ ctx, path, type, next, input, rawInput }) => {
-  const result = await next();
+  const result = await next({
+    ctx: {
+      session: { ...ctx.session, user: (ctx.session as Session).user}
+    },
+  });
 
   if (type == "mutation") {
     const inputdata = {
