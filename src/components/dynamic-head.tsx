@@ -31,7 +31,7 @@ const DynamicHead = ({ meta: pageMeta }: Props): JSX.Element => {
       <meta content={meta.description} name="description" />
       <meta
         property="og:url"
-        content={`https://metispm.azurewebsites.net${router.asPath}`}
+        content={`https://metispm-sd2.azurewebsites.net${router.asPath}`}
       />
       <meta property="og:type" content="website" />
       <meta property="og:site_name" content={meta.title} />
