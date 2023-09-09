@@ -1,8 +1,11 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
+import { ipt_members } from "~/types/ipt_members";
 import type { view_project } from "~/types/view_project";
+import { api } from "~/utils/api";
 import { sendEmail } from "~/utils/email";
+import { getIPTMembers } from "~/utils/iptMembers";
 
 export const projectRouter = createTRPCRouter({
   list_view: protectedProcedure.query(async ({ ctx }) => {
@@ -40,13 +43,26 @@ export const projectRouter = createTRPCRouter({
         ccar_num: z.string(),
       })
     )
+
     .mutation(async ({ input, ctx }) => {
       const user = ctx.session.db_user;
       if (!user) return null;
+
       const new_project = await prisma.project.create({ data: { ...input } });
-      if(!user.user_email)
-      return new_project;
-      await sendEmail(user.user_email, `METIS - ${input.project_name} has been created`,  `You created the following project in METIS: \n\n\tProject name: ${input.project_name} \n\tProject type: ${input.project_type} \n\tContractor: ${input.contractor_id} \n\tBranch: ${input.branch_id} \n\tRequirement type: ${input.requirement_type_id} \n\tSummary: ${input.summary} \n\tCCAR number: ${input.ccar_num} \n\n\nLog into the METIS dashboard to view more detials.`)
+
+      // // Get all admin users
+      // const admins = await prisma.users.findMany({
+      //   where: { user_role: "Admin" },
+      // });
+      
+      // // Send email to all admins
+      // for (const admin of admins) {
+      //   if(!admin.user_email)
+      //     continue;
+        
+      //   await sendEmail(admin.user_email, `METIS - ${input.project_name} has been created by ${user.user_name} (${user.user_email})`,  `${user.user_name} (${user.user_email}) created the following project in METIS: \n\n\tProject name: ${input.project_name} \n\tProject type: ${input.project_type} \n\tContractor: ${input.contractor_id} \n\tBranch: ${input.branch_id} \n\tRequirement type: ${input.requirement_type_id} \n\tSummary: ${input.summary} \n\tCCAR number: ${input.ccar_num} \n\n\nLog into the METIS dashboard to view more detials.`)
+      // }
+
       return new_project;
     }),
   update: protectedProcedure
@@ -60,19 +76,117 @@ export const projectRouter = createTRPCRouter({
         requirement_type_id: z.number(),
         summary: z.string(),
         ccar_num: z.string(),
+        contract_num: z.string().optional(),
+        contract_award_id: z.number().optional(),
       })
     )
     .mutation(async ({ input, ctx }) => {
       const user = ctx.session.db_user;
       if (!user) return null;
-      const update_project = await prisma.project.update({
+
+      const old_contract_award = input.contract_award_id ? await prisma.contract_award.findUnique({
+        where: { id: input.contract_award_id },
+        select: { contract_num: true },
+      }) : null;
+      const old_project = await prisma.project.findUnique({
         where: { id: input.id },
-        data: { ...input },
       });
-      if(!user.user_email)
-      return update_project;
-      await sendEmail(user.user_email, `METIS - ${input.project_name} has been updated`,  `You updated the following project in METIS. New details: \n\n\tProject name: ${input.project_name} \n\tProject type: ${input.project_type} \n\tContractor: ${input.contractor_id} \n\tBranch: ${input.branch_id} \n\tRequirement type: ${input.requirement_type_id} \n\tSummary: ${input.summary} \n\tCCAR number: ${input.ccar_num} \n\n\nLog into the METIS dashboard to view more detials.`)
-      return update_project;
+      const updated_project = await prisma.project.update({
+        where: { id: input.id },
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        data: { ...input, contract_num: undefined, contract_award_id: undefined } as any,
+      });
+
+      // Get all IPT Members for this project
+      const iptMembers = await getIPTMembers(updated_project.id);
+
+      // Get all IPT Members as users
+      const iptMembersUsers = await prisma.users.findMany({
+        where: { id: { in: iptMembers.map((iptMember) => iptMember.id) } },
+      });
+
+      // Send email to all IPT Members for this project
+      let emailContent = '';
+
+      if (old_project && old_project.project_name !== updated_project.project_name)
+        emailContent += `Project Name: ${old_project.project_name || "N/A"} ---> ${updated_project.project_name || "N/A"} \n`;
+
+      if (old_project && old_contract_award !== undefined && old_contract_award !== null && old_contract_award.contract_num !== input.contract_num) {
+        emailContent += `Contract Number: ${old_contract_award.contract_num || "N/A"} ---> ${input.contract_num || "N/A"} \n`;
+      }
+
+      if (old_project && old_project.ccar_num !== updated_project.ccar_num)
+        emailContent += `CCAR Number: ${old_project.ccar_num || "N/A"} ---> ${updated_project.ccar_num || "N/A"} \n`;
+
+      if (old_project && old_project.contractor_id !== updated_project.contractor_id) {
+        const oldContractor = await prisma.contractor.findUnique({
+          where: { id: old_project.contractor_id || undefined },
+          select: { contractor_name: true },
+        });
+        const oldContractorName = oldContractor ? oldContractor.contractor_name : "None";
+      
+        const newContractor = await prisma.contractor.findUnique({
+          where: { id: updated_project.contractor_id || undefined },
+          select: { contractor_name: true },
+        });
+        const newContractorName = newContractor ? newContractor.contractor_name : "None";
+        
+        emailContent += `Contractor: ${oldContractorName|| "N/A"} ---> ${newContractorName|| "N/A"} \n`;
+      }
+
+      if (old_project && old_project.branch_id !== updated_project.branch_id) {
+        const oldBranch = await prisma.branches.findUnique({
+          where: { id: old_project.branch_id || undefined },
+          select: { branch_name: true },
+        });
+        const oldBranchName = oldBranch ? oldBranch.branch_name : "None";
+
+        const newBranch = await prisma.branches.findUnique({
+          where: { id: updated_project.branch_id || undefined },
+          select: { branch_name: true },
+        });
+        const newBranchName = newBranch ? newBranch.branch_name : "None";
+
+        emailContent += `Organization/Branch: ${oldBranchName} ---> ${newBranchName} \n`;
+      }
+
+      if (old_project && old_project.requirement_type_id !== updated_project.requirement_type_id) {
+        const oldReqType = await prisma.requirement_types.findUnique({
+          where: { id: old_project.requirement_type_id || undefined },
+          select: { requirement_type: true },
+        });
+        const oldReqTypeName = oldReqType ? oldReqType.requirement_type : "None";
+
+        const newReqType = await prisma.requirement_types.findUnique({
+          where: { id: updated_project.requirement_type_id || undefined },
+          select: { requirement_type: true },
+        });
+        const newReqTypeName = newReqType ? newReqType.requirement_type : "None";
+
+        emailContent += `Requirement Type: ${oldReqTypeName || "N/A"} ---> ${newReqTypeName || "N/A"} \n`;
+      }
+
+      if (old_project && old_project.summary !== updated_project.summary)
+        emailContent += `Capability Summary: ${old_project.summary || "N/A"} ---> ${updated_project.summary || "N/A"} \n`;
+
+      if (emailContent) {
+        for (const iptMember of iptMembersUsers) {
+          if (!iptMember.user_email)
+            continue;
+
+          await sendEmail(iptMember.user_email, `METIS - ${input.project_name || "N/A"} has been updated by ${user.user_name || "N/A"} (${user.user_email || "N/A"})`, `${user.user_name || "N/A"} (${user.user_email || "N/A"}) updated the following project in METIS: \n\n${emailContent}\n\n\nLog into the METIS dashboard to view more details.`);
+        }
+      }
+      // for (const iptMember of iptMembersUsers) {
+      //   if (!iptMember.user_email)
+      //     continue;
+
+      //   let emailContent = '';
+      //   for (const property in input) if (old_project && (old_project as {[key: string]: any})[property] !== (updated_project as {[key: string]: any})[property]) emailContent += `\t${property.charAt(0).toUpperCase() + property.slice(1)}: ${(old_project as {[key: string]: any})[property]} ---> ${(updated_project as {[key: string]: any})[property]} \n`;
+      //   if (emailContent) await sendEmail(iptMember.user_email, `METIS - ${input.project_name} has been updated by ${user.user_name} (${user.user_email})`, `${user.user_name} (${user.user_email}) updated the following project in METIS: \n\n${emailContent}\n\n\nLog into the METIS dashboard to view more details.`);
+      // }
+      
+      return updated_project;
     }),
 
   delete: protectedProcedure
@@ -80,11 +194,25 @@ export const projectRouter = createTRPCRouter({
     .mutation(async ({ input, ctx}) => {
       const user = ctx.session.db_user;
       if (!user) return null;
-      const del_project = await prisma.project.delete({ where: { id: input.id } });
-      if(!user.user_email)
-      return del_project;
-      await sendEmail(user.user_email, `${input.id} has been deleted`,  `The following project has been deleted from METIS dashboard: \n\n ${input.id} `)
-      return del_project;
+
+      // Get all IPT Members for this project
+      const iptMembers = await getIPTMembers(input.id);
+
+      // Get all IPT Members as users
+      const iptMembersUsers = await prisma.users.findMany({
+        where: { id: { in: iptMembers.map((iptMember) => iptMember.id) } },
+      });
+
+      // Send email to all IPT Members for this project
+      for (const iptMember of iptMembersUsers) {
+        if(!iptMember.user_email)
+          continue;
+
+        await sendEmail(iptMember.user_email, `METIS - ${input.id || "N/A"} has been deleted by ${user.user_name || "N/A"} (${user.user_email || "N/A"})`,  `${user.user_name || "N/A"} (${user.user_email || "N/A"}) deleted the following project in METIS: \n\n ${input.id || "N/A"} `)
+      }
+      
+      const deleted_project = await prisma.project.delete({ where: { id: input.id } });
+      return deleted_project;
     }),
   search: protectedProcedure.input(z.object({
     filterQuery: z.string().optional(),

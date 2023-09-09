@@ -3,6 +3,8 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 import type { users } from "@prisma/client";
 import type { ipt_members } from "~/types/ipt_members";
+import { getIPTMembers } from "~/utils/iptMembers";
+import { sendEmail } from "~/utils/email";
 
 export const userRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async () => {
@@ -103,16 +105,7 @@ export const userRouter = createTRPCRouter({
   getIptMembers: protectedProcedure
     .input(z.object({ project_id: z.number() }))
     .query(async ({ input }) => {
-      return await prisma.$queryRaw<ipt_members[]>`
-      SELECT 
-        u.id, 
-        mjt.mil_job_title, 
-        u.user_name 
-      FROM users u 
-      INNER JOIN user_project_link upl on upl.user_id = u.id
-      INNER JOIN military_job_titles mjt on upl.mil_job_title_id = mjt.id
-      WHERE upl.project_id = ${input.project_id} AND upl.mil_job_title_id IS NOT NULL
-      ORDER BY upl.mil_job_title_id`;
+      return await getIPTMembers(input.project_id);
     }),
   addToUserProjectLink: protectedProcedure
     .input(
@@ -122,7 +115,20 @@ export const userRouter = createTRPCRouter({
         mil_job_title_id: z.number().optional(),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx}) => {
+      const user = ctx.session.db_user;
+      if (!user) return null;
+
+      // Get the added user
+      const addedUser = await prisma.users.findUnique({
+        where: { id: input.user_id }
+      });
+      const project = await prisma.project.findUnique({
+        where: { id: input.project_id }
+      });
+      if (addedUser?.user_email && project)
+        await sendEmail(addedUser.user_email, `METIS - You have been added to ${project.project_name || "N/A"} by ${user.user_name || "N/A"} (${user.user_email || "N/A"})`,  `${user.user_name || "N/A"} (${user.user_email || "N/A"}) added you as an IPT member to the following project in METIS: \n\n\tProject name: ${project.project_name || "N/A"} \n\n\nLog into the METIS dashboard to view more detials.`)
+
       return input.mil_job_title_id !== undefined
         ? await prisma.$executeRaw`
             INSERT INTO user_project_link(

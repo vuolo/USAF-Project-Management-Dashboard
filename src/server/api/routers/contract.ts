@@ -3,6 +3,8 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 import type { contract_award_timeline } from "@prisma/client";
 import type { contract_days_added } from "~/types/contract_days_added";
+import { getIPTMembers } from "~/utils/iptMembers";
+import { sendEmail } from "~/utils/email";
 
 export const contractRouter = createTRPCRouter({
   updateContractStatus: protectedProcedure
@@ -12,11 +14,48 @@ export const contractRouter = createTRPCRouter({
         contract_status: z.enum(["Pre_Award", "Awarded", "Closed"]),
       })
     )
-    .mutation(async ({ input }) => {
-      return await prisma.contract_award.update({
+    .mutation(async ({ input, ctx }) => {
+      const user = ctx.session.db_user;
+      if (!user) return null;
+
+      // Get the old contract
+      const oldContract = await prisma.contract_award.findUnique({
+        where: { id: input.id },
+      });
+      if (!oldContract || !oldContract.project_id) return null;
+      
+      // Get the project
+      const project = await prisma.project.findUnique({
+        where: { id: oldContract.project_id },
+      });
+      if (!project) return null;
+
+      // Get all IPT Members for this project
+      const iptMembers = await getIPTMembers(oldContract.project_id);
+
+      // Get all IPT Members as users
+      const iptMembersUsers = await prisma.users.findMany({
+        where: { id: { in: iptMembers.map((iptMember) => iptMember.id) } },
+      });
+      
+      const updatedContract = await prisma.contract_award.update({
         where: { id: input.id },
         data: { contract_status: input.contract_status },
       });
+
+      // Send email to all IPT Members for this project
+      let emailContent = '';
+      if (oldContract.contract_status !== input.contract_status) emailContent += `Contract status: ${oldContract.contract_status} ---> ${input.contract_status} \n`;
+      if (emailContent) {
+        for (const iptMember of iptMembersUsers) {
+          if (!iptMember.user_email)
+            continue;
+
+          await sendEmail(iptMember.user_email, `METIS - ${project.project_name || "N/A"} contract status has been updated by ${user.user_name || "N/A"} (${user.user_email || "N/A"})`, `${user.user_name || "N/A"} (${user.user_email || "N/A"}) updated the following project in METIS: \n\n${emailContent}\n\n\nLog into the METIS dashboard to view more details.`);
+        }
+      }
+
+      return updatedContract;
     }),
   updateContractNumber: protectedProcedure
     .input(z.object({ id: z.number(), contract_num: z.string() }))

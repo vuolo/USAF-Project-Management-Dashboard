@@ -45,13 +45,16 @@ function ModalEditProjectDetails({
       );
       console.error(error);
     },
-    onSuccess() {
+    onSuccess(data) {
       toast.success(
         toastMessage(
           "Contract number updated.",
           "The contract number has been updated."
         )
       );
+
+      // Update the contract number in the UI
+      project.contract_num = data.contract_num;
     },
   });
 
@@ -87,7 +90,7 @@ function ModalEditProjectDetails({
     },
   });
 
-  const submitUpdateProject = useCallback(() => {
+  const submitUpdateProject = useCallback(async () => {
     if (
       typeof projectName !== "string" ||
       typeof contractNumber !== "string" ||
@@ -107,7 +110,11 @@ function ModalEditProjectDetails({
       return;
     }
 
-    updateProject.mutate({
+    const curContractNum = project.contract_num;
+    const newContractNum = contractNumber;
+    const curContractAwardId = project.contract_award_id;
+
+    await updateProject.mutateAsync({
       id: project.id,
       project_name: projectName,
       project_type: project.project_type,
@@ -117,14 +124,19 @@ function ModalEditProjectDetails({
       requirement_type_id:
         selectedRequirementType?.id ?? project.requirement_type_id,
       summary: capabilitySummary,
+      contract_num: curContractNum !== newContractNum ? newContractNum : undefined,
+      contract_award_id: curContractAwardId,
     });
 
-    if (project.contract_num !== contractNumber && project.contract_award_id) {
-      updateContractNumber.mutate({
-        id: project.contract_award_id,
-        contract_num: contractNumber,
+    if (curContractNum !== newContractNum && curContractAwardId) {
+      await updateContractNumber.mutateAsync({
+        id: curContractAwardId,
+        contract_num: newContractNum,
       });
     }
+
+    // Temp fix: refresh page to sync UI
+    window.location.reload();
   }, [
     projectName,
     contractNumber,
@@ -184,7 +196,7 @@ function ModalEditProjectDetails({
           return;
         }
 
-        submitUpdateProject();
+        void submitUpdateProject();
       }
 
       // Reset the input (use a timeout to wait for the modal close transition to finish)
