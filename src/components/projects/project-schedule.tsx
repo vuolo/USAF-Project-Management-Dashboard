@@ -95,7 +95,7 @@ function GanttChartDataFormat(milestoneSchedules: milestone[]) {
           : milestoneSchedule.ProjectedEnd
       ),
       null,
-      null,
+      getPercentage(milestoneSchedule),
       milestoneSchedule.Predecessors === null
         ? null
         : milestoneSchedule.Predecessors.toString(),
@@ -112,7 +112,7 @@ function GanttChartDataFormat(milestoneSchedules: milestone[]) {
 const getOptions = (cHeight: number) => {
   const options = {
     gantt: {
-      criticalPathEnabled: true,
+      criticalPathEnabled: false,
       criticalPathStyle: {
         stroke: "#e64a19",
       },
@@ -121,4 +121,37 @@ const getOptions = (cHeight: number) => {
   };
 
   return options;
+};
+
+const getPercentage = (milestone: milestone) => {
+  const currDate = new Date();
+
+  if (milestone.ActualStart === null)
+  {
+    return 0;
+  } 
+  else if (milestone.ActualEnd !== null)
+  {
+    if (currDate < new Date(milestone.ActualEnd))
+    {
+      const start = new Date(milestone.ActualStart);
+      const end = new Date(milestone.ActualEnd);
+      const daysElapsed = (+currDate - +start) / (+end - +start);
+      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
+    }
+    else return 100;
+  } 
+  else if (milestone.ProjectedEnd !== null)
+  {
+    if (currDate < new Date(milestone.ProjectedEnd))
+    {
+      const start = new Date(milestone.ActualStart);
+      const end = new Date(milestone.ProjectedEnd);
+      const daysElapsed = (+currDate - +start) / (+end - +start);
+      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
+    }
+    else return 100;
+  }
+
+  else return 0;
 };
