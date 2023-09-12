@@ -64,7 +64,7 @@ function GanttChartDataFormat(successors: all_successors[]) {
         ? new Date(successor.pred_actual_end)
         : new Date(successor.pred_proj_end),
       null,
-      getPercentagePred(successor),
+      getPercentage(successor, true),
       null,
     ]);
     const find = (element: string[]) => element[0] === successor.succ_name;
@@ -82,7 +82,7 @@ function GanttChartDataFormat(successors: all_successors[]) {
           ? new Date(successor.succ_actual_end)
           : new Date(successor.succ_proj_end),
         null,
-        getPercentageSucc(successor),
+        getPercentage(successor, false),
         successor.pred_name,
       ]);
     } else {
@@ -113,63 +113,34 @@ const getOptions = (cHeight: number) => {
   return options;
 };
 
-const getPercentagePred = (successor: all_successors) => {
+const getPercentage = (successor: all_successors, isPredecessor: boolean) => {
   const currDate = new Date();
+  const actualStartKey = isPredecessor ? 'pred_actual_start' : 'succ_actual_start';
+  const actualEndKey = isPredecessor ? 'pred_actual_end' : 'succ_actual_end';
+  const projStartKey = isPredecessor ? 'pred_proj_start' : 'succ_proj_start';
+  const projEndKey = isPredecessor ? 'pred_proj_end' : 'succ_proj_end';
 
-  if (successor.pred_actual_start === null)
+  if (successor[actualStartKey] === null)
   {
     return 0;
   } 
-  else if (successor.pred_actual_end !== null)
+  else if (successor[actualEndKey] !== null)
   {
-    if (currDate < new Date(successor.pred_actual_end))
+    if (currDate < new Date(successor[actualEndKey]))
     {
-      const start = new Date(successor.pred_actual_start);
-      const end = new Date(successor.pred_actual_end);
+      const start = new Date(successor[actualStartKey]);
+      const end = new Date(successor[actualEndKey]);
       const daysElapsed = (+currDate - +start) / (+end - +start);
       return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
     }
     else return 100;
   } 
-  else if (successor.pred_proj_end !== null)
+  else if (successor[projEndKey] !== null)
   {
-    if (currDate < new Date(successor.pred_proj_end))
+    if (currDate < new Date(successor[projEndKey]))
     {
-      const start = new Date(successor.pred_proj_start);
-      const end = new Date(successor.pred_proj_end);
-      const daysElapsed = (+currDate - +start) / (+end - +start);
-      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
-    }
-    else return 100;
-  }
-
-  else return 0;
-};
-
-const getPercentageSucc = (successor: all_successors) => {
-  const currDate = new Date();
-
-  if (successor.succ_actual_start === null)
-  {
-    return 0;
-  } 
-  else if (successor.succ_actual_end !== null)
-  {
-    if (currDate < new Date(successor.succ_actual_end))
-    {
-      const start = new Date(successor.succ_actual_start);
-      const end = new Date(successor.succ_actual_end);
-      const daysElapsed = (+currDate - +start) / (+end - +start);
-      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
-    }
-    else return 100;
-  } 
-  else if (successor.succ_proj_end !== null)
-  {
-    if (currDate < new Date(successor.succ_proj_end))
-    {
-      const start = new Date(successor.succ_proj_start);
-      const end = new Date(successor.succ_proj_end);
+      const start = new Date(successor[projStartKey]);
+      const end = new Date(successor[projEndKey]);
       const daysElapsed = (+currDate - +start) / (+end - +start);
       return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
     }
