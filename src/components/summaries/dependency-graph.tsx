@@ -64,7 +64,7 @@ function GanttChartDataFormat(successors: all_successors[]) {
         ? new Date(successor.pred_actual_end)
         : new Date(successor.pred_proj_end),
       null,
-      "undefined",
+      getPercentagePred(successor),
       null,
     ]);
     const find = (element: string[]) => element[0] === successor.succ_name;
@@ -82,7 +82,7 @@ function GanttChartDataFormat(successors: all_successors[]) {
           ? new Date(successor.succ_actual_end)
           : new Date(successor.succ_proj_end),
         null,
-        "undefined",
+        getPercentageSucc(successor),
         successor.pred_name,
       ]);
     } else {
@@ -111,4 +111,70 @@ const getOptions = (cHeight: number) => {
     },
   };
   return options;
+};
+
+const getPercentagePred = (successor: all_successors) => {
+  const currDate = new Date();
+
+  if (successor.pred_actual_start === null)
+  {
+    return 0;
+  } 
+  else if (successor.pred_actual_end !== null)
+  {
+    if (currDate < new Date(successor.pred_actual_end))
+    {
+      const start = new Date(successor.pred_actual_start);
+      const end = new Date(successor.pred_actual_end);
+      const daysElapsed = (+currDate - +start) / (+end - +start);
+      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
+    }
+    else return 100;
+  } 
+  else if (successor.pred_proj_end !== null)
+  {
+    if (currDate < new Date(successor.pred_proj_end))
+    {
+      const start = new Date(successor.pred_proj_start);
+      const end = new Date(successor.pred_proj_end);
+      const daysElapsed = (+currDate - +start) / (+end - +start);
+      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
+    }
+    else return 100;
+  }
+
+  else return 0;
+};
+
+const getPercentageSucc = (successor: all_successors) => {
+  const currDate = new Date();
+
+  if (successor.succ_actual_start === null)
+  {
+    return 0;
+  } 
+  else if (successor.succ_actual_end !== null)
+  {
+    if (currDate < new Date(successor.succ_actual_end))
+    {
+      const start = new Date(successor.succ_actual_start);
+      const end = new Date(successor.succ_actual_end);
+      const daysElapsed = (+currDate - +start) / (+end - +start);
+      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
+    }
+    else return 100;
+  } 
+  else if (successor.succ_proj_end !== null)
+  {
+    if (currDate < new Date(successor.succ_proj_end))
+    {
+      const start = new Date(successor.succ_proj_start);
+      const end = new Date(successor.succ_proj_end);
+      const daysElapsed = (+currDate - +start) / (+end - +start);
+      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
+    }
+    else return 100;
+  }
+
+  else return 0;
 };
