@@ -7,6 +7,7 @@ import UsersTable from "./tables/users-table";
 import AuditLogTable from "./tables/audit-log-table";
 
 function AdminAuditLog() {
+
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
       <div className="rounded-t-md bg-brand-dark px-8 py-2 text-center font-medium text-white">
@@ -17,6 +18,7 @@ function AdminAuditLog() {
         <AuditLogTable />
       </div>
     </div>
+    
   );
 }
 

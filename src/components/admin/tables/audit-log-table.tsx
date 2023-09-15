@@ -7,12 +7,15 @@ import ModalConfirmDeleteUser from "../modals/modal-confirm-delete-user";
 import ModalAddAdmin from "../modals/modal-add-admin";
 import ModalAddIPTMember from "../modals/modal-add-IPT";
 import ModalAddContractor from "../modals/modal-add-contractor";
+import ModalQuery from "../modals/modal-query";
 
 type FilterType = "user_email" | "query" | "endpoint" | "succeeded" | "time";
 
 function AuditLogTable() {
   const [filterQuery, setFilterQuery] = useState("");
   const [filterType, setFilterType] = useState<FilterType>("user_email");
+  const [queryModalOpen, setQueryModalOpen] = useState(false);
+  const [selectedQuery, setSelectedQuery] = useState("");
 
   const refetchQuery = () => {
     void refetch();
@@ -128,7 +131,16 @@ function AuditLogTable() {
                             {logEntry.time.toString() || "..."}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 overflow-clip">
-                            {logEntry.query || "..."}
+                            <button
+                              onClick={() => {
+                                setSelectedQuery(logEntry.query);
+                                setQueryModalOpen(true);
+                              }}
+                              className="inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+                            >
+                              View Query
+                            </button>
+                            {/* {logEntry.query || "..."} */}
                           </td>
                         </tr>
                       ))}
@@ -139,6 +151,11 @@ function AuditLogTable() {
           </div>
         </div>
       </div>
+      <ModalQuery
+        isOpen={queryModalOpen}
+        setIsOpen={setQueryModalOpen}
+        query={selectedQuery}
+      />
     </>
   );
 }
