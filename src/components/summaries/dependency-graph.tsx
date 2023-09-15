@@ -101,6 +101,7 @@ function GanttChartDataFormat(successors: all_successors[]) {
   return data;
 }
 
+/*
 const getOptions = (cHeight: number) => {
   const options = {
     gantt: {
@@ -112,12 +113,34 @@ const getOptions = (cHeight: number) => {
   };
   return options;
 };
+*/
+const getOptions = (cHeight: number) => {
+  const options = {
+    gantt: {
+      criticalPathEnabled: false,
+      arrow: {
+        angle: 100,
+        width: 1,
+        color: 'dodgerblue',
+        radius: 0
+      },
+      criticalPathStyle: {
+        stroke: "#e64a19",
+      },
+    },
+    height: cHeight,
+    innerGridTrack: {fill: '#F3F7F9'},
+    innerGridDarkTrack: {fill: '#DCE6EC'},
+  };
+
+  return options;
+};
+
 
 const getPercentage = (successor: all_successors, isPredecessor: boolean) => {
   const currDate = new Date();
   const actualStartKey = isPredecessor ? 'pred_actual_start' : 'succ_actual_start';
   const actualEndKey = isPredecessor ? 'pred_actual_end' : 'succ_actual_end';
-  const projStartKey = isPredecessor ? 'pred_proj_start' : 'succ_proj_start';
   const projEndKey = isPredecessor ? 'pred_proj_end' : 'succ_proj_end';
 
   if (successor[actualStartKey] === null)
@@ -139,12 +162,12 @@ const getPercentage = (successor: all_successors, isPredecessor: boolean) => {
   {
     if (currDate < new Date(successor[projEndKey]))
     {
-      const start = new Date(successor[projStartKey]);
+      const start = new Date(successor[actualStartKey]);
       const end = new Date(successor[projEndKey]);
       const daysElapsed = (+currDate - +start) / (+end - +start);
-      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
+      return "Projected " + Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100)).toString();
     }
-    else return 100;
+    else return "Projected 100";
   }
 
   else return 0;

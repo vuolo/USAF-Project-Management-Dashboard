@@ -174,9 +174,9 @@ const getPercentage = (milestone: milestone) => {
       const start = new Date(milestone.ActualStart);
       const end = new Date(milestone.ProjectedEnd);
       const daysElapsed = (+currDate - +start) / (+end - +start);
-      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
+      return "Projected " + Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100)).toString();
     }
-    else return 100;
+    else return "Projected 100";
   }
 
   else return 0;
