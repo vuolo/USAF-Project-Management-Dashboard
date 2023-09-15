@@ -14,10 +14,10 @@ export const auditlogRouter = createTRPCRouter({
   })
   ).query(async ({input}) => {
     return input.filterQuery && input.filterType === "user_email" ? await prisma.$queryRaw<auditlog[]>`
-        SELECT a.* from auditlog a WHERE a.user LIKE ${"%" + input.filterQuery + "%"}` :
+        SELECT a.* from auditlog a WHERE a.user LIKE ${"%" + input.filterQuery + "%"} ORDER BY a.time DESC` :
 
       input.filterQuery && input.filterType === "endpoint" ? await prisma.$queryRaw<auditlog[]>`
-        SELECT a.* from auditlog a WHERE a.endpoint LIKE ${"%" + input.filterQuery + "%"}` :
+        SELECT a.* from auditlog a WHERE a.endpoint LIKE ${"%" + input.filterQuery + "%"} ORDER BY a.time DESC` :
 
       //input.filterQuery && input.filterType === "succeeded" ? await prisma.$queryRaw<auditlog[]>`
         //SELECT a.* from auditlog a WHERE a.succeeded LIKE ${"%" + input.filterQuery + "%"}` :
@@ -26,9 +26,9 @@ export const auditlogRouter = createTRPCRouter({
         //SELECT a.* from auditlog a WHERE a.time LIKE ${"%" + input.filterQuery + "%"}` :
 
       input.filterQuery && input.filterType === "query" ? await prisma.$queryRaw<auditlog[]>`
-        SELECT a.* from auditlog a WHERE a.query LIKE ${"%" + input.filterQuery + "%"}` :
+        SELECT a.* from auditlog a WHERE a.query LIKE ${"%" + input.filterQuery + "%"} ORDER BY a.time DESC` :
 
       await prisma.$queryRaw<auditlog[]>`
-        SELECT a.* from auditlog a`
+        SELECT a.* from auditlog a ORDER BY a.time DESC`
   }),
 });

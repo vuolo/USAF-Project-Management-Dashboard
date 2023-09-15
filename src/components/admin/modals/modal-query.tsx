@@ -98,7 +98,11 @@ function ModalQuery({ isOpen, setIsOpen, query }: ModalProps) {
                       Query
                     </Dialog.Title>
                     <div className="mt-2 min-w-full flex-col gap-2">
+                      {(query != "") ? (
                         <JsonViewer value={JSON.parse(query) as unknown} />
+                      ) : (
+                        <>Loading...</>
+                      )}
                     </div>
                   </div>
                 </div>
