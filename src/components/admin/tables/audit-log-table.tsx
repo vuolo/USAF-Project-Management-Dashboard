@@ -8,6 +8,7 @@ import ModalAddAdmin from "../modals/modal-add-admin";
 import ModalAddIPTMember from "../modals/modal-add-IPT";
 import ModalAddContractor from "../modals/modal-add-contractor";
 import ModalQuery from "../modals/modal-query";
+import DatePicker, { Calendar, type DayValue, type DayRange } from "@hassanmojab/react-modern-calendar-datepicker";
 
 type FilterType = "user_email" | "query" | "endpoint" | "succeeded" | "time";
 
@@ -16,6 +17,10 @@ function AuditLogTable() {
   const [filterType, setFilterType] = useState<FilterType>("user_email");
   const [queryModalOpen, setQueryModalOpen] = useState(false);
   const [selectedQuery, setSelectedQuery] = useState("");
+  const [dateRange, setDateRange] = useState<DayRange>({
+    from: null,
+    to: null
+  });
 
   const refetchQuery = () => {
     void refetch();
@@ -25,6 +30,18 @@ function AuditLogTable() {
   const { data: allLogs, refetch } = api.auditlog.search.useQuery({
     filterQuery,
     filterType,
+    dateRange: dateRange.from && dateRange.to ? {
+      from: {
+        year: dateRange.from.year,
+        month: dateRange.from.month,
+        day: dateRange.from.day
+      },
+      to: {
+        year: dateRange.to.year,
+        month: dateRange.to.month,
+        day: dateRange.to.day
+      }
+    } : undefined
   });
 
   return (
@@ -54,10 +71,21 @@ function AuditLogTable() {
           {/* Filter Type */}
           <option value="user_email">User Email</option>
           <option value="endpoint">Endpoint</option>
-          <option value="succeeded" disabled>Succeeded</option>
-          <option value="time" disabled>Time</option>
+          {/* <option value="succeeded" disabled>Succeeded</option> */}
+          <option value="time">Time</option>
           <option value="query">Query</option>
         </select>
+        {filterType == "time" ? (
+          <>
+            <div>
+              <DatePicker
+                value={dateRange!}
+                onChange={setDateRange}
+                inputPlaceholder="Select a range"
+              />
+            </div>
+          </>
+        ) : null}
       </div>
       <div className="mt-4 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
