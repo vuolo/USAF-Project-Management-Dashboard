@@ -79,7 +79,7 @@ function AuditLogTable() {
           <>
             <div>
               <DatePicker
-                value={dateRange!}
+                value={dateRange}
                 onChange={setDateRange}
                 inputPlaceholder="Select a range"
               />
