@@ -109,26 +109,10 @@ function GanttChartDataFormat(milestoneSchedules: milestone[]) {
   return data;
 }
 
-// const getOptions = (cHeight: number) => {
-//   const options = {
-//     height: cHeight,
-//     gantt: {
-//       criticalPathEnabled: false,
-//       arrow: {
-//         angle: 100,
-//         width: 1,
-//         color: 'dodgerblue',
-//         radius: 0
-//       },
-//       innerGridTrack: {fill: '#F3F7F9'},
-//       innerGridDarkTrack: {fill: '#DCE6EC'},
-//       percentEnabled: true,
-//       shadowEnabled: true
-//     }
-//   };
-// }
+
 const getOptions = (cHeight: number) => {
   const options = {
+    height: cHeight,
     gantt: {
       criticalPathEnabled: false,
       arrow: {
@@ -140,10 +124,9 @@ const getOptions = (cHeight: number) => {
       criticalPathStyle: {
         stroke: "#e64a19",
       },
+      innerGridTrack: {fill: '#F3F7F9'},
+    innerGridDarkTrack: {fill: '#DCE6EC'}
     },
-    height: cHeight,
-    innerGridTrack: {fill: '#F3F7F9'},
-    innerGridDarkTrack: {fill: '#DCE6EC'},
   };
 
   return options;
