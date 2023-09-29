@@ -17,7 +17,7 @@ function DependencyGraph() {
 
   const chartHeight =
     all_successors && all_successors.length > 0
-      ? all_successors.length * 42 + 100
+      ? all_successors.length * 42 + 172
       : 0;
 
   return (
@@ -26,7 +26,35 @@ function DependencyGraph() {
         <h1>Dependency Graph</h1>
       </div>
 
-      <div className="flex flex-col justify-around gap-4 px-4 pt-4 pb-2 text-left sm:px-6 sm:pt-6 lg:flex-row">
+      <div className="flex flex-col gap-4 px-4 pt-4 pb-2 text-left sm:px-6 sm:pt-6">
+        {/* Display Errors for each successor that has an end date date before the predeccessor's end date. */}
+        <div className="w-full text-center">
+          {all_successors && all_successors.map((successor, idx) => {
+            const predEndDate = (successor.pred_actual_end && new Date(successor.pred_actual_end).getFullYear() !== 1969) 
+              ? new Date(successor.pred_actual_end)
+              : (successor.pred_proj_end && new Date(successor.pred_proj_end).getFullYear() !== 1969 
+                ? new Date(successor.pred_proj_end)
+                : null);
+        
+            const succStartDate = (successor.succ_actual_start && new Date(successor.succ_actual_start).getFullYear() !== 1969) 
+                ? new Date(successor.succ_actual_start)
+                : (successor.succ_proj_start && new Date(successor.succ_proj_start).getFullYear() !== 1969 
+                  ? new Date(successor.succ_proj_start)
+                  : null);
+        
+
+            if (succStartDate && predEndDate && succStartDate < predEndDate) {
+              return (
+                <div key={idx} className="text-orange-600">
+                  <span className="font-bold">Warning:</span> Successor task "{successor.succ_name}" in project "{successor.succ_proj_name}" 
+                  starts before its predecessor task "{successor.pred_name}" in project "{successor.pred_proj_name}" is complete.
+                </div>
+              );
+            }
+            return null;
+          })}
+        </div>
+
         {!all_successors ? (
           <p className="italic">Loading...</p>
         ) : all_successors.length === 0 ? (
@@ -53,67 +81,41 @@ function GanttChartDataFormat(successors: all_successors[]) {
   const rows: any[] = [];
 
   successors.map((successor) => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     rows.push([
       successor.pred_name,
       successor.pred_name,
-      successor.pred_actual_start !== null
-        ? new Date(successor.pred_actual_start)
-        : new Date(successor.pred_proj_start),
-      successor.pred_actual_end !== null
-        ? new Date(successor.pred_actual_end)
-        : new Date(successor.pred_proj_end),
+      getDate(successor.pred_actual_start, successor.pred_proj_start),
+      getDate(successor.pred_actual_end, successor.pred_proj_end),
       null,
       getPercentage(successor, true),
       null,
     ]);
+
     const find = (element: string[]) => element[0] === successor.succ_name;
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     const index = rows.findIndex(find);
+
     if (index === -1) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
       rows.push([
         successor.succ_name,
         successor.succ_name,
-        successor.succ_actual_start !== null
-          ? new Date(successor.succ_actual_start)
-          : new Date(successor.succ_proj_start),
-        successor.succ_actual_end !== null
-          ? new Date(successor.succ_actual_end)
-          : new Date(successor.succ_proj_end),
+        getDate(successor.succ_actual_start, successor.succ_proj_start),
+        getDate(successor.succ_actual_end, successor.succ_proj_end),
         null,
         getPercentage(successor, false),
         successor.pred_name,
       ]);
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (rows[index][6] === null) rows[index][6] = successor.pred_name;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/restrict-plus-operands
       else rows[index][6] = rows[index][6] + ", " + successor.pred_name;
     }
     return 0;
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const data = [columns, ...rows];
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return data;
 }
 
-/*
-const getOptions = (cHeight: number) => {
-  const options = {
-    gantt: {
-      criticalPathEnabled: false,
-      criticalPathStyle: {
-        stroke: "#e64a19",
-      },
-    },
-  };
-  return options;
-};
-*/
+
 const getOptions = (cHeight: number) => {
   const options = {
     gantt: {
@@ -136,6 +138,16 @@ const getOptions = (cHeight: number) => {
   return options;
 };
 
+
+const getDate = (actualDate: string | null | Date , projectedDate: string | Date): Date | null => {
+  if (actualDate && new Date(actualDate).getFullYear() !== 1969) {
+    return new Date(actualDate);
+  } else if (projectedDate && new Date(projectedDate).getFullYear() !== 1969) {
+    return new Date(projectedDate);
+  } else {
+    return null;
+  }
+};
 
 const getPercentage = (successor: all_successors, isPredecessor: boolean) => {
   const currDate = new Date();
