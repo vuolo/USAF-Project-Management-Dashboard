@@ -9,31 +9,45 @@ import { sleep } from "~/utils/misc";
 
 const Dependencies: NextPage = () => {
   const router = useRouter();
-  
+
   useEffect(() => {
     if (!router.query.highlightDependencies || !document) return;
 
-    (async () => {
+    void (async () => {
       // Clear all currently highlighted dependencys
-      const highlightedDependencies = document.querySelectorAll(".highlight-dependency");
-      for (const dependency of highlightedDependencies) dependency.classList.remove("highlight-dependency");
+      const highlightedDependencies = document.querySelectorAll(
+        ".highlight-dependency"
+      );
+      for (const dependency of highlightedDependencies)
+        dependency.classList.remove("highlight-dependency");
 
       // Parse the dependency(s) to highlight
-      const pred_milestone_id = (router.query.highlightDependencies as string | undefined)?.split("_to_")[0];
-      const succ_milestone_id = (router.query.highlightDependencies as string | undefined)?.split("_to_")[1];
+      const pred_milestone_id = (
+        router.query.highlightDependencies as string | undefined
+      )?.split("_to_")[0];
+      const succ_milestone_id = (
+        router.query.highlightDependencies as string | undefined
+      )?.split("_to_")[1];
 
       // Check for the dependency(s) to highlight every 100ms
       let dependenciesToHighlight;
       while (!dependenciesToHighlight || dependenciesToHighlight.length === 0) {
         // Get the element with a class name that includes BOTH milestones (this is the entire row of the dependency)
-        dependenciesToHighlight = document.querySelectorAll(`.milestone-${pred_milestone_id}.milestone-${succ_milestone_id}`);
+        dependenciesToHighlight = document.querySelectorAll(
+          `.milestone-${pred_milestone_id || "undefined"}.milestone-${
+            succ_milestone_id || "undefined"
+          }`
+        );
         await sleep(100);
       }
 
       // Apply the highlighted styling to the dependency
       for (const dependency of dependenciesToHighlight) {
         dependency.classList.add("highlight-dependency");
-        setTimeout(() => dependency.classList.remove("highlight-dependency"), 5000);
+        setTimeout(
+          () => dependency.classList.remove("highlight-dependency"),
+          5000
+        );
       }
 
       // Scroll into view of the first dependency
