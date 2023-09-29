@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { api } from "~/utils/api";
+import { classNames } from "~/utils/misc";
 
 function DependencyOverview() {
   const { data: all_successors } = api.dependency.getAllSuccessors.useQuery();
@@ -115,28 +116,31 @@ function DependencyOverview() {
                         <tr
                           key={successorIdx}
                           className={
-                            successorIdx % 2 === 0 ? undefined : "bg-gray-50"
+                            classNames(
+                              successorIdx % 2 === 0 ? "" : "bg-gray-50",
+                              `milestone-${successor.pred_id} milestone-${successor.succ_id}`
+                            )
                           }
                         >
-                          <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
+                          <td className={`whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6 milestone-${successor.pred_id}`}>
                             {successor.pred_proj_name}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className={`whitespace-nowrap px-3 py-4 text-sm text-gray-500 milestone-${successor.pred_id}`}>
                             {successor.pred_name}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className={`whitespace-nowrap px-3 py-4 text-sm text-gray-500 milestone-${successor.pred_id}`}>
                             {format(
                               new Date(successor.pred_proj_start),
                               "MM/dd/yyyy"
                             )}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className={`whitespace-nowrap px-3 py-4 text-sm text-gray-500 milestone-${successor.pred_id}`}>
                             {format(
                               new Date(successor.pred_proj_end),
                               "MM/dd/yyyy"
                             )}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className={`whitespace-nowrap px-3 py-4 text-sm text-gray-500 milestone-${successor.pred_id}`}>
                             {successor.pred_actual_start
                               ? format(
                                   new Date(successor.pred_actual_start),
@@ -144,7 +148,7 @@ function DependencyOverview() {
                                 )
                               : "..."}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className={`whitespace-nowrap px-3 py-4 text-sm text-gray-500 milestone-${successor.pred_id}`}>
                             {successor.pred_actual_end
                               ? format(
                                   new Date(successor.pred_actual_end),
@@ -152,25 +156,25 @@ function DependencyOverview() {
                                 )
                               : "..."}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm font-medium text-black">
+                          <td className={`whitespace-nowrap px-3 py-4 text-sm font-medium text-black milestone-${successor.succ_id}`}>
                             {successor.succ_proj_name}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className={`whitespace-nowrap px-3 py-4 text-sm text-gray-500 milestone-${successor.succ_id}`}>
                             {successor.succ_name}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className={`whitespace-nowrap px-3 py-4 text-sm text-gray-500 milestone-${successor.succ_id}`}>
                             {format(
                               new Date(successor.succ_proj_start),
                               "MM/dd/yyyy"
                             )}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className={`whitespace-nowrap px-3 py-4 text-sm text-gray-500 milestone-${successor.succ_id}`}>
                             {format(
                               new Date(successor.succ_proj_end),
                               "MM/dd/yyyy"
                             )}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className={`whitespace-nowrap px-3 py-4 text-sm text-gray-500 milestone-${successor.succ_id}`}>
                             {successor.succ_actual_start
                               ? format(
                                   new Date(successor.succ_actual_start),
@@ -178,7 +182,7 @@ function DependencyOverview() {
                                 )
                               : "..."}
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className={`whitespace-nowrap px-3 py-4 text-sm text-gray-500 milestone-${successor.succ_id}`}>
                             {successor.succ_actual_end
                               ? format(
                                   new Date(successor.succ_actual_end),

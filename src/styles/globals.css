@@ -51,3 +51,29 @@ main {
 .Toastify {
   z-index: 200000;
 }
+
+@keyframes pulse {
+  0% {
+    background-color: rgb(219, 234, 254, 0.8); /* Start color */
+  }
+  50% {
+    background-color: rgb(219, 234, 254, 0.3); /* Middle color (change as needed) */
+  }
+  100% {
+    background-color: rgb(219, 234, 254, 0.8); /* End color */
+  }
+}
+
+/* Highlight Dependency Styling */
+.highlight-dependency {
+  /* background-color: rgb(219 234 254 / var(--tw-bg-opacity)); */
+  background-color: rgba(219, 234, 254, 0.3); /* Initial background color */
+  animation: pulse 1.5s infinite;
+}
+
+/* Highlight Dependency Styling */
+.highlight-project {
+  /* background-color: rgb(219 234 254 / var(--tw-bg-opacity)); */
+  background-color: rgba(219, 234, 254, 0.3); /* Initial background color */
+  animation: pulse 1.5s infinite;
+}

@@ -5,6 +5,7 @@ import StatusIcon from "./icons/status-icon";
 import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
 import { useState } from "react";
+import { classNames } from "~/utils/misc";
 
 type FilterType = "project_name" | "contract_number" | "contract_value" | "contract_status" | "dependency_status" | "financial_status" | "schedule_status" | "branch" | "contractor";
 
@@ -229,7 +230,10 @@ function ProjectsOverview() {
                         <tr
                           key={project.id}
                           className={
-                            projectIdx % 2 === 0 ? undefined : "bg-gray-50"
+                            classNames(
+                              projectIdx % 2 === 0 ? "" : "bg-gray-50",
+                              `project-${project.id}`
+                            )
                           }
                         >
                           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-brand-dark underline sm:pl-6">

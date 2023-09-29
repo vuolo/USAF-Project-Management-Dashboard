@@ -1,6 +1,7 @@
 export type all_successors = {
   pred_proj_name: string;
   pred_name: string;
+  pred_id: number;
   pred_proj_start: Date;
   pred_proj_end: Date;
   pred_actual_start: Date;
@@ -8,6 +9,7 @@ export type all_successors = {
 
   succ_proj_name: string;
   succ_name: string;
+  succ_id: number;
   succ_proj_start: Date;
   succ_proj_end: Date;
   succ_actual_start: Date;

@@ -1,3 +1,5 @@
+import { view_project } from "./view_project"
+
 export type milestone = {
   ID: number;
   project_id: number;
@@ -21,3 +23,28 @@ export type milestone = {
 // pm.actual_end as "ActualEnd",
 // "Predecessors",
 // "Predecessors_Name"
+
+export type CountedDependency = {
+  pred_project_id: number;
+  pred_project_name: string;
+  pred_milestone_id: number;
+  pred_milestone_name: string;
+
+  succ_project_id: number;
+  succ_project_name: string;
+  succ_milestone_id: number;
+  succ_milestone_name: string;
+
+  date_difference: bigint;
+};
+
+export type ScheduleSummaryWithProjects = {
+  greenProjects: ProjectMilestoneSummary[];
+  yellowProjects: ProjectMilestoneSummary[];
+  redProjects: ProjectMilestoneSummary[];
+}
+
+export type ProjectMilestoneSummary = view_project & {
+  date_difference: number;
+  branch_name: string;
+};
