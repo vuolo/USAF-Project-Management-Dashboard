@@ -32,10 +32,10 @@ function ProjectSchedule({ project }: { project: view_project }) {
   useEffect(() => {
     if (chartRef.current) {
       let curMonthTextElement;
-      while (!curMonthTextElement) {
-        // TODO: Find the first <text> element with a month name (Sep, Dec, Oct, etc.) in it that matches today's month name.
-        // curMonthTextElement = (chartRef.current as HTMLElement).querySelector("text")!;
-      }
+      // while (!curMonthTextElement) {
+      //   // TODO: Find the first <text> element with a month name (Sep, Dec, Oct, etc.) in it that matches today's month name.
+      //   // curMonthTextElement = (chartRef.current as HTMLElement).querySelector("text")!;
+      // }
 
       // // The chart's SVG element can be accessed using `chartRef.current.chart.container`.
       // const svg = (chartRef.current as HTMLElement).querySelector("svg")!
