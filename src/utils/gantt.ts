@@ -16,6 +16,7 @@ const MONTH_NAMES = [
   "Nov",
   "Dec",
 ];
+const TICK_RATE = 10; // ms
 
 interface DisplayTodayLineProps {
   milestoneSchedules?: milestone[] | null;
@@ -170,7 +171,7 @@ export const displayTodayLine = ({
 
   void (async () => {
     while (true) {
-      await sleep(100);
+      await sleep(TICK_RATE);
       // Check if the chart already has a "today" line
       const todayLine = document?.querySelector("#today-line");
       if (todayLine) continue;
@@ -181,7 +182,7 @@ export const displayTodayLine = ({
         chartElement = document.querySelector(
           `[id^="reactgooglegraph-"]`
         ) as HTMLElement;
-        await sleep(100);
+        await sleep(TICK_RATE);
       }
 
       // Find the first <text> element with a month name (Sep, Dec, Oct, etc.) in it that matches today's month name.
@@ -192,7 +193,7 @@ export const displayTodayLine = ({
           if (el.textContent?.includes(curMonthName))
             curMonthTextElements.push(el);
         });
-        await sleep(100);
+        await sleep(TICK_RATE);
       }
 
       // Assign the correct month name text element to today's month name
