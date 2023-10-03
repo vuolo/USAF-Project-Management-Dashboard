@@ -5,6 +5,7 @@ import type { users } from "@prisma/client";
 import type { ipt_members } from "~/types/ipt_members";
 import { getIPTMembers } from "~/utils/iptMembers";
 import { sendEmail } from "~/utils/email";
+import { user_preferences_ext } from "./user_preferences_ext";
 
 export const userRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async () => {
@@ -176,4 +177,5 @@ export const userRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       return await prisma.users.delete({ where: { id: input.id } });
     }),
+    ...user_preferences_ext
 });

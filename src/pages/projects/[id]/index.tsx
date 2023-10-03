@@ -17,6 +17,7 @@ function Project() {
   const router = useRouter();
   const id = parseInt(router.query.id as string);
   const { data: project } = api.project.get_view.useQuery({ id });
+  api.user.addProjectHistory.useQuery({ id });
 
   const [showModal, setShowModal] = useState(false);
 
