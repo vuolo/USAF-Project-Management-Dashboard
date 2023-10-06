@@ -33,7 +33,7 @@ export const formatProjectScheduleSummary = (
             href={`?hightlightProjects=${projectMilestoneSummary.id}`}
             className="w-fit text-[#2767C8] underline"
           >
-            {projectMilestoneSummary.project_name ?? "Untitled"}
+            {projectMilestoneSummary.project_name || "Untitled"}
           </Link>
           <span className="text-left text-xs text-[#6A6A6A]">{`${projectMilestoneSummary.branch}`}</span>
         </div>

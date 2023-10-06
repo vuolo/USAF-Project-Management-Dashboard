@@ -128,7 +128,7 @@ function DependencyOverview() {
                               href={`/projects/${successor.pred_proj_id}`}
                               className="w-fit text-[#2767C8] underline"
                             >
-                              {successor.pred_proj_name ?? "Untitled"}
+                              {successor.pred_proj_name || "Untitled"}
                             </Link>
                           </td>
                           <td
@@ -179,7 +179,7 @@ function DependencyOverview() {
                               href={`/projects/${successor.succ_proj_id}`}
                               className="w-fit text-[#2767C8] underline"
                             >
-                              {successor.succ_proj_name ?? "Untitled"}
+                              {successor.succ_proj_name || "Untitled"}
                             </Link>
                           </td>
                           <td
