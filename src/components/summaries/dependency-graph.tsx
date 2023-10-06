@@ -174,7 +174,7 @@ const getPercentage = (successor: all_successors, isPredecessor: boolean) => {
   const actualEndKey = isPredecessor ? "pred_actual_end" : "succ_actual_end";
   const projEndKey = isPredecessor ? "pred_proj_end" : "succ_proj_end";
 
-  if (successor[actualStartKey] === null) {
+  if (!successor[actualStartKey] && !successor[projEndKey]) {
     return 0;
   } else if (successor[actualEndKey] !== null) {
     if (currDate < new Date(successor[actualEndKey])) {
