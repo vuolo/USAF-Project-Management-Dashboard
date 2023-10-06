@@ -6,6 +6,7 @@ import type { dependency } from "~/types/dependency";
 import { CountedDependency } from "~/types/milestone";
 import type { predecessor } from "~/types/predecessor";
 import type { successor } from "~/types/successor";
+import type { breakpoints } from "~/types/breakpoints";
 
 export const dependencyRouter = createTRPCRouter({
   addDependency: protectedProcedure
@@ -220,6 +221,22 @@ export const dependencyRouter = createTRPCRouter({
     const user = ctx.session.db_user;
     if (!user) return null;
 
+    const breakpoints =
+      (
+        await prisma.$queryRaw<breakpoints[]>`
+      SELECT 
+        obli_yellow_breakpoint,
+        obli_red_breakpoint,
+        expen_yellow_breakpoint,
+        expen_red_breakpoint,
+        schedule_days_yellow,
+        schedule_days_red,
+        dependency_days_green,
+        dependency_days_red
+      FROM financial_summary_breakpoints`
+      )[0] || null;
+    if (!breakpoints) return null;
+
     return user.user_role === "Admin"
       ? await prisma.$queryRaw<CountedDependency[]>`
             SELECT p.id as pred_project_id, p.project_name as pred_project_name, pm.task_name as pred_milestone_name, pm.id as pred_milestone_id, p2.id as succ_project_id, p2.project_name as succ_project_name, pm1.task_name as succ_milestone_name, pm1.id as succ_milestone_id, DATEDIFF(
@@ -240,7 +257,7 @@ export const dependencyRouter = createTRPCRouter({
             WHERE DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
               CURDATE()
-            ) > 5`
+            ) > ${breakpoints.dependency_days_green}`
       : await prisma.$queryRaw<CountedDependency[]>`
             SELECT p.id as pred_project_id, p.project_name as pred_project_name, pm.task_name as pred_milestone_name, pm.id as pred_milestone_id, p2.id as succ_project_id, p2.project_name as succ_project_name, pm1.task_name as succ_milestone_name, pm1.id as succ_milestone_id, DATEDIFF(
                   IFNULL(pm1.actual_start,pm1.start_date),
@@ -261,7 +278,7 @@ export const dependencyRouter = createTRPCRouter({
             WHERE DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
               CURDATE()
-            ) > 5`;
+            ) > ${breakpoints.dependency_days_green}`;
   }),
   getYellow: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.session.db_user;
@@ -322,6 +339,22 @@ export const dependencyRouter = createTRPCRouter({
     const user = ctx.session.db_user;
     if (!user) return null;
 
+    const breakpoints =
+      (
+        await prisma.$queryRaw<breakpoints[]>`
+      SELECT 
+        obli_yellow_breakpoint,
+        obli_red_breakpoint,
+        expen_yellow_breakpoint,
+        expen_red_breakpoint,
+        schedule_days_yellow,
+        schedule_days_red,
+        dependency_days_green,
+        dependency_days_red
+      FROM financial_summary_breakpoints`
+      )[0] || null;
+    if (!breakpoints) return null;
+
     return user.user_role === "Admin"
       ? await prisma.$queryRaw<CountedDependency[]>`
             SELECT p.id as pred_project_id, p.project_name as pred_project_name, pm.task_name as pred_milestone_name, pm.id as pred_milestone_id, p2.id as succ_project_id, p2.project_name as succ_project_name, pm1.task_name as succ_milestone_name, pm1.id as succ_milestone_id, DATEDIFF(
@@ -342,11 +375,11 @@ export const dependencyRouter = createTRPCRouter({
             WHERE DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
               CURDATE()
-            ) > 0
+            ) > ${breakpoints.dependency_days_red}
             AND DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
               CURDATE()
-            ) < 6`
+            ) <= ${breakpoints.dependency_days_green}`
       : await prisma.$queryRaw<CountedDependency[]>`
             SELECT p.id as pred_project_id, p.project_name as pred_project_name, pm.task_name as pred_milestone_name, pm.id as pred_milestone_id, p2.id as succ_project_id, p2.project_name as succ_project_name, pm1.task_name as succ_milestone_name, pm1.id as succ_milestone_id, DATEDIFF(
                   IFNULL(pm1.actual_start,pm1.start_date),
@@ -367,11 +400,11 @@ export const dependencyRouter = createTRPCRouter({
             AND DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
               CURDATE()
-            ) > 0
+            ) > ${breakpoints.dependency_days_red}
             AND DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
               CURDATE()
-            ) < 6`;
+            ) <= ${breakpoints.dependency_days_green}`;
   }),
   getRed: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.session.db_user;
@@ -423,6 +456,22 @@ export const dependencyRouter = createTRPCRouter({
     const user = ctx.session.db_user;
     if (!user) return null;
 
+    const breakpoints =
+      (
+        await prisma.$queryRaw<breakpoints[]>`
+      SELECT 
+        obli_yellow_breakpoint,
+        obli_red_breakpoint,
+        expen_yellow_breakpoint,
+        expen_red_breakpoint,
+        schedule_days_yellow,
+        schedule_days_red,
+        dependency_days_green,
+        dependency_days_red
+      FROM financial_summary_breakpoints`
+      )[0] || null;
+    if (!breakpoints) return null;
+
     return user.user_role === "Admin"
       ? await prisma.$queryRaw<CountedDependency[]>`
             SELECT p.id as pred_project_id, p.project_name as pred_project_name, pm.task_name as pred_milestone_name, pm.id as pred_milestone_id, p2.id as succ_project_id, p2.project_name as succ_project_name, pm1.task_name as succ_milestone_name, pm1.id as succ_milestone_id, DATEDIFF(
@@ -443,7 +492,7 @@ export const dependencyRouter = createTRPCRouter({
             WHERE DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
               CURDATE()
-            ) < 0`
+            ) < ${breakpoints.dependency_days_red}`
       : await prisma.$queryRaw<CountedDependency[]>`
             SELECT p.id as pred_project_id, p.project_name as pred_project_name, pm.task_name as pred_milestone_name, pm.id as pred_milestone_id, p2.id as succ_project_id, p2.project_name as succ_project_name, pm1.task_name as succ_milestone_name, pm1.id as succ_milestone_id, DATEDIFF(
                   IFNULL(pm1.actual_start,pm1.start_date),
@@ -464,6 +513,6 @@ export const dependencyRouter = createTRPCRouter({
             WHERE DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
               CURDATE()
-            ) < 0`;
+            ) < ${breakpoints.dependency_days_red}`;
   }),
 });

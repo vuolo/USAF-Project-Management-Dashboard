@@ -13,6 +13,7 @@ function DependencySummary({ includeButton = true }) {
     api.dependency.getYellowAsDependencies.useQuery();
   const { data: redDependencies } =
     api.dependency.getRedAsDependencies.useQuery();
+  const { data: breakpoints } = api.financial_summary.getBreakpoints.useQuery();
 
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
@@ -33,7 +34,10 @@ function DependencySummary({ includeButton = true }) {
                     open ? "rounded-t-md" : "rounded-md"
                   )}
                 >
-                  <span>&gt; 5 Days Left (Until Impact)</span>
+                  <span>
+                    &gt; {breakpoints?.dependency_days_green} Days Left (Until
+                    Impact)
+                  </span>
                   <div className="flex items-center space-x-1">
                     <span className="justify-end font-bold">
                       {greenDependencies?.length ?? "N/A"}
@@ -60,7 +64,10 @@ function DependencySummary({ includeButton = true }) {
                     open ? "rounded-t-md" : "rounded-md"
                   )}
                 >
-                  <span>&lt; 5 Days Left (Until Impact)</span>
+                  <span>
+                    &lt; {breakpoints?.dependency_days_green} Days Left (Until
+                    Impact)
+                  </span>
                   <div className="flex items-center space-x-1">
                     <span className="justify-end font-bold">
                       {yellowDependencies?.length ?? "N/A"}
