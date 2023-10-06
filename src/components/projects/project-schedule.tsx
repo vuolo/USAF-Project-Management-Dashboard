@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSession } from "next-auth/react";
 import { Chart } from "react-google-charts";
 import { api } from "~/utils/api";
@@ -8,6 +8,8 @@ import TableProjectSchedule from "./tables/table-project-schedule";
 import type { view_project } from "~/types/view_project";
 import type { milestone } from "~/types/milestone";
 import ModalEditProjectSchedule from "./modals/modal-edit-project-schedule";
+import { sleep } from "~/utils/misc";
+import { displayTodayLine } from "~/utils/gantt";
 
 const columns = [
   { type: "string", label: "Task ID" },
@@ -24,8 +26,11 @@ function ProjectSchedule({ project }: { project: view_project }) {
   const { data: milestoneSchedules } = api.milestone.getSchedules.useQuery({
     project_id: project.id,
   });
-
   const [editScheduleModalOpen, setEditScheduleModalOpen] = useState(false);
+  useEffect(
+    () => displayTodayLine({ milestoneSchedules }),
+    [milestoneSchedules]
+  );
 
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
@@ -42,7 +47,7 @@ function ProjectSchedule({ project }: { project: view_project }) {
           )}
       </div>
 
-      <div className="flex flex-col justify-around gap-2 px-4 pt-4 pb-2 text-left sm:px-6 sm:pt-6 md:flex-row">
+      <div className="flex flex-col justify-around gap-2 px-4 pb-2 pt-4 text-left sm:px-6 sm:pt-6 md:flex-row">
         {false ? (
           <p className="text-center italic">
             There is no milestone schedule data available for this project.
@@ -50,6 +55,103 @@ function ProjectSchedule({ project }: { project: view_project }) {
         ) : (
           <div className="flex w-full flex-col gap-8">
             <TableProjectSchedule milestoneSchedules={milestoneSchedules} />
+
+            {/* Display Errors */}
+            <div className="w-full text-center">
+              {milestoneSchedules &&
+                milestoneSchedules.map((milestone, idx) => {
+                  const milestoneStartDate =
+                    milestone.ActualStart &&
+                    new Date(milestone.ActualStart).getFullYear() !== 1969
+                      ? new Date(milestone.ActualStart)
+                      : milestone.ProjectedStart &&
+                        new Date(milestone.ProjectedStart).getFullYear() !==
+                          1969
+                      ? new Date(milestone.ProjectedStart)
+                      : null;
+
+                  const milestoneProjectedStartDate =
+                    milestone.ProjectedStart &&
+                    new Date(milestone.ProjectedStart).getFullYear() !== 1969
+                      ? new Date(milestone.ProjectedStart)
+                      : null;
+
+                  const milestoneProjectedEndDate =
+                    milestone.ProjectedEnd &&
+                    new Date(milestone.ProjectedEnd).getFullYear() !== 1969
+                      ? new Date(milestone.ProjectedEnd)
+                      : null;
+
+                  const milestoneActualStartDate =
+                    milestone.ActualStart &&
+                    new Date(milestone.ActualStart).getFullYear() !== 1969
+                      ? new Date(milestone.ActualStart)
+                      : null;
+
+                  const milestoneActualEndDate =
+                    milestone.ActualEnd &&
+                    new Date(milestone.ActualEnd).getFullYear() !== 1969
+                      ? new Date(milestone.ActualEnd)
+                      : null;
+
+                  const predecessorEndDate = milestone.Predecessors
+                    ? getPredecessorEndDate(
+                        milestone.Predecessors,
+                        milestoneSchedules
+                      )
+                    : null;
+
+                  // Check if the projected start date is after the projected end date:
+                  if (
+                    milestoneProjectedStartDate &&
+                    milestoneProjectedEndDate &&
+                    milestoneProjectedStartDate > milestoneProjectedEndDate
+                  ) {
+                    return (
+                      <div key={idx} className="text-red-600">
+                        <span className="font-bold">Error:</span> Milestone
+                        &quot;
+                        {milestone.Name}&quot; has a projected start date that
+                        is after its projected end date.
+                      </div>
+                    );
+                  }
+
+                  // Check if the actual start date is after the actual end date:
+                  if (
+                    milestoneActualStartDate &&
+                    milestoneActualEndDate &&
+                    milestoneActualStartDate > milestoneActualEndDate
+                  ) {
+                    return (
+                      <div key={idx} className="text-red-600">
+                        <span className="font-bold">Error:</span> Milestone
+                        &quot;
+                        {milestone.Name}&quot; has an actual start date that is
+                        after its actual end date.
+                      </div>
+                    );
+                  }
+
+                  // for milestones that have a start date before their predecessor's end date:
+                  if (
+                    milestoneStartDate &&
+                    predecessorEndDate &&
+                    milestoneStartDate < predecessorEndDate
+                  ) {
+                    return (
+                      <div key={idx} className="text-orange-600">
+                        <span className="font-bold">Warning:</span> Milestone
+                        &quot;
+                        {milestone.Name}&quot; starts before its predecessor
+                        milestone &quot;{milestone.Predecessors_Name}&quot; is
+                        complete.
+                      </div>
+                    );
+                  }
+                  return null;
+                })}
+            </div>
 
             {milestoneSchedules && milestoneSchedules.length !== 0 && (
               <Chart
@@ -77,30 +179,63 @@ function ProjectSchedule({ project }: { project: view_project }) {
 
 export default ProjectSchedule;
 
+// Utility function to get the end date of the predecessor milestone
+const getPredecessorEndDate = (
+  predecessorId: string,
+  milestones: milestone[]
+): Date | null => {
+  const predecessor = milestones.find((m) => m.ID.toString() === predecessorId);
+  return predecessor
+    ? predecessor.ActualEnd &&
+      new Date(predecessor.ActualEnd).getFullYear() !== 1969
+      ? new Date(predecessor.ActualEnd)
+      : predecessor.ProjectedEnd &&
+        new Date(predecessor.ProjectedEnd).getFullYear() !== 1969
+      ? new Date(predecessor.ProjectedEnd)
+      : null
+    : null;
+};
+
 function GanttChartDataFormat(milestoneSchedules: milestone[]) {
   const rows: any[] = [];
 
-  milestoneSchedules.map((milestoneSchedule) =>
+  milestoneSchedules.map((milestoneSchedule) => {
+    const startDate =
+      milestoneSchedule.ActualStart &&
+      new Date(milestoneSchedule.ActualStart).getFullYear() !== 1969
+        ? new Date(milestoneSchedule.ActualStart)
+        : milestoneSchedule.ProjectedStart &&
+          new Date(milestoneSchedule.ProjectedStart).getFullYear() !== 1969
+        ? new Date(milestoneSchedule.ProjectedStart)
+        : null;
+
+    let endDate =
+      milestoneSchedule.ActualEnd &&
+      new Date(milestoneSchedule.ActualEnd).getFullYear() !== 1969
+        ? new Date(milestoneSchedule.ActualEnd)
+        : milestoneSchedule.ProjectedEnd &&
+          new Date(milestoneSchedule.ProjectedEnd).getFullYear() !== 1969
+        ? new Date(milestoneSchedule.ProjectedEnd)
+        : null;
+
+    // Check if start and end dates are the same
+    if (startDate && endDate && startDate.getTime() === endDate.getTime()) {
+      // Add a small amount of time to the end date so it appears as a dot
+      endDate = new Date(endDate.getTime() + 1000 * 60 * 60 * 24); // Adding 24 hours
+    }
+
     rows.push([
       milestoneSchedule.ID.toString(),
       milestoneSchedule.Name,
-      new Date(
-        milestoneSchedule.ActualStart !== null
-          ? milestoneSchedule.ActualStart
-          : milestoneSchedule.ProjectedStart
-      ),
-      new Date(
-        milestoneSchedule.ActualEnd !== null
-          ? milestoneSchedule.ActualEnd
-          : milestoneSchedule.ProjectedEnd
-      ),
+      startDate,
+      endDate,
       null,
-      null,
+      getPercentage(milestoneSchedule),
       milestoneSchedule.Predecessors === null
         ? null
         : milestoneSchedule.Predecessors.toString(),
-    ])
-  );
+    ]);
+  });
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const data = [columns, ...rows];
@@ -111,14 +246,55 @@ function GanttChartDataFormat(milestoneSchedules: milestone[]) {
 
 const getOptions = (cHeight: number) => {
   const options = {
+    height: cHeight,
     gantt: {
-      criticalPathEnabled: true,
+      criticalPathEnabled: false,
+      arrow: {
+        angle: 100,
+        width: 1,
+        color: "dodgerblue",
+        radius: 0,
+      },
       criticalPathStyle: {
         stroke: "#e64a19",
       },
+      innerGridTrack: { fill: "#F3F7F9" },
+      innerGridDarkTrack: { fill: "#DCE6EC" },
     },
-    height: cHeight,
   };
 
   return options;
+};
+
+const getPercentage = (milestone: milestone) => {
+  const currDate = new Date();
+
+  const validActualStart =
+    milestone.ActualStart &&
+    new Date(milestone.ActualStart).getFullYear() !== 1969;
+  const validActualEnd =
+    milestone.ActualEnd && new Date(milestone.ActualEnd).getFullYear() !== 1969;
+  const validProjectedEnd =
+    milestone.ProjectedEnd &&
+    new Date(milestone.ProjectedEnd).getFullYear() !== 1969;
+
+  if (!validActualStart && !validProjectedEnd) return 0;
+  else if (validActualEnd) {
+    if (currDate < new Date(milestone.ActualEnd)) {
+      const start = new Date(milestone.ActualStart);
+      const end = new Date(milestone.ActualEnd);
+      const daysElapsed = (+currDate - +start) / (+end - +start);
+      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
+    } else return 100;
+  } else if (validProjectedEnd) {
+    if (currDate < new Date(milestone.ProjectedEnd)) {
+      const start = new Date(milestone.ActualStart);
+      const end = new Date(milestone.ProjectedEnd);
+      const daysElapsed = (+currDate - +start) / (+end - +start);
+      return (
+        "Projected " +
+        Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100)).toString()
+      );
+    } else return "Projected 100";
+  } else return 0;
 };
