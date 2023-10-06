@@ -42,7 +42,7 @@ export const formatProjectScheduleSummary = (
           {projectMilestoneSummary.earliest_milestone_name &&
             projectMilestoneSummary.earliest_milestone_date && (
               <span className="text-xs text-[#6A6A6A]">{`${
-                projectMilestoneSummary.earliest_milestone_name
+                projectMilestoneSummary.earliest_milestone_name || "Untitled"
               } (${new Date(
                 projectMilestoneSummary.earliest_milestone_date
               ).toLocaleDateString()})`}</span>

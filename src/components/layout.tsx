@@ -19,7 +19,7 @@ function Layout({ children }: Props) {
     {
       enabled: router.pathname.startsWith("/projects/") && !!router.query.id,
       onSuccess: (data) => {
-        setTitle(data?.project_name);
+        setTitle(data?.project_name === "" ? "Untitled" : data?.project_name);
       },
     }
   );
