@@ -215,13 +215,18 @@ export const dependencyRouter = createTRPCRouter({
   getGreenAsDependencies: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.session.db_user;
     if (!user) return null;
-    
-    return (
-      user.user_role === "Admin"
-        ? await prisma.$queryRaw<CountedDependency[]>`
+
+    return user.user_role === "Admin"
+      ? await prisma.$queryRaw<CountedDependency[]>`
             SELECT p.id as pred_project_id, p.project_name as pred_project_name, pm.task_name as pred_milestone_name, pm.id as pred_milestone_id, p2.id as succ_project_id, p2.project_name as succ_project_name, pm1.task_name as succ_milestone_name, pm1.id as succ_milestone_id, DATEDIFF(
                   IFNULL(pm1.actual_start,pm1.start_date),
                   IFNULL(pm.actual_end,pm.end_date)
+                ) as date_margin,
+                IFNULL(pm.actual_end,pm.end_date) as pred_milestone_date,
+                IFNULL(pm1.actual_start,pm1.start_date) as succ_milestone_date,
+                DATEDIFF(
+                  IFNULL(pm1.actual_start,pm1.start_date),
+                  CURDATE()
                 ) as date_difference
             FROM project p
             INNER JOIN project_milestones pm ON pm.project_id = p.id
@@ -230,12 +235,18 @@ export const dependencyRouter = createTRPCRouter({
             INNER JOIN project_milestones pm1 ON pm1.id = pmd.successor_milestone
             WHERE DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
-              IFNULL(pm.actual_end,pm.end_date)
+              CURDATE()
             ) > 5`
-        : await prisma.$queryRaw<CountedDependency[]>`
+      : await prisma.$queryRaw<CountedDependency[]>`
             SELECT p.id as pred_project_id, p.project_name as pred_project_name, pm.task_name as pred_milestone_name, pm.id as pred_milestone_id, p2.id as succ_project_id, p2.project_name as succ_project_name, pm1.task_name as succ_milestone_name, pm1.id as succ_milestone_id, DATEDIFF(
                   IFNULL(pm1.actual_start,pm1.start_date),
                   IFNULL(pm.actual_end,pm.end_date)
+                ) as date_margin,
+                IFNULL(pm.actual_end,pm.end_date) as pred_milestone_date,
+                IFNULL(pm1.actual_start,pm1.start_date) as succ_milestone_date,
+                DATEDIFF(
+                  IFNULL(pm1.actual_start,pm1.start_date),
+                  CURDATE()
                 ) as date_difference
             FROM project p
             INNER JOIN project_milestones pm ON pm.project_id = p.id
@@ -243,11 +254,10 @@ export const dependencyRouter = createTRPCRouter({
             INNER JOIN project p2 ON p2.id = pmd.successor_project
             INNER JOIN project_milestones pm1 ON pm1.id = pmd.successor_milestone
             WHERE p.id IN (SELECT project_id FROM user_project_link WHERE user_id = ${user.id})
-            AND DATEDIFF(
+            WHERE DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
-              IFNULL(pm.actual_end,pm.end_date)
-            ) > 5`
-    );
+              CURDATE()
+            ) > 5`;
   }),
   getYellow: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.session.db_user;
@@ -308,12 +318,17 @@ export const dependencyRouter = createTRPCRouter({
     const user = ctx.session.db_user;
     if (!user) return null;
 
-    return (
-      user.user_role === "Admin"
-        ? await prisma.$queryRaw<CountedDependency[]>`
+    return user.user_role === "Admin"
+      ? await prisma.$queryRaw<CountedDependency[]>`
             SELECT p.id as pred_project_id, p.project_name as pred_project_name, pm.task_name as pred_milestone_name, pm.id as pred_milestone_id, p2.id as succ_project_id, p2.project_name as succ_project_name, pm1.task_name as succ_milestone_name, pm1.id as succ_milestone_id, DATEDIFF(
                   IFNULL(pm1.actual_start,pm1.start_date),
                   IFNULL(pm.actual_end,pm.end_date)
+                ) as date_margin,
+                IFNULL(pm.actual_end,pm.end_date) as pred_milestone_date,
+                IFNULL(pm1.actual_start,pm1.start_date) as succ_milestone_date,
+                DATEDIFF(
+                  IFNULL(pm1.actual_start,pm1.start_date),
+                  CURDATE()
                 ) as date_difference
             FROM project p
             INNER JOIN project_milestones pm ON pm.project_id = p.id
@@ -322,16 +337,22 @@ export const dependencyRouter = createTRPCRouter({
             INNER JOIN project_milestones pm1 ON pm1.id = pmd.successor_milestone
             WHERE DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
-              IFNULL(pm.actual_end,pm.end_date)
+              CURDATE()
             ) > 0
             AND DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
-              IFNULL(pm.actual_end,pm.end_date)
+              CURDATE()
             ) < 6`
-        : await prisma.$queryRaw<CountedDependency[]>`
+      : await prisma.$queryRaw<CountedDependency[]>`
             SELECT p.id as pred_project_id, p.project_name as pred_project_name, pm.task_name as pred_milestone_name, pm.id as pred_milestone_id, p2.id as succ_project_id, p2.project_name as succ_project_name, pm1.task_name as succ_milestone_name, pm1.id as succ_milestone_id, DATEDIFF(
                   IFNULL(pm1.actual_start,pm1.start_date),
                   IFNULL(pm.actual_end,pm.end_date)
+                ) as date_margin,
+                IFNULL(pm.actual_end,pm.end_date) as pred_milestone_date,
+                IFNULL(pm1.actual_start,pm1.start_date) as succ_milestone_date,
+                DATEDIFF(
+                  IFNULL(pm1.actual_start,pm1.start_date),
+                  CURDATE()
                 ) as date_difference
             FROM project p
             INNER JOIN project_milestones pm ON pm.project_id = p.id
@@ -341,13 +362,12 @@ export const dependencyRouter = createTRPCRouter({
             WHERE p.id IN (SELECT project_id FROM user_project_link WHERE user_id = ${user.id})
             AND DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
-              IFNULL(pm.actual_end,pm.end_date)
-                ) > 0
+              CURDATE()
+            ) > 0
             AND DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
-              IFNULL(pm.actual_end,pm.end_date)
-                ) < 6`
-    );
+              CURDATE()
+            ) < 6`;
   }),
   getRed: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx.session.db_user;
@@ -399,12 +419,17 @@ export const dependencyRouter = createTRPCRouter({
     const user = ctx.session.db_user;
     if (!user) return null;
 
-    return (
-      user.user_role === "Admin"
-        ? await prisma.$queryRaw<CountedDependency[]>`
+    return user.user_role === "Admin"
+      ? await prisma.$queryRaw<CountedDependency[]>`
             SELECT p.id as pred_project_id, p.project_name as pred_project_name, pm.task_name as pred_milestone_name, pm.id as pred_milestone_id, p2.id as succ_project_id, p2.project_name as succ_project_name, pm1.task_name as succ_milestone_name, pm1.id as succ_milestone_id, DATEDIFF(
                   IFNULL(pm1.actual_start,pm1.start_date),
                   IFNULL(pm.actual_end,pm.end_date)
+                ) as date_margin,
+                IFNULL(pm.actual_end,pm.end_date) as pred_milestone_date,
+                IFNULL(pm1.actual_start,pm1.start_date) as succ_milestone_date,
+                DATEDIFF(
+                  IFNULL(pm1.actual_start,pm1.start_date),
+                  CURDATE()
                 ) as date_difference
             FROM project p
             INNER JOIN project_milestones pm ON pm.project_id = p.id
@@ -413,12 +438,18 @@ export const dependencyRouter = createTRPCRouter({
             INNER JOIN project_milestones pm1 ON pm1.id = pmd.successor_milestone
             WHERE DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
-              IFNULL(pm.actual_end,pm.end_date)
+              CURDATE()
             ) < 0`
-        : await prisma.$queryRaw<CountedDependency[]>`
+      : await prisma.$queryRaw<CountedDependency[]>`
             SELECT p.id as pred_project_id, p.project_name as pred_project_name, pm.task_name as pred_milestone_name, pm.id as pred_milestone_id, p2.id as succ_project_id, p2.project_name as succ_project_name, pm1.task_name as succ_milestone_name, pm1.id as succ_milestone_id, DATEDIFF(
                   IFNULL(pm1.actual_start,pm1.start_date),
                   IFNULL(pm.actual_end,pm.end_date)
+                ) as date_margin,
+                IFNULL(pm.actual_end,pm.end_date) as pred_milestone_date,
+                IFNULL(pm1.actual_start,pm1.start_date) as succ_milestone_date,
+                DATEDIFF(
+                  IFNULL(pm1.actual_start,pm1.start_date),
+                  CURDATE()
                 ) as date_difference
             FROM project p
             INNER JOIN project_milestones pm ON pm.project_id = p.id
@@ -426,10 +457,9 @@ export const dependencyRouter = createTRPCRouter({
             INNER JOIN project p2 ON p2.id = pmd.successor_project
             INNER JOIN project_milestones pm1 ON pm1.id = pmd.successor_milestone
             WHERE p.id IN (SELECT project_id FROM user_project_link WHERE user_id = ${user.id})
-            AND DATEDIFF(
+            WHERE DATEDIFF(
               IFNULL(pm1.actual_start,pm1.start_date),
-              IFNULL(pm.actual_end,pm.end_date)
-                ) < 0`
-    );
+              CURDATE()
+            ) < 0`;
   }),
 });
