@@ -62,6 +62,7 @@ export const dependencyRouter = createTRPCRouter({
     return user.user_role === "Admin"
       ? await prisma.$queryRaw<all_successors[]>`
           SELECT
+            p.id as pred_proj_id,
             p.project_name as pred_proj_name,
             pm.task_name as pred_name,
             pm.id as pred_id,
@@ -70,6 +71,7 @@ export const dependencyRouter = createTRPCRouter({
             pm.actual_start as pred_actual_start,
             pm.actual_end as pred_actual_end,
 
+            p2.id as succ_proj_id,
             p2.project_name as succ_proj_name,
             pm1.task_name as succ_name,
             pm1.id as succ_id,
@@ -85,6 +87,7 @@ export const dependencyRouter = createTRPCRouter({
           INNER JOIN project_milestones pm1 ON pm1.id = pmd.successor_milestone`
       : await prisma.$queryRaw<all_successors[]>`
       SELECT
+        p.id as pred_proj_id,
         p.project_name as pred_proj_name,
         pm.task_name as pred_name,
         pm.id as pred_id,
@@ -92,7 +95,8 @@ export const dependencyRouter = createTRPCRouter({
         pm.end_date as pred_proj_end,
         pm.actual_start as pred_actual_start,
         pm.actual_end as pred_actual_end,
-                
+        
+        p2.id as succ_proj_id,
         p2.project_name as succ_proj_name,
         pm1.task_name as succ_name,
         pm1.id as succ_id,

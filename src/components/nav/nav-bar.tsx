@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import UserNav from "./user-nav";
 
-function NavBar({ title }: { title?: string }) {
+function NavBar({ title }: { title?: string | null }) {
   return (
     <nav className="flex h-[70px] w-full items-center justify-between border-b border-black/10 bg-brand-dark px-8 sm:px-16">
       <Link href="/" className="flex items-center gap-2 hover:opacity-80">
