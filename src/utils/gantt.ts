@@ -10,7 +10,7 @@ const MONTH_NAMES = [
   "May",
   "Jun",
   "Jul",
-  "Augt",
+  "Aug",
   "Sep",
   "Oct",
   "Nov",
@@ -150,7 +150,11 @@ export const displayTodayLine = ({
   let numMonths = 0;
   let todaysMonthNum = null;
   const cursorDate = new Date(earliestMilestoneStartDate);
-  while (cursorDate <= latestMilestoneEndDate) {
+  cursorDate.setDate(1);
+  const finalDate = new Date(latestMilestoneEndDate);
+  cursorDate.setMonth(cursorDate.getMonth() + 1); // Go to the next month
+  cursorDate.setDate(0); // Roll back one day to the last day of the current month
+  while (cursorDate <= finalDate) {
     if (MONTH_NAMES[cursorDate.getMonth()] === curMonthName) {
       numMonths++;
 
@@ -219,7 +223,7 @@ export const displayTodayLine = ({
       // Get the x position of the subsequent month name text element
       const xPositionForNextMonthStr =
         curMonthTextElement.nextElementSibling?.getAttribute("x") ??
-        chartElement.getAttribute("width");
+        window.getComputedStyle(chartElement).width;
       if (!xPositionForNextMonthStr) continue;
       const xPositionForNextMonth = parseFloat(xPositionForNextMonthStr);
       if (isNaN(xPositionForNextMonth)) continue;
