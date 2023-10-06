@@ -34,7 +34,6 @@ export const formatDependencies = (
             {dependency.pred_milestone_name}
             {` → ${dependency.succ_milestone_name}`}
           </Link>
-          {/* TODO: Make BOTH project names clickable to go to the respective project page */}
           <span className="text-left text-xs text-[#6A6A6A]">{`${
             dependency.pred_project_name || "Untitled"
           } → ${dependency.succ_project_name || "Untitled"}`}</span>

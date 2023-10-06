@@ -20,9 +20,6 @@ const DynamicHead = ({ meta: pageMeta }: Props): JSX.Element => {
     ...pageMeta,
   };
 
-  // TODO: add a case switch for router.pathname to set the title
-  // and description for each page
-
   return (
     <Head>
       <title>{meta.title}</title>

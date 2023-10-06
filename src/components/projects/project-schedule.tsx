@@ -266,35 +266,54 @@ const getOptions = (cHeight: number) => {
   return options;
 };
 
-const getPercentage = (milestone: milestone) => {
+const isValidDate = (date: Date | undefined): boolean => {
+  return date !== undefined && new Date(date).getFullYear() !== 1969;
+};
+
+const getDaysElapsed = (start: Date, end: Date, current: Date): number => {
+  return Math.round(
+    Math.min(Math.max(((+current - +start) / (+end - +start)) * 100, 0), 100)
+  );
+};
+
+const getPercentage = (milestone: milestone): string | number => {
   const currDate = new Date();
 
-  const validActualStart =
-    milestone.ActualStart &&
-    new Date(milestone.ActualStart).getFullYear() !== 1969;
-  const validActualEnd =
-    milestone.ActualEnd && new Date(milestone.ActualEnd).getFullYear() !== 1969;
-  const validProjectedEnd =
-    milestone.ProjectedEnd &&
-    new Date(milestone.ProjectedEnd).getFullYear() !== 1969;
+  const validActualStart = isValidDate(milestone.ActualStart);
+  const validActualEnd = isValidDate(milestone.ActualEnd);
+  const validProjectedEnd = isValidDate(milestone.ProjectedEnd);
 
   if (!validActualStart && !validProjectedEnd) return 0;
-  else if (validActualEnd) {
+
+  if (validActualEnd) {
     if (currDate < new Date(milestone.ActualEnd)) {
-      const start = new Date(milestone.ActualStart);
-      const end = new Date(milestone.ActualEnd);
-      const daysElapsed = (+currDate - +start) / (+end - +start);
-      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
-    } else return 100;
-  } else if (validProjectedEnd) {
-    if (currDate < new Date(milestone.ProjectedEnd)) {
-      const start = new Date(milestone.ActualStart);
-      const end = new Date(milestone.ProjectedEnd);
-      const daysElapsed = (+currDate - +start) / (+end - +start);
-      return (
-        "Projected " +
-        Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100)).toString()
+      return getDaysElapsed(
+        new Date(milestone.ActualStart),
+        new Date(milestone.ActualEnd),
+        currDate
       );
-    } else return "Projected 100";
-  } else return 0;
+    }
+    return 100;
+  }
+
+  if (validProjectedEnd) {
+    const projectedStart = milestone.ActualStart || milestone.ProjectedStart;
+    if (isValidDate(projectedStart)) {
+      if (currDate >= new Date(projectedStart)) {
+        if (currDate < new Date(milestone.ProjectedEnd)) {
+          return `Projected ${getDaysElapsed(
+            new Date(projectedStart),
+            new Date(milestone.ProjectedEnd),
+            currDate
+          )}`;
+        }
+        return "Projected 100";
+      }
+      // If projected start is in the future
+      return "Projected 0";
+    }
+    return "Projected 100";
+  }
+
+  return 0;
 };
