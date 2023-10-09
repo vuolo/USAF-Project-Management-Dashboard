@@ -7,6 +7,7 @@ import DependencySummary from "~/components/summaries/dependency-summary";
 import ScheduleSummary from "~/components/summaries/schedule-summary";
 import FinancialSummary from "~/components/summaries/financial-summary";
 import ProjectsOverview from "~/components/summaries/projects-overview";
+import TailoredView from "~/components/summaries/tailored-view";
 import React from "react";
 import { sleep } from "~/utils/misc";
 
@@ -69,6 +70,10 @@ const Home: NextPage = () => {
             <FinancialSummary />
           </div>
         )}
+      </div>
+
+      <div>
+        <TailoredView />
       </div>
 
       {/* Underneath Top Section */}

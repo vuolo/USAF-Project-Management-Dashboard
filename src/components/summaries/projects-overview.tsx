@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import StatusIcon from "./icons/status-icon";
+import {Star} from "lucide-react";
 
 import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
@@ -38,6 +39,24 @@ function ProjectsOverview() {
     ));
   }
 
+  const [isHighlighted, setHighlighted] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
+
+  const handleMouseEnter = () => {
+    setHighlighted(true);
+  };
+  const handleMouseLeave = () => {
+    if(!isClicked)
+      setHighlighted(false);
+  };
+
+  const handleClick = () => {
+    setHighlighted(isHighlighted);
+    setIsClicked(!isClicked)
+  };
+  // const starColor = isHighlighted ? 'yellow' : '';
+
+    
   return (
     <>
       <div className="sm:flex sm:items-center">
@@ -186,6 +205,7 @@ function ProjectsOverview() {
                 <table className="min-w-full divide-y divide-gray-300">
                   <thead className="bg-gray-50">
                     <tr>
+                      <th></th>
                       <th
                         scope="col"
                         className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
@@ -250,6 +270,9 @@ function ProjectsOverview() {
                             `project-${project.id}`
                           )}
                         >
+                          <td className="pl-5 pr-0 cursor-pointer" onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                            <Star size={20} style={{fill:`${isHighlighted ? 'yellow' : ''}`}}/>
+                          </td>
                           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-brand-dark underline sm:pl-6">
                             <Link
                               href={`/projects/${project.id}`}
