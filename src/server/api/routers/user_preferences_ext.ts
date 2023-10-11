@@ -5,22 +5,23 @@ import type { users } from "@prisma/client";
 import type { ipt_members } from "~/types/ipt_members";
 
 export const user_preferences_ext = {
-  getFavorites: protectedProcedure.input(z.object({
-    userId: z.number()
-  })).query(async ({input}) => {
+  getFavorites: protectedProcedure.query(async ({input, ctx}) => {
+    const user = ctx.session.db_user;
+    if (!user) return null;
     return await prisma.favorites.findMany({
       where: {
-        userId: input.userId
+        userId: user.id
       }
     })
   }),
   addFavorite: protectedProcedure.input(z.object({
-    userId: z.number(),
     projectId: z.number()
-  })).query(async ({input}) => {
+  })).query(async ({input, ctx}) => {
+    const user = ctx.session.db_user;
+    if (!user) return null;
     return await prisma.favorites.create({
       data: {
-        userId: input.userId,
+        userId: user.id,
         projectId: input.projectId
       }
     })
