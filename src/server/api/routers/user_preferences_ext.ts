@@ -26,6 +26,34 @@ export const user_preferences_ext = {
       }
     })
   }),
+  removeFavorite: protectedProcedure.input(z.object({
+    projectId: z.number()
+  })).query(async ({input, ctx}) => {
+    const user = ctx.session.db_user;
+    if (!user) return null;
+
+    return await prisma.favorites.delete({
+      where: {
+        userId_projectId: {
+          userId: user.id,
+          projectId: input.projectId
+        }
+      }
+    })
+    
+  }),
+  getProjectHistory: protectedProcedure.query(async ({ctx}) => {
+    const user = ctx.session.db_user;
+    if (!user) return null;
+
+    return await prisma.project.findMany({
+      where: {
+        project_history: {
+          userId: user.id
+        }
+      }
+    })
+  }),
   addProjectHistory: protectedProcedure.input(z.object({
     id: z.number()
   })).query(async ({ input, ctx }) => {
@@ -63,7 +91,6 @@ export const user_preferences_ext = {
         }
       }
     });
-
     return upsertResult;
   }),
 }
