@@ -1,13 +1,23 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import StatusIcon from "./icons/status-icon";
+import {Star} from "lucide-react";
 
 import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
 import { useState } from "react";
 import { classNames } from "~/utils/misc";
 
-type FilterType = "project_name" | "contract_number" | "contract_value" | "contract_status" | "dependency_status" | "financial_status" | "schedule_status" | "branch" | "contractor";
+type FilterType =
+  | "project_name"
+  | "contract_number"
+  | "contract_value"
+  | "contract_status"
+  | "dependency_status"
+  | "financial_status"
+  | "schedule_status"
+  | "branch"
+  | "contractor";
 
 function ProjectsOverview() {
   const user = useSession().data?.db_user;
@@ -21,19 +31,39 @@ function ProjectsOverview() {
   });
 
   function convertBranches() {
-    if(!branches) return null;
+    if (!branches) return null;
     return branches.map((branch) => (
-      <option key={branch.id} value={branch.branch_name}>{branch.branch_name}</option>
+      <option key={branch.id} value={branch.branch_name}>
+        {branch.branch_name}
+      </option>
     ));
   }
-  
+
+  const [isHighlighted, setHighlighted] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
+
+  const handleMouseEnter = () => {
+    setHighlighted(true);
+  };
+  const handleMouseLeave = () => {
+    if(!isClicked)
+      setHighlighted(false);
+  };
+
+  const handleClick = () => {
+    setHighlighted(isHighlighted);
+    setIsClicked(!isClicked)
+  };
+  // const starColor = isHighlighted ? 'yellow' : '';
+
+    
   return (
     <>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Projects</h1>
+          <h1 className="text-xl font-semibold text-gray-100">Projects</h1>
         </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
+        <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <Link
             href="/add-project"
             type="button"
@@ -46,8 +76,8 @@ function ProjectsOverview() {
 
       {/*Search*/}
       <div className="mt-4 flex w-fit gap-2 px-2">
-
-        {filterType === "dependency_status" || filterType === "schedule_status" ?
+        {filterType === "dependency_status" ||
+        filterType === "schedule_status" ? (
           // Icon Dropdown search
           <select
             id="filter-select"
@@ -57,33 +87,14 @@ function ProjectsOverview() {
             onChange={(e) => {
               setFilterQuery(e.target.value);
               void refetch();
-            }}>
-              <option value="">No Filter</option>
-              <option value="ONTRACK">On-Track</option>
-              <option value="BEHIND">Behind</option>
-              <option value="REALLY-BEHIND">Really-Behind</option>
+            }}
+          >
+            <option value="">No Filter</option>
+            <option value="ONTRACK">On-Track</option>
+            <option value="BEHIND">Behind</option>
+            <option value="REALLY-BEHIND">Really-Behind</option>
           </select>
-
-          : filterType === "financial_status" ?
-            <select
-              id="filter-select"
-              name="filter-select"
-              className="block flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
-              value={filterQuery}
-              onChange={(e) => {
-                setFilterQuery(e.target.value);
-                void refetch();
-              }}>
-                <option value="">No Filter</option>
-                <option value="ON-BUDGET">ON-BUDGET</option>
-                <option value="UNDERBUDGET">UNDERBUDGET</option>
-                <option value="OVERBUDGET">OVERBUDGET</option>
-                <option value="REALLY-UNDERBUDGET">REALLY-UNDERBUDGET</option>
-                <option value="REALLY-OVERBUDGET">REALLY-OVERBUDGET</option>
-            </select>
-
-          // Contract Status Dropdown search
-          : filterType === "contract_status" ?
+        ) : filterType === "financial_status" ? (
           <select
             id="filter-select"
             name="filter-select"
@@ -92,15 +103,17 @@ function ProjectsOverview() {
             onChange={(e) => {
               setFilterQuery(e.target.value);
               void refetch();
-            }}>
-              <option value="">No Filter</option>
-              <option value="Closed">Closed</option>
-              <option value="Awarded">Awarded</option>
-              <option value="Pre-Award">Pre-Award</option>
+            }}
+          >
+            <option value="">No Filter</option>
+            <option value="ON-BUDGET">ON-BUDGET</option>
+            <option value="UNDERBUDGET">UNDERBUDGET</option>
+            <option value="OVERBUDGET">OVERBUDGET</option>
+            <option value="REALLY-UNDERBUDGET">REALLY-UNDERBUDGET</option>
+            <option value="REALLY-OVERBUDGET">REALLY-OVERBUDGET</option>
           </select>
-
-          // Branch dropdown search
-          : filterType === "branch" ?
+        ) : // Contract Status Dropdown search
+        filterType === "contract_status" ? (
           <select
             id="filter-select"
             name="filter-select"
@@ -109,12 +122,30 @@ function ProjectsOverview() {
             onChange={(e) => {
               setFilterQuery(e.target.value);
               void refetch();
-            }}>
-              <option value="">No Filter</option>
-              {convertBranches()}
+            }}
+          >
+            <option value="">No Filter</option>
+            <option value="Closed">Closed</option>
+            <option value="Awarded">Awarded</option>
+            <option value="Pre-Award">Pre-Award</option>
           </select>
-
-          : // Text search
+        ) : // Branch dropdown search
+        filterType === "branch" ? (
+          <select
+            id="filter-select"
+            name="filter-select"
+            className="block flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+            value={filterQuery}
+            onChange={(e) => {
+              setFilterQuery(e.target.value);
+              void refetch();
+            }}
+          >
+            <option value="">No Filter</option>
+            {convertBranches()}
+          </select>
+        ) : (
+          // Text search
           <input
             type="text"
             name="filter-text"
@@ -126,7 +157,7 @@ function ProjectsOverview() {
               void refetch();
             }}
           />
-        }
+        )}
 
         {/*Search Field Dropdown*/}
         <select
@@ -147,13 +178,17 @@ function ProjectsOverview() {
           <option value="dependency_status">Dependency Status</option>
           <option value="financial_status">Financial Status</option>
           <option value="schedule_status">Schedule Status</option>
-          {user?.user_role !== "Contractor" ? <option value="contractor">Contractor</option> : <></>}
+          {user?.user_role !== "Contractor" ? (
+            <option value="contractor">Contractor</option>
+          ) : (
+            <></>
+          )}
         </select>
       </div>
-      
+
       {/*Projects Table*/}
       <div className="mt-8 flex flex-col">
-        <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               {!projects ? (
@@ -170,6 +205,7 @@ function ProjectsOverview() {
                 <table className="min-w-full divide-y divide-gray-300">
                   <thead className="bg-gray-50">
                     <tr>
+                      <th></th>
                       <th
                         scope="col"
                         className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
@@ -229,13 +265,14 @@ function ProjectsOverview() {
                       projects.map((project, projectIdx) => (
                         <tr
                           key={project.id}
-                          className={
-                            classNames(
-                              projectIdx % 2 === 0 ? "" : "bg-gray-50",
-                              `project-${project.id}`
-                            )
-                          }
+                          className={classNames(
+                            projectIdx % 2 === 0 ? "" : "bg-gray-50",
+                            `project-${project.id}`
+                          )}
                         >
+                          <td className="pl-5 pr-0 cursor-pointer" onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+                            <Star size={20} style={{fill:`${isHighlighted ? 'yellow' : ''}`}}/>
+                          </td>
                           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-brand-dark underline sm:pl-6">
                             <Link
                               href={`/projects/${project.id}`}

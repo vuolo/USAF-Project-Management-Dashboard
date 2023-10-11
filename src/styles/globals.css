@@ -14,7 +14,13 @@ body {
 main {
   height: calc(100vh - 70px);
   width: 100vw;
-  background-color: theme("colors.brand.light");
+  /* background-color: theme("colors.brand.light"); */
+  /* background-image: url("/images/usaf_mq-9_backgrounds/twilight_runway_mq9.png"); */
+  background-image: url("/images/usaf_mq-9_backgrounds/twilight_runway_mq9.png"),
+    linear-gradient(rgba(0, 0, 0, 0.3), rgba(220, 229, 240, 0.1)); /* Image and opacity layer */
+  background-blend-mode: multiply; /* blend the image and background color */
+  background-size: cover; /* ensure the image covers the full viewport */
+  background-position: center center; /* center the background image */
   overflow: auto;
 }
 
@@ -57,7 +63,12 @@ main {
     background-color: rgb(219, 234, 254, 0.8); /* Start color */
   }
   50% {
-    background-color: rgb(219, 234, 254, 0.3); /* Middle color (change as needed) */
+    background-color: rgb(
+      219,
+      234,
+      254,
+      0.3
+    ); /* Middle color (change as needed) */
   }
   100% {
     background-color: rgb(219, 234, 254, 0.8); /* End color */

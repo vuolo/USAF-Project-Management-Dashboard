@@ -10,7 +10,7 @@ export const getDateDifferenceComponent = (
       {Math.abs(Number(date_difference))} Day
       {Math.abs(Number(date_difference)) !== 1 ? "s" : ""}
     </span>{" "}
-    {date_difference > 0 ? "left" : "over"}
+    {date_difference > 0 ? "left" : "behind"}
   </span>
 );
 
@@ -21,7 +21,7 @@ export const formatDependencies = (
     dependencies?.map((dependency, index) => (
       <div
         className={classNames(
-          "flex items-start justify-between py-3 px-4 text-sm",
+          "flex items-start justify-between px-4 py-3 text-sm",
           index % 2 === 1 ? "bg-[#F7F7F7]" : "bg-white"
         )}
         key={index}
@@ -34,14 +34,24 @@ export const formatDependencies = (
             {dependency.pred_milestone_name}
             {` → ${dependency.succ_milestone_name}`}
           </Link>
-          {/* TODO: Make BOTH project names clickable to go to the respective project page */}
-          <span className="text-left text-xs text-[#6A6A6A]">{`${dependency.pred_project_name} → ${dependency.succ_project_name}`}</span>
+          <span className="text-left text-xs text-[#6A6A6A]">{`${
+            dependency.pred_project_name || "Untitled"
+          } → ${dependency.succ_project_name || "Untitled"}`}</span>
         </div>
-        {getDateDifferenceComponent(dependency.date_difference)}
+        <div className="flex flex-col items-end">
+          {getDateDifferenceComponent(dependency.date_difference)}
+          {dependency.pred_milestone_date && dependency.succ_milestone_date && (
+            <span className="text-xs text-[#6A6A6A]">{`${new Date(
+              dependency.pred_milestone_date
+            ).toLocaleDateString()} → ${new Date(
+              dependency.succ_milestone_date
+            ).toLocaleDateString()}`}</span>
+          )}
+        </div>
       </div>
     ))
   ) : (
-    <div className="flex items-center justify-center bg-white py-3 px-4 text-sm text-[#6A6A6A]">
+    <div className="flex items-center justify-center bg-white px-4 py-3 text-sm text-[#6A6A6A]">
       NO DEPENDENCIES TO DISPLAY...
     </div>
   );
