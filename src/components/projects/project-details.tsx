@@ -5,6 +5,7 @@ import type { view_project } from "~/types/view_project";
 import { api } from "~/utils/api";
 import ModalEditProjectDetails from "./modals/modal-edit-project-details";
 import ModalUploadProjectProPricer from "./modals/modal-upload-project-pro-pricer";
+import ModalDownloadProPricerTemplate from "./modals/modal-download-pro-pricer-template";
 
 function ProjectDetails({ project }: { project: view_project }) {
   const user = useSession().data?.db_user;
@@ -14,6 +15,7 @@ function ProjectDetails({ project }: { project: view_project }) {
 
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [downloadModalOpen, setDownloadModalOpen] = useState(false);
 
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
@@ -67,6 +69,15 @@ function ProjectDetails({ project }: { project: view_project }) {
 
         {project.contract_status !== "Closed" && (
           <button
+            onClick={() => setDownloadModalOpen(true)}
+            className="mt-2 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+          >
+            ProPricer Template
+          </button>
+        )}
+
+        {project.contract_status !== "Closed" && (
+          <button
             onClick={() => setUploadModalOpen(true)}
             className="mt-2 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
           >
@@ -90,6 +101,13 @@ function ProjectDetails({ project }: { project: view_project }) {
         project={project}
         isOpen={uploadModalOpen}
         setIsOpen={setUploadModalOpen}
+      />
+
+      {/* Download ProPricer Modal */}
+      <ModalDownloadProPricerTemplate
+        project={project}
+        isOpen={downloadModalOpen}
+        setIsOpen={setDownloadModalOpen}
       />
     </div>
   );
