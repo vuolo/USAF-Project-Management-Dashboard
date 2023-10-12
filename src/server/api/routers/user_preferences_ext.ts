@@ -16,7 +16,7 @@ export const user_preferences_ext = {
   }),
   addFavorite: protectedProcedure.input(z.object({
     projectId: z.number()
-  })).query(async ({input, ctx}) => {
+  })).mutation(async ({input, ctx}) => {
     const user = ctx.session.db_user;
     if (!user) return null;
     return await prisma.favorites.create({
@@ -28,7 +28,7 @@ export const user_preferences_ext = {
   }),
   removeFavorite: protectedProcedure.input(z.object({
     projectId: z.number()
-  })).query(async ({input, ctx}) => {
+  })).mutation(async ({input, ctx}) => {
     const user = ctx.session.db_user;
     if (!user) return null;
 
@@ -56,7 +56,7 @@ export const user_preferences_ext = {
   }),
   addProjectHistory: protectedProcedure.input(z.object({
     id: z.number()
-  })).query(async ({ input, ctx }) => {
+  })).mutation(async ({ input, ctx }) => {
     const user = ctx.session.db_user;
     if (!user) return null;
     
