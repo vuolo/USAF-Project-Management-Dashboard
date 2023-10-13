@@ -11,6 +11,15 @@ export const user_preferences_ext = {
     return await prisma.favorites.findMany({
       where: {
         userId: user.id
+      },
+      select: {
+        projectId: true,
+        userId: true,
+        project: {
+          select: {
+            project_name: true
+          }
+        }
       }
     })
   }),
