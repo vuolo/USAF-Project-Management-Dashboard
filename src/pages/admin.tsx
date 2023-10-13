@@ -28,7 +28,7 @@ const Admin: NextPage = () => {
             <>
               {/* Sidebar (Top Bar on Mobile) */}
               <div className="flex flex-col gap-2 sm:w-[33%]">
-                <h1 className="mb-4 mt-2 text-center text-xl font-medium sm:mt-0">
+                <h1 className="mb-4 mt-2 text-center text-xl font-medium sm:mt-0 text-white">
                   Admin Settings
                 </h1>
                 <p

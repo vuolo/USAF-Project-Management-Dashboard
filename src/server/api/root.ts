@@ -16,6 +16,7 @@ import { requirementTypeRouter } from "./routers/requirement_type";
 import { clinRouter } from "./routers/clin";
 import { wbsRouter } from "./routers/wbs";
 import { auditlogRouter } from "./routers/auditlog";
+import { insightRouter } from "./routers/insight";
 
 /**
  * This is the primary router for your server.
@@ -40,6 +41,7 @@ export const appRouter = createTRPCRouter({
   clin: clinRouter,
   wbs: wbsRouter,
   auditlog: auditlogRouter,
+  insight: insightRouter,
 });
 
 // export type definition of API

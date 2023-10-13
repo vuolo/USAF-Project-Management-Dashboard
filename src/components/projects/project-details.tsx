@@ -6,6 +6,7 @@ import { api } from "~/utils/api";
 import ModalEditProjectDetails from "./modals/modal-edit-project-details";
 import ModalUploadProjectProPricer from "./modals/modal-upload-project-pro-pricer";
 import ModalDownloadProPricerTemplate from "./modals/modal-download-pro-pricer-template";
+import { DownloadIcon } from "lucide-react";
 
 function ProjectDetails({ project }: { project: view_project }) {
   const user = useSession().data?.db_user;
@@ -32,7 +33,7 @@ function ProjectDetails({ project }: { project: view_project }) {
           )}
       </div>
 
-      <div className="flex flex-col gap-2 px-4 pt-4 pb-2 text-left sm:px-6 sm:pt-6">
+      <div className="flex flex-col gap-2 px-4 pb-2 pt-4 text-left sm:px-6 sm:pt-6">
         <p>
           <b>Project Name:</b> {project.project_name || "N/A"}
         </p>
@@ -69,21 +70,20 @@ function ProjectDetails({ project }: { project: view_project }) {
 
         {project.contract_status !== "Closed" && (
           <button
-            onClick={() => setDownloadModalOpen(true)}
-            className="mt-2 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
-          >
-            ProPricer Template
-          </button>
-        )}
-
-        {project.contract_status !== "Closed" && (
-          <button
             onClick={() => setUploadModalOpen(true)}
             className="mt-2 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
           >
             Upload ProPricer
           </button>
         )}
+
+        <button
+          onClick={() => setDownloadModalOpen(true)}
+          className="mt-2 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+        >
+          <DownloadIcon className="mr-2 h-5 w-5" />
+          ProPricer Template
+        </button>
       </div>
 
       {/* Edit Details Modal */}

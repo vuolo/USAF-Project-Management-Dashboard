@@ -10,10 +10,10 @@ function DependencyOverview() {
     <>
       <div className="mt-6 sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-100">
+          <h1 className="text-xl font-semibold text-gray-100 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">
             Dependency Overview
           </h1>
-          <p className="mt-2 text-sm text-gray-200">
+          <p className="mt-2 text-sm text-gray-200 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">
             An overview of all dependency predeccessors and successors for the
             projects you are assigned to.
           </p>

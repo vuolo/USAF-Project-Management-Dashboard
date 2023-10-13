@@ -406,3 +406,16 @@ model auditlog {
     time      DateTime
     query     String   @db.Text
 }
+
+model insight {
+    id          Int     @id @default(autoincrement())
+    name        String
+    description String?
+    options     Json?
+
+    is_archived        Boolean @default(false)
+    created_by_user_id Int
+
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+}

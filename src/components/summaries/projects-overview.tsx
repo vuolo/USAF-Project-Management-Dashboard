@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import StatusIcon from "./icons/status-icon";
-import {Star} from "lucide-react";
+import { Star } from "lucide-react";
 
 import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
@@ -46,22 +46,22 @@ function ProjectsOverview() {
     setHighlighted(true);
   };
   const handleMouseLeave = () => {
-    if(!isClicked)
-      setHighlighted(false);
+    if (!isClicked) setHighlighted(false);
   };
 
   const handleClick = () => {
     setHighlighted(isHighlighted);
-    setIsClicked(!isClicked)
+    setIsClicked(!isClicked);
   };
   // const starColor = isHighlighted ? 'yellow' : '';
 
-    
   return (
     <>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-100">Projects</h1>
+          <h1 className="text-xl font-semibold text-gray-100 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">
+            Projects
+          </h1>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
           <Link
@@ -270,8 +270,18 @@ function ProjectsOverview() {
                             `project-${project.id}`
                           )}
                         >
-                          <td className="pl-5 pr-0 cursor-pointer" onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-                            <Star size={20} style={{fill:`${isHighlighted ? 'yellow' : ''}`}}/>
+                          <td
+                            className="cursor-pointer pl-5 pr-0"
+                            onClick={handleClick}
+                            onMouseEnter={handleMouseEnter}
+                            onMouseLeave={handleMouseLeave}
+                          >
+                            <Star
+                              size={20}
+                              style={{
+                                fill: `${isHighlighted ? "yellow" : ""}`,
+                              }}
+                            />
                           </td>
                           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-brand-dark underline sm:pl-6">
                             <Link

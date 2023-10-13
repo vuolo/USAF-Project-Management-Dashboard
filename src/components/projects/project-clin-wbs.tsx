@@ -17,14 +17,16 @@ function ProjectClinWBS({
     <>
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">WBS</h1>
-          <p className="mt-2 text-sm text-gray-700">
+          <h1 className="text-xl font-semibold text-gray-100 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">
+            WBS
+          </h1>
+          <p className="mt-2 text-sm text-gray-200 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">
             View the WBS (Work Breakdown Structure) data for this CLIN.
           </p>
         </div>
       </div>
       <div className="mt-8 flex flex-col">
-        <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
+        <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               {!wbs_list ? (
@@ -33,7 +35,7 @@ function ProjectClinWBS({
                 </div>
               ) : wbs_list.length === 0 ? (
                 <div className="flex h-64 items-center justify-center">
-                  <div className="italic text-gray-500">
+                  <div className="italic text-gray-200 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">
                     No WBS data for this CLIN.
                   </div>
                 </div>
