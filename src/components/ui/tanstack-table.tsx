@@ -199,15 +199,15 @@ const TanstackTable: FC<TableProps> = ({
                   <tr>
                     <td
                       colSpan={table.getHeaderGroups()[0]?.headers.length}
-                      className="p-10 text-center text-gray-600"
+                      className="bg-white p-10 text-center text-gray-600"
                     >
                       <div className="-mr-3 flex items-center justify-center space-x-2">
                         {NothingToDisplayIcon ? (
-                          <NothingToDisplayIcon className="h-5 w-5 text-gray-100 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]" />
+                          <NothingToDisplayIcon className="h-5 w-5 text-gray-700" />
                         ) : (
-                          <CircleSlash2Icon className="h-5 w-5 text-gray-100 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]" />
+                          <CircleSlash2Icon className="h-5 w-5 text-gray-700" />
                         )}
-                        <span className="text-sm italic text-gray-200 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">
+                        <span className="text-sm italic text-gray-900">
                           No {tableFor ?? "rows"} to display...
                         </span>
                       </div>
