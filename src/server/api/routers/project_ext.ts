@@ -14,8 +14,8 @@ export const project_ext = {
     const user = ctx.session.db_user;
     if (!user) return null;
     
-    let currentDate = new Date();
-    let nextDate = new Date();
+    const currentDate = new Date();
+    const nextDate = new Date();
     nextDate.setDate(currentDate.getDate() + input.days);
 
     const projects = await prisma.project.findMany({
@@ -42,7 +42,7 @@ export const project_ext = {
     })
 
     // Return the projects with milestones that are within the next 7 days
-    return await projects.filter(async (project) => {
+    return projects.filter(async (project) => {
       const iptMembers = await getIPTMembers(project.id);
       const isMember = iptMembers.find(member => member.id === user.id);
       return isMember;
