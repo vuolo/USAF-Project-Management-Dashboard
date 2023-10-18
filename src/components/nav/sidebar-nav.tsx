@@ -8,6 +8,7 @@ import {
   FoldersIcon,
   HomeIcon,
   CogIcon,
+  LightbulbIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -54,7 +55,7 @@ function SidebarNav() {
         >
           <div className="flex h-full flex-col justify-between">
             <div>
-              <div className="ml-4 mt-2 mb-2 font-semibold leading-5 tracking-wider text-[#1C1C1C]">
+              <div className="mb-2 ml-4 mt-2 font-semibold leading-5 tracking-wider text-[#1C1C1C]">
                 {collapsed ? (
                   <div className="flex w-full items-center justify-center pr-3.5">
                     <h1 className="opacity-60">•</h1>
@@ -97,7 +98,26 @@ function SidebarNav() {
                   Dependencies
                 </MenuItem>
               </Link>
-              <div className="ml-4 mt-2 mb-2 font-semibold leading-5 tracking-wide text-[#1C1C1C]">
+
+              <Link href={"/insights"}>
+                <MenuItem
+                  id={route == "/insights" ? "selected-menu-item" : ""}
+                  style={{
+                    boxShadow:
+                      "inset 5px 0px rgb(79 70 229 / var(--tw-border-opacity)",
+                  }}
+                  className={
+                    route == "/insights"
+                      ? "border-blue-600 bg-blue-100 text-blue-600"
+                      : ""
+                  }
+                  icon={<LightbulbIcon />}
+                >
+                  Insights
+                </MenuItem>
+              </Link>
+
+              <div className="mb-2 ml-4 mt-2 font-semibold leading-5 tracking-wide text-[#1C1C1C]">
                 {collapsed ? (
                   <div className="flex w-full items-center justify-center pr-3.5">
                     <h1 className="opacity-60">•</h1>

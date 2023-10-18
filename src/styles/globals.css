@@ -2,13 +2,77 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Local Font Import */
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/inter/static/Inter-Thin.ttf");
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/inter/static/Inter-ExtraLight.ttf");
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/inter/static/Inter-Light.ttf");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/inter/static/Inter-Regular.ttf");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/inter/static/Inter-Medium.ttf");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/inter/static/Inter-SemiBold.ttf");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/inter/static/Inter-Bold.ttf");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/inter/static/Inter-ExtraBold.ttf");
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/inter/static/Inter-Black.ttf");
+  font-weight: 200;
+  font-style: normal;
+}
+
 body {
   background-color: theme("colors.brand.light");
 }
 
 * {
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Helvetica Neue",
-    "Helvetica", sans-serif !important;
+  font-family: Inter, -apple-system, system-ui, BlinkMacSystemFont,
+    "Helvetica Neue", "Helvetica", sans-serif !important;
 }
 
 main {
@@ -25,8 +89,8 @@ main {
 }
 
 .default-font {
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Helvetica Neue",
-    "Helvetica", sans-serif !important;
+  font-family: Inter, -apple-system, system-ui, BlinkMacSystemFont,
+    "Helvetica Neue", "Helvetica", sans-serif !important;
 }
 
 /* react-google-charts */
@@ -37,6 +101,11 @@ main {
   box-shadow: 2px 2px 4px #ccc !important;
   padding: 0px !important;
   background-color: #fff !important;
+}
+
+/* react-tooltip */
+.react-tooltip {
+  z-index: 999999 !important;
 }
 
 /* react-modern-calendar-datepicker */
@@ -50,8 +119,8 @@ main {
 
 /* Toastify */
 .Toastify__toast-body {
-  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Helvetica Neue",
-    "Helvetica", sans-serif;
+  font-family: Inter, -apple-system, system-ui, BlinkMacSystemFont,
+    "Helvetica Neue", "Helvetica", sans-serif;
 }
 
 .Toastify {

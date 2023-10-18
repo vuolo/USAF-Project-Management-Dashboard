@@ -20,8 +20,14 @@ function SignIn({
 
   return (
     <main className="flex h-screen w-screen flex-col items-center justify-center gap-8 bg-white px-2 pb-[20vh] text-center">
-      <Image src="/images/brand/AirForce.jpg" width={200} height={200} alt="" />
-      <h1 className="text-3xl font-medium">
+      <Image
+        src="/images/brand/USAF-White.png"
+        className="rounded-md"
+        width={200}
+        height={200}
+        alt=""
+      />
+      <h1 className="text-3xl font-medium text-gray-100 [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)]">
         Welcome to the USAF Project Management Dashboard
       </h1>
 
@@ -30,7 +36,7 @@ function SignIn({
         <div key={provider.name}>
           <button
             onClick={() => void signIn(provider.id)}
-            className="rounded-full bg-black/10 px-10 py-3 font-medium no-underline transition hover:bg-black/20"
+            className="rounded-full bg-black/10 px-10 py-3 font-medium text-gray-100 no-underline transition [text-shadow:_0_1px_0_rgb(0_0_0_/_40%)] hover:bg-black/20"
           >
             Sign in with {provider.name}
           </button>
