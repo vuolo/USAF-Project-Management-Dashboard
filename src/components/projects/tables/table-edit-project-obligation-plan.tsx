@@ -12,7 +12,7 @@ import type { obligation_plan } from "~/types/obligation_plan";
 import { formatCurrency } from "~/utils/currency";
 import DatePicker from "@hassanmojab/react-modern-calendar-datepicker";
 import { convertDateToDayValue, convertDayValueToDate } from "~/utils/date";
-
+ 
 type TableProps = {
   project: view_project;
   obligationPlan?: obligation_plan[];
