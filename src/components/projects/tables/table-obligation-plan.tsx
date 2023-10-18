@@ -132,7 +132,7 @@ function getRowValue(
         // If obli.date is greater than today's date, format the text in red
         return formatRed('$0.00');
       }
-      return formattedText;
+      return formatCurrency(obli.Actual);
 
     default:
       return "...";
