@@ -59,7 +59,7 @@ export const project_ext = {
     }[] = [];
 
     await Promise.all(projects.map(async (project) => {
-      if (input.allProjects && isAdmin)
+      if (isAdmin)
         final.push({
           ...project,
           project_milestones: project.project_milestones.filter((milestone) => {
@@ -69,7 +69,6 @@ export const project_ext = {
         });
       const iptMembers = await getIPTMembers(project.id);
       const isMember = iptMembers.find(m => m.id === user.id) ? true : false;
-      console.log(project.project_name + " -> " + isMember);
       if (isMember) {
         final.push({
           ...project,
