@@ -17,12 +17,6 @@ const Home: NextPage = () => {
   const user = useSession().data?.db_user;
   const router = useRouter();
 
-  // TODO: Remove before merge to main
-  {
-    const { data: projectsWithUpcomingDueMilestones } = api.project.getProjectsWithUpcomingDueMilestones.useQuery({ days: 60, favorites: true });
-    console.log("projectsWithUpcomingDueMilestones", projectsWithUpcomingDueMilestones);
-  }
-
   useEffect(() => {
     if (!router.query.hightlightProjects || !document) return;
 

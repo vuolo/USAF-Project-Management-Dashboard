@@ -46,7 +46,7 @@ function UpcomingEvents() {
                     </label>
                     <input
                         onChange={(e) => {
-                            
+                            setFavorites(!favorites);
                         }}
                         type="checkbox"
                         id="favoritesInput"
@@ -61,14 +61,14 @@ function UpcomingEvents() {
                                 <>
                                     <Disclosure.Button
                                         className={classNames(
-                                            "flex w-full items-center justify-between border border-black bg-[green] px-2 py-1 text-sm font-normal text-white shadow-sm hover:bg-green-600 focus:outline-none focus-visible:ring",
+                                            "flex w-full items-center justify-between border border-black px-2 py-1 text-sm font-normal text-white shadow-sm focus:outline-none focus-visible:ring",
                                             open ? "rounded-t-md" : "rounded-md", project.project_milestones.some((p) => {
                                                 if (p.end_date == null) return false;
                                                 const currentDate = new Date();
                                                 const nextDate = new Date();
                                                 nextDate.setDate(currentDate.getDate() + 7);
                                                 return p.end_date < nextDate;
-                                            }) ? "bg-[red]" : "bg-[green]"
+                                            }) ? "bg-[red] hover:bg-red-600" : "bg-[green] hover:bg-green-600"
                                         )}
                                     >
                                         <span>
