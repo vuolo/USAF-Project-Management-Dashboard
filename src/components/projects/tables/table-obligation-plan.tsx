@@ -1,14 +1,16 @@
 import { api } from "~/utils/api";
 import type { obligation_plan } from "~/types/obligation_plan";
-import { formatCurrency } from "~/utils/currency";
+import { formatCurrency} from "~/utils/currency";
 import { format } from "date-fns";
 import type { funding_types } from "@prisma/client";
 import type { view_project } from "~/types/view_project";
+import { renderToString } from 'react-dom/server';
+import { string } from "zod";
 
 type TableProps = {
   project: view_project;
   obligationPlan?: obligation_plan[];
-};
+}; 
 
 function TableObligationPlan({ project, obligationPlan }: TableProps) {
   const { data: fundingTypes } = api.funding_type.getAll.useQuery();
@@ -96,6 +98,10 @@ function TableObligationPlan({ project, obligationPlan }: TableProps) {
 
 export default TableObligationPlan;
 
+function formatRed(text: string): JSX.Element {
+  return <span style={{ color: 'red', fontWeight: 'bold' }}>{text}</span>;
+}
+
 function getRowValue(
   obli: obligation_plan,
   rowIdx: number,
@@ -119,7 +125,14 @@ function getRowValue(
 
     // Actual
     case 3:
-      return formatCurrency(obli.Actual);
+      const currentDate = new Date();  
+      let formattedText = formatCurrency(obli.Actual); 
+      
+      if (currentDate >= obli.date && formattedText === '$0.00') {
+        // If obli.date is greater than today's date, format the text in red
+        return formatRed('$0.00');
+      }
+      return formattedText;
 
     default:
       return "...";
