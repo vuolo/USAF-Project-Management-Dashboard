@@ -9,11 +9,14 @@ import { getIPTMembers } from "~/utils/iptMembers";
 export const project_ext = {
   getProjectsWithUpcomingDueMilestones: protectedProcedure.input(z.object({
     days: z.number().optional().default(7),
-    favorites: z.boolean().optional()
-  })).query(async ({input, ctx }) => {
+    favorites: z.boolean().optional(),
+    allProjects: z.boolean().optional().default(false)
+  })).query(async ({ input, ctx }) => {
     const user = ctx.session.db_user;
     if (!user) return null;
-    
+
+    const isAdmin = user.user_role == "Admin";
+
     const currentDate = new Date();
     const nextDate = new Date();
     nextDate.setDate(currentDate.getDate() + input.days);
@@ -39,21 +42,44 @@ export const project_ext = {
         project_name: true,
         project_milestones: true,
       },
-    })
+    });
 
-    // Return the projects with milestones that are within the next 7 days
-    return projects.filter(async (project) => {
+    let final: {
+      id: number;
+      project_name: string | null;
+      project_milestones: {
+        id: number;
+        project_id: number | null;
+        task_name: string;
+        start_date: Date | null;
+        end_date: Date | null;
+        actual_start: Date | null;
+        actual_end: Date | null;
+      }[];
+    }[] = [];
+
+    await Promise.all(projects.map(async (project) => {
+      if (input.allProjects && isAdmin)
+        final.push({
+          ...project,
+          project_milestones: project.project_milestones.filter((milestone) => {
+            if (!milestone.end_date) return false;
+            return milestone.end_date >= currentDate && milestone.end_date <= nextDate;
+          })
+        });
       const iptMembers = await getIPTMembers(project.id);
-      const isMember = iptMembers.find(member => member.id === user.id);
-      return isMember;
-    }).map((project) => {
-      return {
-        ...project,
-        project_milestones: project.project_milestones.filter((milestone) => {
-          if (!milestone.end_date) return false;
-          return milestone.end_date >= currentDate && milestone.end_date <= nextDate;
-        })
+      const isMember = iptMembers.find(m => m.id === user.id) ? true : false;
+      console.log(project.project_name + " -> " + isMember);
+      if (isMember) {
+        final.push({
+          ...project,
+          project_milestones: project.project_milestones.filter((milestone) => {
+            if (!milestone.end_date) return false;
+            return milestone.end_date >= currentDate && milestone.end_date <= nextDate;
+          })
+        });
       }
-    })
+    }));
+    return final;
   })
 }
