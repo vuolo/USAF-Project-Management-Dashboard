@@ -1,5 +1,6 @@
 import { Disclosure } from "@headlessui/react";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { api } from "~/utils/api";
 import { getDateDifferenceComponent } from "~/utils/format_dependencies";
@@ -8,11 +9,14 @@ import { classNames, getDayDifference } from "~/utils/misc";
 function UpcomingEvents() {
     const [days, setDays] = useState(7);
     const [favorites, setFavorites] = useState(false);
+    const [allProjects, setAllProjects] = useState(false);
+
+    const user = useSession().data?.db_user;
 
     const { data: projects } = api.project.getProjectsWithUpcomingDueMilestones.useQuery({
         days: days,
         favorites: favorites,
-        // allProjects: true
+        allProjects: allProjects
     });
 
 
@@ -21,38 +25,55 @@ function UpcomingEvents() {
             <div className="rounded-t-md bg-brand-dark px-8 py-2 text-center font-medium text-white">
                 <h1>Upcoming Due Milestones</h1>
             </div>
-
             <div className="w-full items-center justify-between gap-6 px-8 pb-6 pt-4 sm:min-w-[35rem]">
-                <div className="mt-2 flex flex-row items-center justify-center gap-2">
-                    <label>
-                        Days:
-                    </label>
-                    <input
-                        onChange={(e) => {
-                            setDays(Number(e.target.value || 7));
-                        }}
-                        type="number"
-                        id="upcomingDaysInput"
-                        value={days}
-                        min={0}
-                        max={365 * 4}
-                        placeholder="Days"
-                        className="w-24 px-4 py-2 text-black">
-                    </input>
-                </div>
-                <div className="mt-2 flex flex-row items-center justify-center gap-2">
-                    <label>
-                        Favorites: 
-                    </label>
-                    <input
-                        onChange={(e) => {
-                            setFavorites(!favorites);
-                        }}
-                        type="checkbox"
-                        id="favoritesInput"
-                        value={favorites ? "true" : "false"}
-                        className="text-black">
-                    </input>
+                <div className="flex flex-row justify-center">
+                    <div className="mt-2 flex flex-row items-center justify-center gap-2 mr-2">
+                        <label>
+                            Days:
+                        </label>
+                        <input
+                            onChange={(e) => {
+                                setDays(Number(e.target.value || 7));
+                            }}
+                            type="number"
+                            id="upcomingDaysInput"
+                            value={days}
+                            min={0}
+                            max={365 * 4}
+                            placeholder="Days"
+                            className="w-24 px-4 py-2 text-black">
+                        </input>
+                    </div>
+                    <div className="mt-2 flex flex-row items-center justify-center gap-2 mr-2">
+                        <label>
+                            Favorites:
+                        </label>
+                        <input
+                            onChange={(e) => {
+                                setFavorites(!favorites);
+                            }}
+                            type="checkbox"
+                            id="favoritesInput"
+                            value={favorites ? "true" : "false"}
+                            className="text-black">
+                        </input>
+                    </div>
+                    {user?.user_role == "Admin" ? <>
+                        <div className="mt-2 flex flex-row items-center justify-center gap-2 mr-2">
+                            <label>
+                                All Projects:
+                            </label>
+                            <input
+                                onChange={(e) => {
+                                    setAllProjects(!allProjects);
+                                }}
+                                type="checkbox"
+                                id="allProjectsInput"
+                                value={allProjects ? "true" : "false"}
+                                className="text-black">
+                            </input>
+                        </div>
+                    </> : <></>}
                 </div>
                 {projects && projects.map((project, index) => (
                     <div className="mt-4">

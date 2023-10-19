@@ -59,7 +59,7 @@ export const project_ext = {
     }[] = [];
 
     await Promise.all(projects.map(async (project) => {
-      if (isAdmin)
+      if (isAdmin && input.allProjects)
         final.push({
           ...project,
           project_milestones: project.project_milestones.filter((milestone) => {
