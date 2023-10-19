@@ -3,7 +3,7 @@ export type expenditure_plan = {
   date: Date;
   Projected: number;
   "Projected Total": number;
-  Actual: number | null;
+  Actual: number;
   "Actual Total": number;
 };
 
