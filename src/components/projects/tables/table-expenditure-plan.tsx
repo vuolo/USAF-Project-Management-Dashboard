@@ -93,7 +93,7 @@ function getRowValue(expen: expenditure_plan, rowIdx: number) {
 
     // Actual
     case 1:
-      return formatCurrency(expen.Actual);
+      return expen.Actual !== null ? formatCurrency(expen.Actual) : "...";
 
     default:
       return "...";
