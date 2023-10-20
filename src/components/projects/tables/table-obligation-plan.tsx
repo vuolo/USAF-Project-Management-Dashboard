@@ -130,7 +130,7 @@ function getRowValue(
       
       if (currentDate >= obli.date && formattedText === '$0.00') {
         // If obli.date is greater than today's date, format the text in red
-        return formatRed('$0.00');
+        return formatRed('Missing Obligation ($0.00)');
       }
       return formatCurrency(obli.Actual);
 
