@@ -20,7 +20,10 @@ function Project() {
 
   const [showModal, setShowModal] = useState(false);
 
-  if ((user?.user_role === "Contractor") && (user.contractor_id !== Number(project?.contractor_id))) {
+  if (
+    user?.user_role === "Contractor" &&
+    user.contractor_id !== Number(project?.contractor_id)
+  ) {
     return (
       <>
         <main>
@@ -32,14 +35,13 @@ function Project() {
         </main>
       </>
     );
-  }
-  else {
+  } else {
     return (
       <main>
         {project && (
           <>
             {/* Top Section */}
-            <div className="flex flex-col gap-6 px-2 pt-2 pb-2 sm:justify-around sm:pt-6 lg:flex-row">
+            <div className="flex flex-col gap-6 px-2 pb-2 pt-2 sm:justify-around sm:pt-6 lg:flex-row">
               {/* Left */}
               <ProjectDetails project={project} />
 
@@ -48,7 +50,7 @@ function Project() {
             </div>
 
             {/* Underneath Top Section */}
-            <div className="flex flex-col gap-6 px-2 pt-2 pb-2 sm:px-6 sm:pt-6">
+            <div className="flex flex-col gap-6 px-2 pb-2 pt-2 sm:px-6 sm:pt-6">
               <ProjectDependencies project={project} />
               {(project.contract_status as string) === "Pre-Award" && (
                 <ProjectContractStatus project={project} />

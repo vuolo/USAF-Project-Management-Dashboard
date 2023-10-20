@@ -21,50 +21,61 @@ export const userRouter = createTRPCRouter({
       },
     });
   }),
-  searchByName: protectedProcedure.input(z.object({
-    search: z.string()
-  })
-  ).query(async ({input}) => {
-    return await prisma.$queryRaw<(users & { contractor_name: string })[]>`
+  searchByName: protectedProcedure
+    .input(
+      z.object({
+        search: z.string(),
+      })
+    )
+    .query(async ({ input }) => {
+      return await prisma.$queryRaw<(users & { contractor_name: string })[]>`
       SELECT u.*, c.contractor_name from users u 
       LEFT JOIN contractor c 
       ON u.contractor_id = c.id
-      WHERE u.user_name LIKE ${"%" + input.search + "%"}`
-  }),
-  search: protectedProcedure.input(z.object({
-    filterQuery: z.string().optional(),
-    filterType: z.enum(["user_name", "user_email", "user_role", "contractor_name"])
-  })
-  ).query(async ({input}) => {
-    return input.filterQuery && input.filterType === "user_name" ? await prisma.$queryRaw<(users & { contractor_name: string })[]>`
+      WHERE u.user_name LIKE ${"%" + input.search + "%"}`;
+    }),
+  search: protectedProcedure
+    .input(
+      z.object({
+        filterQuery: z.string().optional(),
+        filterType: z.enum([
+          "user_name",
+          "user_email",
+          "user_role",
+          "contractor_name",
+        ]),
+      })
+    )
+    .query(async ({ input }) => {
+      return input.filterQuery && input.filterType === "user_name"
+        ? await prisma.$queryRaw<(users & { contractor_name: string })[]>`
         SELECT u.*, c.contractor_name from users u 
         LEFT JOIN contractor c 
         ON u.contractor_id = c.id
-        WHERE u.user_name LIKE ${"%" + input.filterQuery + "%"}` :
-
-      input.filterQuery && input.filterType === "user_email" ? await prisma.$queryRaw<(users & { contractor_name: string })[]>`
+        WHERE u.user_name LIKE ${"%" + input.filterQuery + "%"}`
+        : input.filterQuery && input.filterType === "user_email"
+        ? await prisma.$queryRaw<(users & { contractor_name: string })[]>`
         SELECT u.*, c.contractor_name from users u
         LEFT JOIN contractor c
         ON u.contractor_id = c.id
-        WHERE u.user_email LIKE ${"%" + input.filterQuery + "%"}` :
-
-      input.filterQuery && input.filterType === "user_role" ? await prisma.$queryRaw<(users & { contractor_name: string })[]>`
+        WHERE u.user_email LIKE ${"%" + input.filterQuery + "%"}`
+        : input.filterQuery && input.filterType === "user_role"
+        ? await prisma.$queryRaw<(users & { contractor_name: string })[]>`
         SELECT u.*, c.contractor_name from users u
         LEFT JOIN contractor c
         ON u.contractor_id = c.id
-        WHERE u.user_role LIKE ${"%" + input.filterQuery + "%"}` :
-
-      input.filterQuery && input.filterType === "contractor_name" ? await prisma.$queryRaw<(users & { contractor_name: string })[]>`
+        WHERE u.user_role LIKE ${"%" + input.filterQuery + "%"}`
+        : input.filterQuery && input.filterType === "contractor_name"
+        ? await prisma.$queryRaw<(users & { contractor_name: string })[]>`
         SELECT u.*, c.contractor_name from users u
         LEFT JOIN contractor c
         ON u.contractor_id = c.id
-        WHERE c.contractor_name LIKE ${"%" + input.filterQuery + "%"}` :
-
-      await prisma.$queryRaw<(users & { contractor_name: string })[]>`
+        WHERE c.contractor_name LIKE ${"%" + input.filterQuery + "%"}`
+        : await prisma.$queryRaw<(users & { contractor_name: string })[]>`
         SELECT u.*, c.contractor_name from users u
         LEFT JOIN contractor c
-        ON u.contractor_id = c.id`
-  }),
+        ON u.contractor_id = c.id`;
+    }),
   update: protectedProcedure
     .input(
       z.object({
@@ -72,7 +83,7 @@ export const userRouter = createTRPCRouter({
         user_name: z.string(),
         user_role: z.enum(["Admin", "IPT_Member", "Contractor"]),
         user_email: z.string(),
-        contractor_id: z.number().optional()
+        contractor_id: z.number().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -115,19 +126,29 @@ export const userRouter = createTRPCRouter({
         mil_job_title_id: z.number().optional(),
       })
     )
-    .mutation(async ({ input, ctx}) => {
-      const user = ctx.session.db_user;
+    .mutation(async ({ input, ctx }) => {
+      const user = ctx.session?.db_user;
       if (!user) return null;
 
       // Get the added user
       const addedUser = await prisma.users.findUnique({
-        where: { id: input.user_id }
+        where: { id: input.user_id },
       });
       const project = await prisma.project.findUnique({
-        where: { id: input.project_id }
+        where: { id: input.project_id },
       });
       if (addedUser?.user_email && project)
-        await sendEmail(addedUser.user_email, `METIS - You have been added to ${project.project_name || "N/A"} by ${user.user_name || "N/A"} (${user.user_email || "N/A"})`,  `${user.user_name || "N/A"} (${user.user_email || "N/A"}) added you as an IPT member to the following project in METIS: \n\n\tProject name: ${project.project_name || "N/A"} \n\n\nLog into the METIS dashboard to view more detials.`)
+        await sendEmail(
+          addedUser.user_email,
+          `METIS - You have been added to ${project.project_name || "N/A"} by ${
+            user.user_name || "N/A"
+          } (${user.user_email || "N/A"})`,
+          `${user.user_name || "N/A"} (${
+            user.user_email || "N/A"
+          }) added you as an IPT member to the following project in METIS: \n\n\tProject name: ${
+            project.project_name || "N/A"
+          } \n\n\nLog into the METIS dashboard to view more detials.`
+        );
 
       return input.mil_job_title_id !== undefined
         ? await prisma.$executeRaw`

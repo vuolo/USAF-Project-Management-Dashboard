@@ -102,6 +102,10 @@ function formatRed(text: string): JSX.Element {
   return <span style={{ color: 'red', fontWeight: 'bold' }}>{text}</span>;
 }
 
+function formatRed(text: string): JSX.Element {
+  return <span style={{ color: 'red', fontWeight: 'bold' }}>{text}</span>;
+}
+
 function getRowValue(
   obli: obligation_plan,
   rowIdx: number,
@@ -126,13 +130,13 @@ function getRowValue(
     // Actual
     case 3:
       const currentDate = new Date();  
-      let formattedText = formatCurrency(obli.Actual); 
+      const formattedText = formatCurrency(obli.Actual); 
       
       if (currentDate >= obli.date && formattedText === '$0.00') {
         // If obli.date is greater than today's date, format the text in red
         return formatRed('$0.00');
       }
-      return formattedText;
+      return formatCurrency(obli.Actual);
 
     default:
       return "...";

@@ -30,6 +30,7 @@
     "@trpc/react-query": "^10.9.0",
     "@trpc/server": "^10.9.0",
     "date-fns": "^2.29.3",
+    "date-fns-tz": "^2.0.0",
     "lucide-react": "^0.246.0",
     "next": "^13.4.2",
     "next-auth": "^4.20.1",

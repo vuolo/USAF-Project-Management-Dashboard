@@ -112,51 +112,116 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   });
 });
 
+const loggerMiddleware = t.middleware(
+  async ({ ctx, path, type, next, input, rawInput }) => {
+    const result = await next({
+      ctx,
+    });
 
+    if (type == "mutation") {
+      const inputdata = {
+        user: ctx.session?.db_user?.user_email
+          ? ctx.session.db_user.user_email
+          : "N/A",
+        endpoint: path,
+        succeeded: result.ok ? true : false,
+        time: new Date(),
+        query: JSON.stringify(rawInput),
+      };
 
-const loggerMiddleware = t.middleware(async ({ ctx, path, type, next, input, rawInput }) => {
-  const result = await next({
-    ctx: {
-      session: { ...ctx.session, user: (ctx.session as Session).user}
-    },
-  });
-
-  if (type == "mutation") {
-    const inputdata = {
-      user: ctx.session?.db_user?.user_email ? ctx.session.db_user.user_email : "N/A",
-      endpoint: path,
-      succeeded: result.ok ? true : false,
-      time: new Date(),
-      query: JSON.stringify(rawInput)
-    }
-
-    try {
-      if (z.object({
-        user: z.string(),
-        endpoint: z.string(),
-        succeeded: z.boolean(),
-        time: z.date(),
-        query: z.string()
-      }).parse(inputdata)) {
-        await prisma.auditlog.create({
-          data: {
-            user: inputdata.user,
-            endpoint: inputdata.endpoint,
-            succeeded: inputdata.succeeded,
-            time: inputdata.time,
-            query: inputdata.query
-          }
-        });
+      try {
+        if (
+          z
+            .object({
+              user: z.string(),
+              endpoint: z.string(),
+              succeeded: z.boolean(),
+              time: z.date(),
+              query: z.string(),
+            })
+            .parse(inputdata)
+        ) {
+          await prisma.auditlog.create({
+            data: {
+              user: inputdata.user,
+              endpoint: inputdata.endpoint,
+              succeeded: inputdata.succeeded,
+              time: inputdata.time,
+              query: inputdata.query,
+            },
+          });
+        }
+      } catch (e) {
+        console.log(e);
       }
     }
-    catch (e) {
-      console.log(e);
+
+    return result;
+  }
+);
+
+import { utcToZonedTime } from "date-fns-tz";
+
+type Convertible =
+  | Date
+  | Convertible[]
+  | { [key: string]: Convertible }
+  | undefined;
+
+// Recursive function to convert dates in nested objects and arrays
+const convertDatesInObject = (obj: Convertible): Convertible => {
+  if (obj instanceof Date) {
+    const isDST = isDateInDST(obj, "America/New_York");
+    // Add 4 hours for EDT or 5 hours for EST
+    obj.setHours(obj.getHours() + (isDST ? 4 : 5));
+    return obj;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(convertDatesInObject);
+  }
+  if (typeof obj === "object" && obj !== null) {
+    const newObj: { [key: string]: Convertible } = {};
+    for (const key in obj) {
+      newObj[key] = convertDatesInObject(obj[key]);
+    }
+    return newObj;
+  }
+  return obj;
+};
+
+function isDateInDST(date: Date, timeZone: string): boolean {
+  // A date in January, which is outside of DST
+  const januaryDate = new Date(date.getFullYear(), 0, 1);
+  const januaryOffset = -Math.round(januaryDate.getTimezoneOffset() / 60);
+
+  // The timezone offset for the given date
+  const dateInTimeZone = utcToZonedTime(date, timeZone);
+  const dateOffset = -Math.round(dateInTimeZone.getTimezoneOffset() / 60);
+
+  // DST is in effect if the offsets are different
+  return januaryOffset !== dateOffset;
+}
+
+const convertTimezoneMiddleware = t.middleware(
+  async ({ ctx, type, next, input }) => {
+    const result = await next({
+      ctx,
+    });
+
+    if (
+      result.ok &&
+      (typeof result.data === "object" || result.data === undefined) &&
+      result.data !== null &&
+      result.data !== undefined
+    ) {
+      result.data = convertDatesInObject(
+        result.data as Convertible
+      ) as typeof result.data;
     }
 
+    return result;
   }
-
-  return result;
-});
+);
 
 /**
  * Protected (authenticated) procedure
@@ -166,4 +231,7 @@ const loggerMiddleware = t.middleware(async ({ ctx, path, type, next, input, raw
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed).use(loggerMiddleware);
+export const protectedProcedure = t.procedure
+  .use(enforceUserIsAuthed)
+  .use(loggerMiddleware)
+  .use(convertTimezoneMiddleware);

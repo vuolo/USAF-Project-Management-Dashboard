@@ -4,82 +4,34 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 import type { expenditure } from "~/types/expenditure";
 import type { expenditure_plan } from "~/types/expenditure_plan";
-import type { wbs_data } from "~/types/wbs_data";
-
-function adjustDateToStartOfIntendedMonth(date: Date): Date {
-  const adjustedDate = new Date(date);
-  adjustedDate.setDate(adjustedDate.getDate() + 1); // Move forward by one day
-  return adjustedDate;
-}
 
 export const expenditureRouter = createTRPCRouter({
   getExpenditurePlan: protectedProcedure
     .input(z.object({ project_id: z.number() }))
     .query(async ({ input }) => {
-      const expenditureData = await prisma.$queryRaw<expenditure_plan[]>`
-  SELECT 
-    id,
-    expen_funding_date as date,
-    expen_projected as Projected, 
-    expen_projected_total as "Projected Total",
-    expen_actual as Actual,
-    expen_actual_total as "Actual Total"
-  FROM view_expenditure 
-  WHERE project_id=${input.project_id}
-  ORDER BY expen_funding_date`;
-
-const wbsData = await prisma.$queryRaw<wbs_data[]>`
-  SELECT 
-    id,
-    month as date,
-    total_price as Projected
-  FROM task_resource_table
-  WHERE project_id=${input.project_id}
-  ORDER BY month`;
-  
-const groupedWbsData: Record<string, number> = {};
-
-wbsData.forEach((wbsItem) => {
-  const date = new Date(wbsItem.date);
-  const key = `${date.getFullYear()}-${date.getMonth()}`;  // Key format: YYYY-MM
-  groupedWbsData[key] = (groupedWbsData[key] || 0) + Number(wbsItem.Projected);
-});
-
-let runningTotal = 0;
-
-
-const mergedData = expenditureData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) // Sort by date
-  .map((expenditureItem) => {
-    // Adjust the date of the expenditure data to the start of the intended month
-    const adjustedDate = adjustDateToStartOfIntendedMonth(new Date(expenditureItem.date));
-    const key = `${adjustedDate.getFullYear()}-${adjustedDate.getMonth()}`; // Key format: YYYY-MM
-
-    // Get the corresponding 'Projected' value from groupedWbsData for this month
-    const wbsProjectedForMonth = groupedWbsData[key];
-
-    runningTotal += Number(wbsProjectedForMonth || 0);
-
-    return {
-      ...expenditureItem,
-      date: adjustedDate,
-      Projected: wbsProjectedForMonth || expenditureItem.Projected,  // Use the WBS projected value for the month if available, otherwise keep the original
-      "Projected Total": runningTotal,
-    };
-});
-
-return mergedData;
-}),
+      return await prisma.$queryRaw<expenditure_plan[]>`
+        SELECT 
+          id,
+          expen_funding_date as date,
+          expen_projected as Projected, 
+          expen_projected_total as "Projected Total",
+          expen_actual as Actual,
+          expen_actual_total as "Actual Total"
+        FROM view_expenditure 
+        WHERE project_id=${input.project_id}
+        ORDER BY expen_funding_date`;
+    }),
   getTotalExpenditure: protectedProcedure
     .input(z.object({ project_ids: z.array(z.number()).optional() }))
     .query(async ({ ctx, input }) => {
-      const user = ctx.session.db_user;
+      const user = ctx.session?.db_user;
       if (!user) return null;
 
       return (
         // NOTE: This only calculates "Awarded" projects (contract_status = 2)
         (user.user_role === "Admin" || user.user_role === "IPT_Member"
           ? // Select filtered input project_ids if they exist, otherwise select all projects
-          input.project_ids && input.project_ids.length > 0
+            input.project_ids && input.project_ids.length > 0
             ? await prisma.$queryRaw<expenditure[]>`
               SELECT 
                 SUM(CASE WHEN DATEDIFF((SELECT CURDATE()), ve.expen_funding_date) >= 0 THEN expen_projected ELSE 0 END) as expen_projected,
@@ -101,8 +53,8 @@ return mergedData;
               -- AND (SELECT DATEDIFF((SELECT CURDATE()), ve.expen_funding_date)) >= 0
               `
           : // Contractors
-          // TODO: add project_id filtering for non-admins
-          await prisma.$queryRaw<expenditure[]>`
+            // TODO: add project_id filtering for non-admins
+            await prisma.$queryRaw<expenditure[]>`
               SELECT 
                 SUM(CASE WHEN DATEDIFF((SELECT CURDATE()), ve.expen_funding_date) >= 0 THEN expen_projected ELSE 0 END) as expen_projected,
                 SUM(CASE WHEN DATEDIFF((SELECT CURDATE()), ve.expen_funding_date) >= 0 THEN expen_actual ELSE 0 END) as expen_actual,

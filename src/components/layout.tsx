@@ -36,11 +36,10 @@ function Layout({ children }: Props) {
   return (
     <>
       <NavBar title={title} />
-      <div className="hidden sm:relative sm:flex sm:w-screen">
+      <div className="sm:relative sm:flex sm:w-screen">
         <SideBarNav />
-        <div className="ml-[75px] mr-0 flex overflow-hidden">{children}</div>
+        <div className="mr-0 flex overflow-hidden sm:ml-[75px]">{children}</div>
       </div>
-      <div className="block sm:hidden">{children}</div>
     </>
   );
 }

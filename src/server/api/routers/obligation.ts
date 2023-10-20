@@ -26,7 +26,7 @@ export const obligationRouter = createTRPCRouter({
   getTotalObligation: protectedProcedure
     .input(z.object({ project_ids: z.array(z.number()).optional() }))
     .query(async ({ ctx, input }) => {
-      const user = ctx.session.db_user;
+      const user = ctx.session?.db_user;
       if (!user) return null;
 
       return (
