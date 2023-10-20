@@ -262,13 +262,36 @@ export default function Insights() {
             data-tooltip-id="description-tooltip"
             data-tooltip-content={String(info.cell.getValue() || "")}
           >
-            <span className="cursor-help">
+            <span /*className="cursor-help"*/>
               {String(info.cell.getValue() || "")}
             </span>
-            <Tooltip
+            {/* <Tooltip
               id="description-tooltip"
               className="z-10 max-w-sm whitespace-normal break-words"
-            />
+            /> */}
+          </div>
+        ),
+      },
+      {
+        id: "Created At",
+        header: "Created At",
+        accessorKey: "created_at",
+        cell: (info) => (
+          <div className="flex items-center justify-center">
+            <span className="text-sm text-gray-500">
+              {info.cell.getValue()
+                ? new Date(info.cell.getValue() as Date)
+                    // yyyy-mm-dd at hh:mm (MILITARY TIME)
+                    .toLocaleString("en-US", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "numeric",
+                      minute: "numeric",
+                      hour12: false,
+                    })
+                : "..."}
+            </span>
           </div>
         ),
       },

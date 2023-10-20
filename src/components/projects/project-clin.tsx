@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useState } from "react";
+import { Fragment, useCallback, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -19,7 +19,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
   // Add CLIN Modal functionality (states)
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [addModalInput_clinNumber, setAddModalInput_clinNumber] =
-    useState<number>();
+    useState<string>();
   const [addModalInput_selectedClinType, setAddModalInput_selectedClinType] =
     useState<clin_data_clin_type>("FFP");
   const [addModalInput_clinScope, setAddModalInput_clinScope] = useState("");
@@ -50,7 +50,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
 
   const submitAddClin = useCallback(() => {
     if (
-      typeof addModalInput_clinNumber !== "number" ||
+      typeof addModalInput_clinNumber !== "string" ||
       typeof addModalInput_selectedClinType !== "string" ||
       typeof addModalInput_clinScope !== "string" ||
       typeof addModalInput_igce !== "number"
@@ -66,7 +66,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
 
     addClin.mutate({
       project_id,
-      clin_num: addModalInput_clinNumber,
+      clin_num: parseInt(addModalInput_clinNumber),
       clin_type: addModalInput_selectedClinType,
       clin_scope: addModalInput_clinScope,
       ind_gov_est: addModalInput_igce,
@@ -96,7 +96,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
 
       if (save) {
         if (
-          typeof addModalInput_clinNumber !== "number" ||
+          typeof addModalInput_clinNumber !== "string" ||
           typeof addModalInput_selectedClinType !== "string" ||
           typeof addModalInput_clinScope !== "string" ||
           typeof addModalInput_igce !== "number"
@@ -133,7 +133,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
   // Edit CLIN Modal functionality (states)
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editModalInput_clinNumber, setEditModalInput_clinNumber] =
-    useState<number>();
+    useState<string>();
   const [editModalInput_selectedClinType, setEditModalInput_selectedClinType] =
     useState<clin_data_clin_type>("FFP");
   const [editModalInput_clinScope, setEditModalInput_clinScope] = useState("");
@@ -165,7 +165,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
 
   const submitEditClin = useCallback(() => {
     if (
-      typeof editModalInput_clinNumber !== "number" ||
+      typeof editModalInput_clinNumber !== "string" ||
       typeof editModalInput_selectedClinType !== "string" ||
       typeof editModalInput_clinScope !== "string" ||
       typeof editModalInput_igce !== "number" ||
@@ -183,7 +183,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
     editClin.mutate({
       id: editModalInput_clinId,
       project_id,
-      clin_num: editModalInput_clinNumber,
+      clin_num: parseInt(editModalInput_clinNumber),
       clin_type: editModalInput_selectedClinType,
       clin_scope: editModalInput_clinScope,
       ind_gov_est: editModalInput_igce,
@@ -210,7 +210,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
   // Open edit CLIN modal
   const openEditModal = useCallback(
     (clin: view_clin) => {
-      setEditModalInput_clinNumber(clin.clin_num ?? undefined);
+      setEditModalInput_clinNumber(clin.clin_num?.toString()?.padStart(4, '0') ?? undefined);
       setEditModalInput_selectedClinType(clin.clin_type);
       setEditModalInput_clinScope(clin.clin_scope ?? "");
       setEditModalInput_igce(Number(clin.ind_gov_est));
@@ -227,7 +227,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
 
       if (save) {
         if (
-          typeof editModalInput_clinNumber !== "number" ||
+          typeof editModalInput_clinNumber !== "string" ||
           typeof editModalInput_selectedClinType !== "string" ||
           typeof editModalInput_clinScope !== "string" ||
           typeof editModalInput_igce !== "number" ||
@@ -394,7 +394,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
                               href={`/projects/${project_id}/clin/${clin.clin_num}/wbs`}
                               className="hover:text-brand-dark/80"
                             >
-                              {clin.clin_num}
+                              {clin.clin_num?.toString()?.padStart(4, '0')}
                             </Link>
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -503,16 +503,29 @@ function ProjectClin({ project_id }: { project_id: number }) {
                         >
                           <label htmlFor="clin-number">CLIN Number</label>
                           <input
-                            type="number"
+                            type="text"
                             name="clin-number"
                             id="clin-number"
                             className="block w-full min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
-                            placeholder="e.g. '1'"
+                            placeholder="e.g. '0001'"
                             value={addModalInput_clinNumber}
                             onChange={(e) => {
-                              setAddModalInput_clinNumber(
-                                Number(e.target.value)
-                              );
+                              const inputValue = e.target.value;
+                              const numericValue = Number(inputValue);
+                              var minValue = 0;
+                              var maxValue = 9999;
+
+                              if (numericValue >= minValue && numericValue <= maxValue) {
+                                // Reformat the number with leading zeros
+                                const formattedValue = numericValue.toString().padStart(4, '0');
+                                setAddModalInput_clinNumber(formattedValue);
+                              } else if (numericValue < minValue) {
+                                // If the input value is less than the minimum, set it to the minimum value
+                                setAddModalInput_clinNumber(minValue.toString().padStart(4, '0'));
+                              } else {
+                                // If the input value is greater than the maximum, set it to the maximum value
+                                setAddModalInput_clinNumber(maxValue.toString().padStart(4, '0'));
+                              }
                             }}
                           />
                         </form>
@@ -690,9 +703,22 @@ function ProjectClin({ project_id }: { project_id: number }) {
                             placeholder="e.g. '1'"
                             value={editModalInput_clinNumber}
                             onChange={(e) => {
-                              setEditModalInput_clinNumber(
-                                Number(e.target.value)
-                              );
+                              const inputValue = e.target.value;
+                              const numericValue = Number(inputValue);
+                              var minValue = 0;
+                              var maxValue = 9999;
+
+                              if (numericValue >= minValue && numericValue <= maxValue) {
+                                // Reformat the number with leading zeros
+                                const formattedValue = numericValue.toString().padStart(4, '0');
+                                setEditModalInput_clinNumber(formattedValue);
+                              } else if (numericValue < minValue) {
+                                // If the input value is less than the minimum, set it to the minimum value
+                                setEditModalInput_clinNumber(minValue.toString().padStart(4, '0'));
+                              } else {
+                                // If the input value is greater than the maximum, set it to the maximum value
+                                setEditModalInput_clinNumber(maxValue.toString().padStart(4, '0'));
+                              }
                             }}
                           />
                         </form>

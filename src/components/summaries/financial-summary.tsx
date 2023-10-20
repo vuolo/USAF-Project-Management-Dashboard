@@ -31,7 +31,7 @@ function FinancialSummary() {
     }, 100);
   };
 
-  useBreakpointChange(breakpointChanged);
+  useBreakpointChange(breakpointChanged, true);
 
   return (
     <div className="rounded-md bg-white text-center shadow-md">
@@ -39,12 +39,12 @@ function FinancialSummary() {
         <h1>Financial Summary</h1>
       </div>
 
-      <div className="flex h-fit flex-col justify-between gap-6 px-8 pt-4 pb-6">
+      <div className="flex h-fit flex-col justify-between gap-6 px-8 pb-6 pt-4">
         {obligation && expenditure && breakpoints ? (
           <>
             <div className="flex h-full flex-col justify-evenly gap-6 overflow-hidden xl:flex-row">
               {/* Obligation Status */}
-              <div className="flex h-full flex-1 flex-col bg-[#F7F7F7] px-4 pt-2 pb-4 shadow-md">
+              <div className="flex h-full flex-1 flex-col bg-[#F7F7F7] px-4 pb-4 pt-2 shadow-md">
                 {/* Header */}
                 <div className="flex items-center justify-between gap-1">
                   <h2 className="text-md">Obligation</h2>
@@ -91,7 +91,7 @@ function FinancialSummary() {
                     />
                   ) : (
                     // Display Error Message
-                    <div className="mx-auto mt-2 mb-4 flex h-[14rem] w-[14rem] items-center justify-center gap-2 rounded-full border-[30px] border-gray-300 bg-transparent text-center text-sm font-bold">
+                    <div className="mx-auto mb-4 mt-2 flex h-[14rem] w-[14rem] items-center justify-center gap-2 rounded-full border-[30px] border-gray-300 bg-transparent text-center text-sm font-bold">
                       <div
                         style={{
                           backgroundColor: lightenHexColor("#ff0000", 92.5),
@@ -110,7 +110,7 @@ function FinancialSummary() {
                   )
                 ) : (
                   // Loading Skeleton
-                  <div className="mx-auto mt-2 mb-4 h-[14rem] w-[14rem] animate-pulse rounded-full border-[30px] border-gray-300 bg-transparent" />
+                  <div className="mx-auto mb-4 mt-2 h-[14rem] w-[14rem] animate-pulse rounded-full border-[30px] border-gray-300 bg-transparent" />
                 )}
 
                 {/* Key */}
@@ -208,7 +208,7 @@ function FinancialSummary() {
               </div>
 
               {/* Expenditure Status */}
-              <div className="flex h-full flex-1 flex-col bg-[#F7F7F7] px-4 pt-2 pb-4 shadow-md">
+              <div className="flex h-full flex-1 flex-col bg-[#F7F7F7] px-4 pb-4 pt-2 shadow-md">
                 {/* Header */}
                 <div className="flex items-center justify-between gap-1">
                   <h2 className="text-md">Expenditure</h2>
@@ -255,7 +255,7 @@ function FinancialSummary() {
                     />
                   ) : (
                     // Display Error Message
-                    <div className="mx-auto mt-2 mb-4 flex h-[14rem] w-[14rem] items-center justify-center gap-2 rounded-full border-[30px] border-gray-300 bg-transparent text-center text-sm font-bold">
+                    <div className="mx-auto mb-4 mt-2 flex h-[14rem] w-[14rem] items-center justify-center gap-2 rounded-full border-[30px] border-gray-300 bg-transparent text-center text-sm font-bold">
                       <div
                         style={{
                           backgroundColor: lightenHexColor("#ff0000", 92.5),
@@ -275,7 +275,7 @@ function FinancialSummary() {
                   )
                 ) : (
                   // Loading Skeleton
-                  <div className="mx-auto mt-2 mb-4 h-[14rem] w-[14rem] animate-pulse rounded-full border-[30px] border-gray-300 bg-transparent" />
+                  <div className="mx-auto mb-4 mt-2 h-[14rem] w-[14rem] animate-pulse rounded-full border-[30px] border-gray-300 bg-transparent" />
                 )}
 
                 {/* Key */}
@@ -487,7 +487,7 @@ const DonutChart = ({
     <div className="relative my-2 h-80 overflow-visible lg:-my-4">
       {/* Outer Ring */}
       <Chart
-        className="absolute top-0 left-0 z-[2] h-full w-full overflow-visible rounded-full"
+        className="absolute left-0 top-0 z-[2] h-full w-full overflow-visible rounded-full"
         chartType="PieChart"
         width="100%"
         height="100%"
@@ -495,7 +495,7 @@ const DonutChart = ({
         options={outerRingOptions}
       />
 
-      <div className="absolute top-1/2 left-1/2 z-[1] mx-auto -translate-x-1/2 -translate-y-1/2 transform text-center">
+      <div className="absolute left-1/2 top-1/2 z-[1] mx-auto -translate-x-1/2 -translate-y-1/2 transform text-center">
         <h2 className="text-2xl font-bold">
           {/* format (projected - actual) like the example: ~$13.1K */}
           {formatNumber(projectedToDate - actualToDate)}

@@ -57,7 +57,7 @@ export const dependencyRouter = createTRPCRouter({
         AND successor_milestone = ${input.successor_milestone}`;
     }),
   getAllSuccessors: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx.session.db_user;
+    const user = ctx.session?.db_user;
     if (!user) return null;
 
     return user.user_role === "Admin"
@@ -170,7 +170,7 @@ export const dependencyRouter = createTRPCRouter({
         AND pmd.predecessor_project != pmd.successor_project`;
     }),
   getGreen: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx.session.db_user;
+    const user = ctx.session?.db_user;
     if (!user) return null;
 
     return (
@@ -218,7 +218,7 @@ export const dependencyRouter = createTRPCRouter({
   }),
   // "Getting Green" as dependencies means, instead of returning the count, return the actual dependencies that fit the criteria
   getGreenAsDependencies: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx.session.db_user;
+    const user = ctx.session?.db_user;
     if (!user) return null;
 
     const breakpoints =
@@ -281,7 +281,7 @@ export const dependencyRouter = createTRPCRouter({
             ) > ${breakpoints.dependency_days_green}`;
   }),
   getYellow: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx.session.db_user;
+    const user = ctx.session?.db_user;
     if (!user) return null;
 
     return (
@@ -336,7 +336,7 @@ export const dependencyRouter = createTRPCRouter({
     );
   }),
   getYellowAsDependencies: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx.session.db_user;
+    const user = ctx.session?.db_user;
     if (!user) return null;
 
     const breakpoints =
@@ -407,7 +407,7 @@ export const dependencyRouter = createTRPCRouter({
             ) <= ${breakpoints.dependency_days_green}`;
   }),
   getRed: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx.session.db_user;
+    const user = ctx.session?.db_user;
     if (!user) return null;
 
     return (
@@ -453,7 +453,7 @@ export const dependencyRouter = createTRPCRouter({
     );
   }),
   getRedAsDependencies: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx.session.db_user;
+    const user = ctx.session?.db_user;
     if (!user) return null;
 
     const breakpoints =

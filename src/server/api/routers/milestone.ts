@@ -46,7 +46,7 @@ export const milestoneRouter = createTRPCRouter({
       WHERE pm.project_id = ${input.project_id}`;
     }),
   getScheduleSummary: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx.session.db_user;
+    const user = ctx.session?.db_user;
     if (!user) return null;
 
     return (
@@ -80,7 +80,7 @@ export const milestoneRouter = createTRPCRouter({
     );
   }),
   getScheduleSummaryWithProjects: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx.session.db_user;
+    const user = ctx.session?.db_user;
     if (!user) return null;
 
     // Get all viewable projects

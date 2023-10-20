@@ -32,7 +32,7 @@ export const insightRouter = createTRPCRouter({
         .optional()
     )
     .query(async ({ input, ctx }) => {
-      const user = ctx.session.db_user;
+      const user = ctx.session?.db_user;
       if (!user)
         throw new TRPCError({
           code: "UNAUTHORIZED",
@@ -55,7 +55,7 @@ export const insightRouter = createTRPCRouter({
   addInsight: protectedProcedure
     .input(addInsightSchema)
     .mutation(async ({ input, ctx }) => {
-      const user = ctx.session.db_user;
+      const user = ctx.session?.db_user;
       if (!user)
         throw new TRPCError({
           code: "UNAUTHORIZED",
