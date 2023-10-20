@@ -15,7 +15,7 @@ export const contractRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const user = ctx.session.db_user;
+      const user = ctx.session?.db_user;
       if (!user) return null;
 
       // Get the old contract
@@ -23,7 +23,7 @@ export const contractRouter = createTRPCRouter({
         where: { id: input.id },
       });
       if (!oldContract || !oldContract.project_id) return null;
-      
+
       // Get the project
       const project = await prisma.project.findUnique({
         where: { id: oldContract.project_id },
@@ -37,21 +37,31 @@ export const contractRouter = createTRPCRouter({
       const iptMembersUsers = await prisma.users.findMany({
         where: { id: { in: iptMembers.map((iptMember) => iptMember.id) } },
       });
-      
+
       const updatedContract = await prisma.contract_award.update({
         where: { id: input.id },
         data: { contract_status: input.contract_status },
       });
 
       // Send email to all IPT Members for this project
-      let emailContent = '';
-      if (oldContract.contract_status !== input.contract_status) emailContent += `Contract status: ${oldContract.contract_status} ---> ${input.contract_status} \n`;
+      let emailContent = "";
+      if (oldContract.contract_status !== input.contract_status)
+        emailContent += `Contract status: ${oldContract.contract_status} ---> ${input.contract_status} \n`;
       if (emailContent) {
         for (const iptMember of iptMembersUsers) {
-          if (!iptMember.user_email)
-            continue;
+          if (!iptMember.user_email) continue;
 
-          await sendEmail(iptMember.user_email, `METIS - ${project.project_name || "N/A"} contract status has been updated by ${user.user_name || "N/A"} (${user.user_email || "N/A"})`, `${user.user_name || "N/A"} (${user.user_email || "N/A"}) updated the following project in METIS: \n\n${emailContent}\n\n\nLog into the METIS dashboard to view more details.`);
+          await sendEmail(
+            iptMember.user_email,
+            `METIS - ${
+              project.project_name || "N/A"
+            } contract status has been updated by ${user.user_name || "N/A"} (${
+              user.user_email || "N/A"
+            })`,
+            `${user.user_name || "N/A"} (${
+              user.user_email || "N/A"
+            }) updated the following project in METIS: \n\n${emailContent}\n\n\nLog into the METIS dashboard to view more details.`
+          );
         }
       }
 

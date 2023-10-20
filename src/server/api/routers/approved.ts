@@ -27,7 +27,7 @@ export const approvedRouter = createTRPCRouter({
       })
     )
     // .mutation(async ({ input, ctx }) => {
-    //   const user = ctx.session.db_user;
+    //   const user = ctx.session?.db_user;
     //   if (!user) return null;
     //   const new_funding = await prisma.project.create({
     //     data: {
