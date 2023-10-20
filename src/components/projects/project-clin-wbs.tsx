@@ -166,7 +166,7 @@ function ProjectClinWBS({
                               : "..."}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {wbs.clin_num}
+                            {wbs.clin_num?.toString()?.padStart(4, '0')}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             {wbs.source_type}
