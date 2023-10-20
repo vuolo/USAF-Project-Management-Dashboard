@@ -102,10 +102,6 @@ function formatRed(text: string): JSX.Element {
   return <span style={{ color: 'red', fontWeight: 'bold' }}>{text}</span>;
 }
 
-function formatRed(text: string): JSX.Element {
-  return <span style={{ color: 'red', fontWeight: 'bold' }}>{text}</span>;
-}
-
 function getRowValue(
   obli: obligation_plan,
   rowIdx: number,
