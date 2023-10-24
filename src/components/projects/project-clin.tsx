@@ -296,6 +296,27 @@ function ProjectClin({ project_id }: { project_id: number }) {
       });
   }, [deleteClin, editModalInput_clinId]);
 
+  // Update projected expenditure based on clin/WBS
+  const updateProjectedExpenditure = api.clin.updateProjFromClin.useMutation({
+    onError(error) {
+      toast.error(
+        toastMessage(
+          "Error updating projected expenditure.",
+          "There was an error fetching the WBS data and updating the projection. Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess() {
+      toast.success(
+        toastMessage(
+          "Projected Expenditure Updated.",
+          "The WBS data was fetched and expenditure projection was updated successfully."
+        )
+      );
+    },
+  });
+
   return (
     <>
       <div className="sm:flex sm:items-center">
@@ -309,6 +330,17 @@ function ProjectClin({ project_id }: { project_id: number }) {
           </p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+        {/* Refresh the clin data, The same function should also be triggered once new clin data is added/deleted */}
+        <button
+            type="button"
+            title="Update projected expenditure from WBS"
+            onClick={() => {
+              updateProjectedExpenditure.mutate({ project_id: project_id });
+            }}
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand-dark px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-dark/80 focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto mr-2"
+          >
+            Refresh
+          </button>
           <button
             onClick={openAddModal}
             type="button"

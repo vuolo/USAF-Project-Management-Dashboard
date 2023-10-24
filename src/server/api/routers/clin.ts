@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
 import type { view_clin } from "~/types/view_clin";
+import type { wbs } from "~/types/wbs";
 
 export const clinRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async () => {
@@ -75,4 +76,81 @@ export const clinRouter = createTRPCRouter({
         DELETE FROM clin_data 
         WHERE id = ${input.id}`;
     }),
+  updateProjFromClin: protectedProcedure
+  .input(z.object({ project_id: z.number() }))
+  .mutation(async ({ input }) => {
+    const wbsData = await prisma.$queryRaw<wbs[]>`
+      SELECT 
+        id,
+        month as date,
+        total_price as Projected
+      FROM task_resource_table
+      WHERE project_id=${input.project_id}
+      ORDER BY month
+    `;
+    
+    const groupedWbsData: Record<string, number> = {};
+    wbsData.forEach((wbsItem) => {
+      const date = new Date(wbsItem.date);
+      const key = `${date.getFullYear()}-${date.getMonth()}`;  // Key format: YYYY-MM
+      groupedWbsData[key] = (groupedWbsData[key] || 0) + Number(wbsItem.Projected);
+    });
+
+    const sortedGroupedWbsDataArray = Object.entries(groupedWbsData).sort((a, b) => {
+      return a[0].localeCompare(b[0]);
+    });
+  
+
+    /*
+    if (!year || !month) {
+        console.warn(`Invalid key format encountered: ${key}. Skipping.`);
+        continue;
+      }
+    */
+    // Upload to projected expenditure
+    for (const [key, value] of sortedGroupedWbsDataArray) {
+      const [year, month] = key.split('-').map(Number);
+  
+      if (!year || !month) {
+        console.warn(`Invalid key format encountered: ${key}. Skipping.`);
+        continue;
+      }
+      // Calculate the start and end of the month for filtering
+      const startOfMonth = new Date(year, month, 1); // First day of the month
+      const startOfNextMonth = new Date(year, month + 1, 1); // First day of the next month
+  
+      // Check if an entry already exists for this date (matching the year and month)
+      const existingEntry = await prisma.expenditure_funding_data.findFirst({
+        where: {
+          project_id: input.project_id,
+          expen_funding_date: {
+            gte: startOfMonth,
+            lt: startOfNextMonth
+          }
+        }
+      });
+
+      const expen_funding_date = new Date(year, month, 15);
+  
+      if (existingEntry) {
+        // Update the entry if it already exists
+        await prisma.expenditure_funding_data.update({
+          where: { id: existingEntry.id },
+          data: { expen_projected: value },
+        });
+      } else {
+        // Create a new entry if it doesn't exist
+        await prisma.expenditure_funding_data.create({
+          data: {
+            project_id: input.project_id,
+            expen_funding_date,
+            expen_projected: value,
+          }
+        });
+      }
+    }
+
+
+    return;
+  }),
 });
