@@ -22,13 +22,20 @@ import {
   generateNumberFromAlphaId,
   isNumeric,
 } from "~/utils/misc";
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from "@tanstack/react-query";
 
 type ModalProps = {
   project: view_project;
   milestoneSchedules?: milestone[] | null;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  refetchMilestoneSchedules: () => void;
+  refetchMilestoneSchedules: <TPageData>(
+    options?: RefetchOptions & RefetchQueryFilters<TPageData>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 };
 
 function ModalEditProjectSchedule({
@@ -525,7 +532,7 @@ function ModalEditProjectSchedule({
       if (save) await submitUpdateMilestoneSchedule();
 
       // Update UI to reflect new data
-      refetchMilestoneSchedules();
+      await refetchMilestoneSchedules();
 
       // Reset the edit state (after 500ms, to allow the modal to close)
       setTimeout(() => {
