@@ -23,3 +23,7 @@ export function generateNumberFromAlphaId(alphaId: string): number {
       (alphaId.charCodeAt(i) - 65) * Math.pow(26, alphaId.length - i - 1);
   return number;
 }
+
+export function isNumeric(str: string): boolean {
+  return /^\d+$/.test(str);
+}

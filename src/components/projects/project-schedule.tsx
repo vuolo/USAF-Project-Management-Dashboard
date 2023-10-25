@@ -23,9 +23,10 @@ const columns = [
 
 function ProjectSchedule({ project }: { project: view_project }) {
   const user = useSession().data?.db_user;
-  const { data: milestoneSchedules } = api.milestone.getSchedules.useQuery({
-    project_id: project.id,
-  });
+  const { data: milestoneSchedules, refetch: refetchMilestoneSchedules } =
+    api.milestone.getSchedules.useQuery({
+      project_id: project.id,
+    });
   const [editScheduleModalOpen, setEditScheduleModalOpen] = useState(false);
   useEffect(
     () => displayTodayLine({ milestoneSchedules }),
@@ -172,6 +173,7 @@ function ProjectSchedule({ project }: { project: view_project }) {
         milestoneSchedules={milestoneSchedules}
         isOpen={editScheduleModalOpen}
         setIsOpen={setEditScheduleModalOpen}
+        refetchMilestoneSchedules={refetchMilestoneSchedules}
       />
     </div>
   );

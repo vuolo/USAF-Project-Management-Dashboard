@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { protectedProcedure } from "~/server/api/trpc";
 import { prisma } from "~/server/db";
@@ -5,6 +6,26 @@ import type { NewMilestone } from "~/types/milestone";
 import { generateNumberFromAlphaId } from "~/utils/misc";
 
 export const milestonebulk_ext = {
+  bulkDeleteMilestones: protectedProcedure
+    .input(
+      z.object({
+        milestone_ids: z.array(z.number()).min(1),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      await prisma.$executeRaw`
+        DELETE FROM project_milestone_dependency
+        WHERE predecessor_project = successor_project
+        AND successor_milestone IN (${Prisma.join(input.milestone_ids)})`;
+
+      return await prisma.project_milestones.deleteMany({
+        where: {
+          id: {
+            in: input.milestone_ids,
+          },
+        },
+      });
+    }),
   bulkAddMilestones: protectedProcedure
     .input(
       z.object({
@@ -113,6 +134,8 @@ export const milestonebulk_ext = {
               ${dependency.successor_milestone})`;
         }
       }
+
+      return true;
 
       // // let newMilestones = some kind of array
       // for (let i = 0; i < newMilestones.length(); i++) {

@@ -8,6 +8,7 @@ export type milestone_using_day_values = Partial<NewMilestone> &
     ActualStart: DayValue;
     ActualEnd: DayValue;
     hasBeenUpdated?: boolean;
+    markedForDeletion?: boolean;
   };
 
 // pm.id as ID,

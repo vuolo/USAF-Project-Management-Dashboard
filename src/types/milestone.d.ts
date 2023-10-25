@@ -26,6 +26,7 @@ export type milestone = {
 
 export type NewMilestone = Omit<milestone, "ID"> & {
   alphaId: string;
+  markedForDeletion?: boolean;
 };
 
 export type CountedDependency = {

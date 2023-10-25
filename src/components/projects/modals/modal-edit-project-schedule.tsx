@@ -16,13 +16,19 @@ import DatePicker, {
 import type { view_project } from "~/types/view_project";
 import type { milestone, NewMilestone } from "~/types/milestone";
 import type { milestone_using_day_values } from "~/types/milestone_using_day_values";
-import { classNames, generateAlphaId } from "~/utils/misc";
+import {
+  classNames,
+  generateAlphaId,
+  generateNumberFromAlphaId,
+  isNumeric,
+} from "~/utils/misc";
 
 type ModalProps = {
   project: view_project;
   milestoneSchedules?: milestone[] | null;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  refetchMilestoneSchedules: () => void;
 };
 
 function ModalEditProjectSchedule({
@@ -30,6 +36,7 @@ function ModalEditProjectSchedule({
   milestoneSchedules,
   isOpen,
   setIsOpen,
+  refetchMilestoneSchedules,
 }: ModalProps) {
   const router = useRouter();
 
@@ -46,11 +53,138 @@ function ModalEditProjectSchedule({
     if (!modalOpen) setNewMilestones([]);
   }, [modalOpen]);
 
+  // Listen for changes in newMilestones (and also editableMilestoneSchedules to handle deletion)
   useEffect(() => {
-    // add newMilestones to editableMilestoneSchedules
-    console.log("newMilestones", newMilestones);
-
     if (newMilestones.length === 0) return;
+
+    // Remove newMilestones that have been marked for deletion
+    let hasDeletedAMilestone = false;
+    const newMilestonesMarkedForDeletion = editableMilestoneSchedules.filter(
+      (m) => m.markedForDeletion
+    );
+    for (const mForDeletion of newMilestonesMarkedForDeletion) {
+      const mForDeletionAlphaId = mForDeletion.alphaId;
+      if (!mForDeletionAlphaId) continue; // Should never happen (but just in case)
+
+      // 1. Go through ALL newMilestones, and update occurances of the deleted milestone in Predecessors
+      setNewMilestones((prev) =>
+        prev.map((m) => {
+          if (m.Predecessors?.includes(mForDeletionAlphaId)) {
+            return {
+              ...m,
+              Predecessors: m.Predecessors.replace(
+                new RegExp(`\\b${mForDeletionAlphaId}\\b`, "g"),
+                ""
+                // generateAlphaId(
+                //   generateNumberFromAlphaId(mForDeletionAlphaId) - 1
+                // )
+              )
+                .replace(/,\s*,/g, ",")
+                .replace(/^,|,$/g, "")
+                .trim(),
+            };
+          }
+          return m;
+        })
+      );
+
+      // 2. Go through ALL editableMilestoneSchedules, and update occurances of the deleted milestone in Predecessors
+      setEditableMilestoneSchedules((prev) =>
+        prev.map((m) => {
+          if (m.Predecessors?.includes(mForDeletionAlphaId)) {
+            return {
+              ...m,
+              Predecessors: m.Predecessors.replace(
+                new RegExp(`\\b${mForDeletionAlphaId}\\b`, "g"),
+                ""
+                // generateAlphaId(
+                //   generateNumberFromAlphaId(mForDeletionAlphaId) - 1
+                // )
+              )
+                .replace(/,\s*,/g, ",")
+                .replace(/^,|,$/g, "")
+                .trim(),
+            };
+          }
+          return m;
+        })
+      );
+
+      // 2. Remove from newMilestones
+      setNewMilestones((prev) =>
+        prev.filter((m) => m.alphaId !== mForDeletionAlphaId)
+      );
+
+      // 3. Remove from editableMilestoneSchedules
+      setEditableMilestoneSchedules((prev) =>
+        prev.filter((m) => m.alphaId !== mForDeletionAlphaId)
+      );
+
+      // 4. Refresh alphaIds of newMilestones
+      setNewMilestones((prev) =>
+        prev.map((m, mIdx) => {
+          if (m.alphaId) {
+            return {
+              ...m,
+              alphaId: generateAlphaId(mIdx),
+            };
+          }
+          return m;
+        })
+      );
+
+      // 5. Refresh alphaIds of editableMilestoneSchedules
+      setEditableMilestoneSchedules((prev) =>
+        prev.map((m, mIdx) => {
+          if (m.alphaId) {
+            return {
+              ...m,
+              alphaId: generateAlphaId(
+                mIdx - (milestoneSchedules?.length || 0)
+              ),
+            };
+          }
+          return m;
+        })
+      );
+
+      // 6. Shift predecessor alphaIds of editableMilestoneSchedules
+      setEditableMilestoneSchedules((prev) =>
+        prev.map((m) => {
+          if (
+            m.alphaId && // Only shift if it's a new milestone
+            generateNumberFromAlphaId(m.alphaId) >
+              generateNumberFromAlphaId(mForDeletionAlphaId)
+          ) {
+            return {
+              ...m,
+              Predecessors: m.Predecessors?.split(",")
+                .map((p) => p.trim())
+                .map((p) => {
+                  // Check if needed to be shifted
+                  if (
+                    !isNumeric(p) &&
+                    generateNumberFromAlphaId(p) >
+                      generateNumberFromAlphaId(mForDeletionAlphaId)
+                  ) {
+                    // Shift
+                    return generateAlphaId(generateNumberFromAlphaId(p) - 1);
+                  }
+                })
+                .join(", ")
+                .trim(),
+            };
+          }
+          return m;
+        })
+      );
+
+      hasDeletedAMilestone = true;
+    }
+
+    if (hasDeletedAMilestone) return; // Don't add new milestones if we've deleted one
+
+    // Add newMilestones to editableMilestoneSchedules
     setEditableMilestoneSchedules((prev) => [
       ...prev,
       ...(newMilestones
@@ -73,7 +207,7 @@ function ModalEditProjectSchedule({
             : convertDateToDayValue(m.ActualEnd),
         })) as milestone_using_day_values[]),
     ]);
-  }, [newMilestones]);
+  }, [newMilestones, editableMilestoneSchedules]);
 
   // Listen for changes in milestoneSchedules, and update edit state (the edit state is used to render the table on the modal)
   useEffect(() => {
@@ -206,19 +340,39 @@ function ModalEditProjectSchedule({
     },
   });
 
-  const bulkAddMilestones = api.milestone.bulkAddMilestones.useMutation({
+  const bulkDeleteMilestones = api.milestone.bulkDeleteMilestones.useMutation({
     onError: (error) => {
       toast.error(
         toastMessage(
-          "Error Adding Milestones",
-          "There was an error adding the milestones. Please try again."
+          "Error Deleting Milestones",
+          "There was an error deleting the milestone(s). Please try again."
         )
       );
       console.error(error);
     },
     onSuccess: () => {
       toast.success(
-        toastMessage("Milestones Added", "The milestones have been added.")
+        toastMessage(
+          "Milestones Deleted",
+          "The milestone(s) have been deleted."
+        )
+      );
+    },
+  });
+
+  const bulkAddMilestones = api.milestone.bulkAddMilestones.useMutation({
+    onError: (error) => {
+      toast.error(
+        toastMessage(
+          "Error Adding Milestones",
+          "There was an error adding the milestone(s). Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess: () => {
+      toast.success(
+        toastMessage("Milestones Added", "The milestone(s) have been added.")
       );
     },
   });
@@ -244,17 +398,29 @@ function ModalEditProjectSchedule({
       },
     });
 
-  const submitUpdateMilestoneSchedule = useCallback(() => {
+  const submitUpdateMilestoneSchedule = useCallback(async () => {
     if (!milestoneSchedules) return;
 
+    const updateMilestonePromises = [];
+    const dependencyPromises = [];
+
+    // Delete milestones that have been marked for deletion
+    const milestonesToDelete = editableMilestoneSchedules.filter(
+      (m) => m.markedForDeletion
+    );
+    if (milestonesToDelete.length > 0)
+      await bulkDeleteMilestones.mutateAsync({
+        milestone_ids: milestonesToDelete.map((m) => m.ID),
+      });
+
     // Convert each DayValue to a Date (this is used by the database)
-    editableMilestoneSchedules.forEach((m, mIdx) => {
+    for (const [mIdx, m] of editableMilestoneSchedules.entries()) {
       // Only update if the milestone has been updated
       if (
         !m.alphaId &&
-        (m.hasBeenUpdated || m.Name != milestoneSchedules[mIdx]?.Name)
-      )
-        updateMilestoneSchedule.mutate({
+        (m.hasBeenUpdated || m.Name !== milestoneSchedules[mIdx]?.Name)
+      ) {
+        const updatePromise = updateMilestoneSchedule.mutateAsync({
           milestone_id: m.ID,
           project_id: m.project_id,
           task_name: m.Name,
@@ -271,40 +437,51 @@ function ModalEditProjectSchedule({
             ? convertDayValueToDate(m.ActualEnd, 1)
             : new Date("December 31, 1969"),
         });
+        updateMilestonePromises.push(updatePromise);
+      }
 
       // Update Predecessors
       if (
         !m.alphaId &&
-        m.Predecessors != milestoneSchedules[mIdx]?.Predecessors
+        m.Predecessors !== milestoneSchedules[mIdx]?.Predecessors
       ) {
-        // Delete all associated milestone dependencies
-        removeAssociatedMilestoneDependencies.mutate({
-          milestone_id: m.ID,
-        });
+        const removeDependencyPromise =
+          removeAssociatedMilestoneDependencies.mutateAsync({
+            milestone_id: m.ID,
+          });
+        dependencyPromises.push(removeDependencyPromise);
 
-        // Add new milestone dependencies
-        m.Predecessors.split(",").forEach((p) => {
+        const addDependencyPromises = m.Predecessors.split(",").map((p) => {
           const predecessor_milestone_str = p.trim();
-
-          // Ensure the predecessor milestone is a number (id)
           const predecessor_milestone = Number(predecessor_milestone_str);
-          if (isNaN(Number(predecessor_milestone))) return;
 
-          addDependency.mutate({
+          if (isNaN(predecessor_milestone)) return Promise.resolve();
+
+          return addDependency.mutateAsync({
             predecessor_project: m.project_id,
             predecessor_milestone,
             successor_project: m.project_id,
             successor_milestone: m.ID,
           });
         });
+
+        dependencyPromises.push(...addDependencyPromises);
       }
-    });
+    }
+
+    // Wait for all milestone updates to be processed
+    await Promise.all(updateMilestonePromises);
+
+    // Wait for all dependency updates to be processed, only after milestone updates are done
+    await Promise.all(dependencyPromises);
 
     // Bulk add new milestones
-    bulkAddMilestones.mutate({
-      milestones: editableMilestoneSchedules
-        .filter((m) => m.alphaId)
-        .map((m) => ({
+    const newMilestonesToBulkAdd = editableMilestoneSchedules.filter(
+      (m) => m.alphaId
+    );
+    if (newMilestonesToBulkAdd.length > 0)
+      await bulkAddMilestones.mutateAsync({
+        milestones: newMilestonesToBulkAdd.map((m) => ({
           alphaId: m.alphaId,
           project_id: m.project_id,
           Name: m.Name,
@@ -323,8 +500,9 @@ function ModalEditProjectSchedule({
           Predecessors: m.Predecessors,
           Predecessors_Name: m.Predecessors_Name,
         })),
-    });
+      });
   }, [
+    bulkDeleteMilestones,
     bulkAddMilestones,
     editableMilestoneSchedules,
     updateMilestoneSchedule,
@@ -340,19 +518,21 @@ function ModalEditProjectSchedule({
 
   // Close modal
   const closeModal = useCallback(
-    (save: boolean) => {
+    async (save: boolean) => {
       setModalOpen(false);
       setIsOpen(false);
 
-      if (save) submitUpdateMilestoneSchedule();
+      if (save) await submitUpdateMilestoneSchedule();
 
-      // Reset the edit state
+      // Update UI to reflect new data
+      refetchMilestoneSchedules();
+
+      // Reset the edit state (after 500ms, to allow the modal to close)
       setTimeout(() => {
         setEditableMilestoneSchedules([]);
-        // TODO: Refetch milestoneSchedules in the parent component
       }, 500);
     },
-    [setIsOpen, submitUpdateMilestoneSchedule]
+    [setIsOpen, submitUpdateMilestoneSchedule, refetchMilestoneSchedules]
   );
 
   useEffect(() => {
@@ -401,7 +581,7 @@ function ModalEditProjectSchedule({
         className="fixed inset-0 z-10 overflow-y-auto"
         initialFocus={saveButtonRef}
         onClose={() => {
-          closeModal(false);
+          void closeModal(false);
         }}
       >
         <div className="flex min-h-screen items-center justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
@@ -517,17 +697,22 @@ function ModalEditProjectSchedule({
                                             key={
                                               milestone.ID || milestone.alphaId
                                             }
-                                            className={
+                                            className={classNames(
                                               milestoneIdx % 2 === 0
-                                                ? undefined
-                                                : "bg-gray-50"
-                                            }
+                                                ? ""
+                                                : "bg-gray-50",
+                                              milestone.markedForDeletion
+                                                ? "bg-red-200 line-through"
+                                                : ""
+                                            )}
                                           >
                                             <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-black sm:pl-6">
                                               <div className="flex items-center justify-center gap-2">
                                                 <span
                                                   className={classNames(
-                                                    milestone.alphaId
+                                                    milestone.markedForDeletion
+                                                      ? "text-red-800"
+                                                      : milestone.alphaId
                                                       ? "text-green-800"
                                                       : ""
                                                   )}
@@ -536,13 +721,32 @@ function ModalEditProjectSchedule({
                                                     milestone.alphaId}
                                                 </span>
                                                 <Trash2
-                                                  onClick={() =>
-                                                    submitDeleteMilestoneSchedule(
-                                                      milestone.ID ||
-                                                        milestone.alphaId
-                                                    )
+                                                  onClick={
+                                                    () =>
+                                                      setEditableMilestoneSchedules(
+                                                        (prev) =>
+                                                          // mark for deletion
+                                                          prev.map((m, idx) =>
+                                                            idx === milestoneIdx
+                                                              ? {
+                                                                  ...m,
+                                                                  markedForDeletion:
+                                                                    !m.markedForDeletion,
+                                                                }
+                                                              : m
+                                                          )
+                                                      )
+                                                    // submitDeleteMilestoneSchedule(
+                                                    //   milestone.ID ||
+                                                    //     milestone.alphaId
+                                                    // )
                                                   }
-                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                  className={classNames(
+                                                    "h-4 w-4 cursor-pointer hover:text-red-500",
+                                                    milestone.markedForDeletion
+                                                      ? "text-red-800"
+                                                      : "text-gray-400"
+                                                  )}
                                                 />
                                               </div>
                                             </td>
@@ -594,7 +798,12 @@ function ModalEditProjectSchedule({
                                                       "ProjectedStart"
                                                     )
                                                   }
-                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                  className={classNames(
+                                                    "h-4 w-4 cursor-pointer hover:text-red-500",
+                                                    milestone.markedForDeletion
+                                                      ? "text-red-800"
+                                                      : "text-gray-400"
+                                                  )}
                                                 />
                                               </div>
                                             </td>
@@ -620,7 +829,12 @@ function ModalEditProjectSchedule({
                                                       "ProjectedEnd"
                                                     )
                                                   }
-                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                  className={classNames(
+                                                    "h-4 w-4 cursor-pointer hover:text-red-500",
+                                                    milestone.markedForDeletion
+                                                      ? "text-red-800"
+                                                      : "text-gray-400"
+                                                  )}
                                                 />
                                               </div>
                                             </td>
@@ -646,7 +860,12 @@ function ModalEditProjectSchedule({
                                                       "ActualStart"
                                                     )
                                                   }
-                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                  className={classNames(
+                                                    "h-4 w-4 cursor-pointer hover:text-red-500",
+                                                    milestone.markedForDeletion
+                                                      ? "text-red-800"
+                                                      : "text-gray-400"
+                                                  )}
                                                 />
                                               </div>
                                             </td>
@@ -672,7 +891,12 @@ function ModalEditProjectSchedule({
                                                       "ActualEnd"
                                                     )
                                                   }
-                                                  className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
+                                                  className={classNames(
+                                                    "h-4 w-4 cursor-pointer hover:text-red-500",
+                                                    milestone.markedForDeletion
+                                                      ? "text-red-800"
+                                                      : "text-gray-400"
+                                                  )}
                                                 />
                                               </div>
                                             </td>
@@ -752,14 +976,14 @@ function ModalEditProjectSchedule({
                     ref={saveButtonRef}
                     type="button"
                     className="inline-flex w-fit justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
-                    onClick={() => closeModal(true)}
+                    onClick={() => void closeModal(true)}
                   >
                     Save
                   </button>
                   <button
                     type="button"
                     className="ml-3 mt-3 inline-flex w-fit justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm"
-                    onClick={() => closeModal(false)}
+                    onClick={() => void closeModal(false)}
                   >
                     Cancel
                   </button>
