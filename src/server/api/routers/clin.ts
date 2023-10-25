@@ -79,6 +79,7 @@ export const clinRouter = createTRPCRouter({
   updateProjFromClin: protectedProcedure
   .input(z.object({ project_id: z.number() }))
   .mutation(async ({ input }) => {
+    // Get WBS data, Group by month, and sort it
     const wbsData = await prisma.$queryRaw<wbs[]>`
       SELECT 
         id,
@@ -100,57 +101,52 @@ export const clinRouter = createTRPCRouter({
       return a[0].localeCompare(b[0]);
     });
   
+    // Store the actual expenditure data
+    const actualExpenditureData = await prisma.expenditure_funding_data.findMany({
+      where: {
+        project_id: input.project_id,
+      }
+    });
 
-    /*
-    if (!year || !month) {
-        console.warn(`Invalid key format encountered: ${key}. Skipping.`);
-        continue;
+     // Delete all existing data for that project
+     await prisma.expenditure_funding_data.deleteMany({
+      where: {
+        project_id: input.project_id,
       }
-    */
-    // Upload to projected expenditure
-    for (const [key, value] of sortedGroupedWbsDataArray) {
-      const [year, month] = key.split('-').map(Number);
-  
-      if (!year || !month) {
-        console.warn(`Invalid key format encountered: ${key}. Skipping.`);
-        continue;
-      }
-      // Calculate the start and end of the month for filtering
-      const startOfMonth = new Date(year, month, 1); // First day of the month
-      const startOfNextMonth = new Date(year, month + 1, 1); // First day of the next month
-  
-      // Check if an entry already exists for this date (matching the year and month)
-      const existingEntry = await prisma.expenditure_funding_data.findFirst({
-        where: {
-          project_id: input.project_id,
-          expen_funding_date: {
-            gte: startOfMonth,
-            lt: startOfNextMonth
-          }
+    });
+
+    // Upload Expenditure data
+    const uploadToExpenditure = async (project_id: number, sortedWbsData: [string, number][]) => {
+      for (const [key, value] of sortedWbsData) {
+        const [year, month] = key.split('-').map(Number);
+
+        if (!year || !month) {
+          console.warn(`Invalid key format encountered: ${key}. Skipping.`);
+          continue;
         }
-      });
 
-      const expen_funding_date = new Date(year, month, 15);
-  
-      if (existingEntry) {
-        // Update the entry if it already exists
-        await prisma.expenditure_funding_data.update({
-          where: { id: existingEntry.id },
-          data: { expen_projected: value },
+        const expen_funding_date = new Date(year, month - 1, 15); 
+
+        // Find the actual expenditure for that month, if it exists
+        const actualForMonth = actualExpenditureData.find(item => {
+          const date = new Date(item.expen_funding_date);
+          return date.getFullYear() === year && date.getMonth() === month - 1;
         });
-      } else {
-        // Create a new entry if it doesn't exist
+
+        const expen_actual = actualForMonth ? actualForMonth.expen_actual : null;
+
         await prisma.expenditure_funding_data.create({
           data: {
-            project_id: input.project_id,
+            project_id,
             expen_funding_date,
             expen_projected: value,
+            expen_actual: expen_actual
           }
         });
       }
     }
 
 
-    return;
+    await uploadToExpenditure(input.project_id, sortedGroupedWbsDataArray);
   }),
 });

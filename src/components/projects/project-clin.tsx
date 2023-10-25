@@ -10,6 +10,7 @@ import { formatCurrency } from "~/utils/currency";
 import { List, ListPlus } from "lucide-react";
 import type { clin_data_clin_type } from "@prisma/client";
 import type { view_clin } from "~/types/view_clin";
+import ConfirmProjectedRefreshModal from "./modals/modal-confirm-refresh";
 
 function ProjectClin({ project_id }: { project_id: number }) {
   const router = useRouter();
@@ -296,26 +297,13 @@ function ProjectClin({ project_id }: { project_id: number }) {
       });
   }, [deleteClin, editModalInput_clinId]);
 
-  // Update projected expenditure based on clin/WBS
-  const updateProjectedExpenditure = api.clin.updateProjFromClin.useMutation({
-    onError(error) {
-      toast.error(
-        toastMessage(
-          "Error updating projected expenditure.",
-          "There was an error fetching the WBS data and updating the projection. Please try again."
-        )
-      );
-      console.error(error);
-    },
-    onSuccess() {
-      toast.success(
-        toastMessage(
-          "Projected Expenditure Updated.",
-          "The WBS data was fetched and expenditure projection was updated successfully."
-        )
-      );
-    },
-  });
+  // Update Expenditure modal
+  const [refreshModalOpen, setRefreshModalOpen] = useState(false);
+  const closeRefreshModal = useCallback(
+    () => {
+      setRefreshModalOpen(false);
+    },[]
+  );
 
   return (
     <>
@@ -331,15 +319,13 @@ function ProjectClin({ project_id }: { project_id: number }) {
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
         {/* Refresh the clin data, The same function should also be triggered once new clin data is added/deleted */}
-        <button
+          <button
             type="button"
             title="Update projected expenditure from WBS"
-            onClick={() => {
-              updateProjectedExpenditure.mutate({ project_id: project_id });
-            }}
+            onClick={() => setRefreshModalOpen(true)}
             className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand-dark px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-dark/80 focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto mr-2"
           >
-            Refresh
+            Update Expenditure
           </button>
           <button
             onClick={openAddModal}
@@ -865,6 +851,14 @@ function ProjectClin({ project_id }: { project_id: number }) {
           </div>
         </Dialog>
       </Transition.Root>
+
+      {/* Update Projected Expenditure Modal*/}
+      <ConfirmProjectedRefreshModal
+        project_id={project_id}
+        isOpen={refreshModalOpen}
+        closeModal={closeRefreshModal}
+      />
+
     </>
   );
 }
