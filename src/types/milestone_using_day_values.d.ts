@@ -1,13 +1,14 @@
 import type { DayValue } from "@hassanmojab/react-modern-calendar-datepicker";
-import type { milestone } from "./milestone";
+import type { milestone, NewMilestone } from "./milestone";
 
-export type milestone_using_day_values = milestone & {
-  ProjectedStart: DayValue;
-  ProjectedEnd: DayValue;
-  ActualStart: DayValue;
-  ActualEnd: DayValue;
-  hasBeenUpdated?: boolean;
-};
+export type milestone_using_day_values = Partial<NewMilestone> &
+  milestone & {
+    ProjectedStart: DayValue;
+    ProjectedEnd: DayValue;
+    ActualStart: DayValue;
+    ActualEnd: DayValue;
+    hasBeenUpdated?: boolean;
+  };
 
 // pm.id as ID,
 // pm.project_id,

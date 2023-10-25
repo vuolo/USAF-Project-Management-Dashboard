@@ -285,7 +285,7 @@ const getPercentage = (milestone: milestone): string | number => {
 
   if (!validActualStart && !validProjectedEnd) return 0;
 
-  if (validActualEnd) {
+  if (validActualEnd && milestone.ActualEnd && milestone.ActualStart) {
     if (currDate < new Date(milestone.ActualEnd)) {
       return getDaysElapsed(
         new Date(milestone.ActualStart),
@@ -298,7 +298,11 @@ const getPercentage = (milestone: milestone): string | number => {
 
   if (validProjectedEnd) {
     const projectedStart = milestone.ActualStart || milestone.ProjectedStart;
-    if (isValidDate(projectedStart)) {
+    if (
+      isValidDate(projectedStart) &&
+      projectedStart &&
+      milestone.ProjectedEnd
+    ) {
       if (currDate >= new Date(projectedStart)) {
         if (currDate < new Date(milestone.ProjectedEnd)) {
           return `Projected ${getDaysElapsed(

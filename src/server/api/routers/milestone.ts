@@ -10,6 +10,7 @@ import type {
 import type { schedule_summary } from "~/types/schedule_summary";
 import { view_project } from "~/types/view_project";
 import type { breakpoints } from "~/types/breakpoints";
+import { milestonebulk_ext } from "./milestone_bulk";
 
 export const milestoneRouter = createTRPCRouter({
   getSchedules: protectedProcedure
@@ -206,4 +207,5 @@ export const milestoneRouter = createTRPCRouter({
         },
       });
     }),
+  ...milestonebulk_ext,
 });

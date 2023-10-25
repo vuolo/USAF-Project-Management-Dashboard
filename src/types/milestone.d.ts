@@ -5,10 +5,10 @@ export type milestone = {
   project_id: number;
   Name: string;
   Duration: number;
-  ProjectedStart: Date;
-  ProjectedEnd: Date;
-  ActualStart: Date;
-  ActualEnd: Date;
+  ProjectedStart?: Date;
+  ProjectedEnd?: Date;
+  ActualStart?: Date;
+  ActualEnd?: Date;
   Predecessors: string;
   Predecessors_Name: string;
 };
@@ -23,6 +23,10 @@ export type milestone = {
 // pm.actual_end as "ActualEnd",
 // "Predecessors",
 // "Predecessors_Name"
+
+export type NewMilestone = Omit<milestone, "ID"> & {
+  alphaId: string;
+};
 
 export type CountedDependency = {
   pred_project_id: number;
