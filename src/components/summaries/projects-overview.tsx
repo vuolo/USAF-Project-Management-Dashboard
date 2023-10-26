@@ -26,12 +26,13 @@ function ProjectsOverview() {
   const [filterQuery, setFilterQuery] = useState("");
   const [filterType, setFilterType] = useState<FilterType>("project_name");
   const { data: branches } = api.branch.getAll.useQuery();
-  const { data: favorites } = api.user.getFavorites.useQuery();
+  const { data: favorites, refetch: refetchFavoriteList } = api.user.getFavorites.useQuery();
   const favoriteId = favorites?.map(x => x.projectId);
   const { data: projects, refetch } = api.project.search.useQuery({
     filterQuery,
     filterType,
   });
+
 
   function convertBranches() {
     if (!branches) return null;
@@ -60,6 +61,8 @@ function ProjectsOverview() {
             "The project favorite was added successfully."
           )
         );
+        
+        void refetchFavoriteList();
       },
     }
   );
@@ -81,6 +84,8 @@ function ProjectsOverview() {
             "The project favorite was removed successfully."
           )
         );
+
+        void refetchFavoriteList();
       },
     }
   );
