@@ -44,7 +44,7 @@ export const project_ext = {
       },
     });
 
-    let final: {
+    const final: {
       id: number;
       project_name: string | null;
       project_milestones: {

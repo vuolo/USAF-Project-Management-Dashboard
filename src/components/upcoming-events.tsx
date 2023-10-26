@@ -76,7 +76,7 @@ function UpcomingEvents() {
                     </> : <></>}
                 </div>
                 {projects && projects.map((project, index) => (
-                    <div className="mt-4">
+                    <div className="mt-4" key={project.id}>
                         <Disclosure>
                             {({ open }) => (
                                 <>
