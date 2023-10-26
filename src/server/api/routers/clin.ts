@@ -125,6 +125,8 @@ export const clinRouter = createTRPCRouter({
           continue;
         }
 
+        if (year === 1969) continue;
+
         const expen_funding_date = new Date(year, month - 1, 15); 
 
         // Find the actual expenditure for that month, if it exists

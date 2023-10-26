@@ -3,6 +3,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
 import { api } from "~/utils/api";
+import { useRouter } from "next/router";
 
 
 type ModalProps = {
@@ -17,6 +18,7 @@ export default function ConfirmProjectedRefreshModal({
     closeModal
   }: ModalProps) {
 
+  const router = useRouter();
     // Update projected expenditure based on clin/WBS
   const updateProjectedExpenditure = api.clin.updateProjFromClin.useMutation({
     onError(error) {
@@ -35,9 +37,10 @@ export default function ConfirmProjectedRefreshModal({
           "The WBS data was fetched and expenditure projection was updated successfully."
         )
       );
+
+      router.reload();
     },
   });
-
 
     return (
         <Transition.Root show={isOpen} as={Fragment}>
