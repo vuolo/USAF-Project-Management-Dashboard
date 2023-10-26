@@ -53,40 +53,41 @@ function ModalAddProjectContract({
     const requirementPlan_asDate = convertDayValueToDate(requirementPlanDate);
     if (!requirementPlan_asDate) return;
 
+    // Set the rest of the dates
+    const draftRfpReleased_asDate = addDays(
+      requirementPlan_asDate,
+      daysAdded.draft_rfp_released
+    );
+    const approvedByAcb_asDate = addDays(
+      draftRfpReleased_asDate,
+      daysAdded.approved_by_acb
+    );
+    const rfpReleased_asDate = addDays(
+      approvedByAcb_asDate,
+      daysAdded.rfp_released
+    );
+    const proposalReceived_asDate = addDays(
+      rfpReleased_asDate,
+      daysAdded.proposal_received
+    );
+    const techEvalComp_asDate = addDays(
+      proposalReceived_asDate,
+      daysAdded.tech_eval_comp
+    );
+    const negotiationComp_asDate = addDays(
+      techEvalComp_asDate,
+      daysAdded.negotiation_comp
+    );
+    const awarded_asDate = addDays(negotiationComp_asDate, daysAdded.awarded);
+
     // Update the rest of the dates
-    setDraftRfpReleasedDate(
-      convertDateToDayValue(
-        addDays(requirementPlan_asDate, daysAdded.draft_rfp_released)
-      )
-    );
-    setApprovedByAcbDate(
-      convertDateToDayValue(
-        addDays(requirementPlan_asDate, daysAdded.approved_by_acb)
-      )
-    );
-    setRfpReleasedDate(
-      convertDateToDayValue(
-        addDays(requirementPlan_asDate, daysAdded.rfp_released)
-      )
-    );
-    setProposalReceivedDate(
-      convertDateToDayValue(
-        addDays(requirementPlan_asDate, daysAdded.proposal_received)
-      )
-    );
-    setTechEvalCompDate(
-      convertDateToDayValue(
-        addDays(requirementPlan_asDate, daysAdded.tech_eval_comp)
-      )
-    );
-    setNegotiationCompDate(
-      convertDateToDayValue(
-        addDays(requirementPlan_asDate, daysAdded.negotiation_comp)
-      )
-    );
-    setAwardedDate(
-      convertDateToDayValue(addDays(requirementPlan_asDate, daysAdded.awarded))
-    );
+    setDraftRfpReleasedDate(convertDateToDayValue(draftRfpReleased_asDate));
+    setApprovedByAcbDate(convertDateToDayValue(approvedByAcb_asDate));
+    setRfpReleasedDate(convertDateToDayValue(rfpReleased_asDate));
+    setProposalReceivedDate(convertDateToDayValue(proposalReceived_asDate));
+    setTechEvalCompDate(convertDateToDayValue(techEvalComp_asDate));
+    setNegotiationCompDate(convertDateToDayValue(negotiationComp_asDate));
+    setAwardedDate(convertDateToDayValue(awarded_asDate));
   }, [daysAdded, requirementPlanDate]);
 
   const addContractAwardTimeline =
@@ -211,7 +212,7 @@ function ModalAddProjectContract({
           closeModal(false);
         }}
       >
-        <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div className="flex min-h-screen items-center justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -241,7 +242,7 @@ function ModalAddProjectContract({
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
             <div className="relative inline-block transform overflow-visible rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:align-middle">
-              <div className="rounded-lg bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="rounded-lg bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
                     <CalendarClock
@@ -249,7 +250,7 @@ function ModalAddProjectContract({
                       aria-hidden="true"
                     />
                   </div>
-                  <div className="mt-3 mr-2 w-full text-center sm:mt-0 sm:ml-4 sm:text-left">
+                  <div className="mr-2 mt-3 w-full text-center sm:ml-4 sm:mt-0 sm:text-left">
                     <Dialog.Title
                       as="h3"
                       className="text-lg font-medium leading-6 text-gray-900"
@@ -375,7 +376,7 @@ function ModalAddProjectContract({
                 </button>
                 <button
                   type="button"
-                  className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm"
                   onClick={() => closeModal(false)}
                 >
                   Cancel
