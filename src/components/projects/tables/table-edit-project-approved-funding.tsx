@@ -7,17 +7,26 @@ import { api } from "~/utils/api";
 import type { approved_funding, funding_types } from "@prisma/client";
 import type { Decimal } from "@prisma/client/runtime";
 import type { view_project } from "~/types/view_project";
+import {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from "@tanstack/react-query";
 
 type TableProps = {
   project: view_project;
   approvedFunding?: approved_funding[];
   fundingTypes?: funding_types[];
+  refetchApprovedFunding: <TPageData>(
+    options?: RefetchOptions & RefetchQueryFilters<TPageData>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 };
 
 function TableEditApprovedFunding({
   project,
   approvedFunding,
   fundingTypes,
+  refetchApprovedFunding,
 }: TableProps) {
   const router = useRouter();
 
@@ -34,29 +43,55 @@ function TableEditApprovedFunding({
     number | null
   >(null);
 
-  const fiscalYears: number[] = [];
-  const activeFundingTypeIds: number[] = [];
+  const [fiscalYears, setFiscalYears] = useState<number[]>([]);
+  const [activeFundingTypeIds, setActiveFundingTypeIds] = useState<number[]>(
+    []
+  );
 
-  // For each approved funding, add the fiscal year to the list of fiscal years,
-  // and add the funding type to the list of active funding types
-  approvedFunding?.forEach((approvedFunding) => {
-    if (
-      approvedFunding.appro_fiscal_year !== null &&
-      !fiscalYears.includes(approvedFunding.appro_fiscal_year)
-    )
-      fiscalYears.push(approvedFunding.appro_fiscal_year);
+  // Sync editableApprovedFunding fiscal years and funding types on remove
 
-    if (
-      approvedFunding.appro_funding_type !== null &&
-      !activeFundingTypeIds.includes(approvedFunding.appro_funding_type)
-    )
-      activeFundingTypeIds.push(approvedFunding.appro_funding_type);
-  });
+  useEffect(() => {
+    // For each approved funding, add the fiscal year to the list of fiscal years,
+    // and add the funding type to the list of active funding types
+    approvedFunding?.forEach((aprFunding) => {
+      if (
+        aprFunding.appro_fiscal_year !== null &&
+        !fiscalYears.includes(aprFunding.appro_fiscal_year)
+      )
+        setFiscalYears((prev) => [
+          ...prev.filter((fy) => fy !== aprFunding.appro_fiscal_year),
+          aprFunding.appro_fiscal_year as number,
+        ]);
+
+      if (
+        aprFunding.appro_funding_type !== null &&
+        !activeFundingTypeIds.includes(aprFunding.appro_funding_type)
+      )
+        setActiveFundingTypeIds((prev) => [
+          ...prev.filter((ft) => ft !== aprFunding.appro_funding_type),
+          aprFunding.appro_funding_type as number,
+        ]);
+    });
+  }, [approvedFunding, fiscalYears, activeFundingTypeIds]);
 
   // Listen for changes in approvedFunding, and update edit state (the edit state is used to render the table on the modal)
   useEffect(() => {
-    if (!approvedFunding || editableApprovedFunding.length > 0) return;
-    setEditableApprovedFunding([...approvedFunding]);
+    if (!approvedFunding) return;
+    setEditableApprovedFunding((prev) =>
+      [
+        ...prev,
+        ...approvedFunding.filter(
+          (aprFunding) =>
+            !prev.find((prevAprFunding) => prevAprFunding.id === aprFunding.id)
+        ),
+      ]
+        // remove all from new array that are not in approvedFunding (check ids)
+        .filter((aprFunding) =>
+          approvedFunding.find(
+            (prevAprFunding) => prevAprFunding.id === aprFunding.id
+          )
+        )
+    );
   }, [approvedFunding, editableApprovedFunding.length]);
 
   const updateApprovedFunding = api.approved.updateApprovedFunding.useMutation({
@@ -70,38 +105,48 @@ function TableEditApprovedFunding({
       console.error(error);
     },
     onSuccess() {
-      toast.success(
-        toastMessage(
-          "Approved Funding Updated",
-          "The approved funding has been updated successfully."
-        )
-      );
-
+      // toast.success(
+      //   toastMessage(
+      //     "Approved Funding Updated",
+      //     "The approved funding has been updated successfully."
+      //   )
+      // );
       // Refresh UI data for modal
-      router.reload(); // This is a temporary, hacky solution
+      // router.reload(); // This is a temporary, hacky solution
     },
   });
 
-  const submitUpdateApprovedFunding = useCallback(() => {
-    editableApprovedFunding.forEach((approvedFund) => {
-      if (
-        typeof approvedFund.id !== "number" ||
-        typeof approvedFund.project_id !== "number" ||
-        typeof approvedFund.appro_fiscal_year !== "number" ||
-        typeof approvedFund.appro_funding_type !== "number" ||
-        typeof approvedFund.approved_amount !== "number"
-      )
-        return;
+  const submitUpdateApprovedFunding = useCallback(async () => {
+    await Promise.all(
+      editableApprovedFunding.map((approvedFund) => {
+        if (
+          typeof approvedFund.id !== "number" ||
+          typeof approvedFund.project_id !== "number" ||
+          typeof approvedFund.appro_fiscal_year !== "number" ||
+          typeof approvedFund.appro_funding_type !== "number" ||
+          typeof approvedFund.approved_amount !== "number"
+        )
+          return;
 
-      updateApprovedFunding.mutate({
-        approvedID: approvedFund.id,
-        projectID: approvedFund.project_id,
-        appro_funding_type: approvedFund.appro_funding_type,
-        appro_fiscal_year: approvedFund.appro_fiscal_year,
-        approved_amount: approvedFund.approved_amount,
-      });
-    });
-  }, [updateApprovedFunding, editableApprovedFunding]);
+        return updateApprovedFunding.mutateAsync({
+          approvedID: approvedFund.id,
+          projectID: approvedFund.project_id,
+          appro_funding_type: approvedFund.appro_funding_type,
+          appro_fiscal_year: approvedFund.appro_fiscal_year,
+          approved_amount: approvedFund.approved_amount,
+        });
+      })
+    );
+
+    toast.success(
+      toastMessage(
+        "Approved Funding Updated",
+        "The approved funding has been updated successfully."
+      )
+    );
+
+    await refetchApprovedFunding();
+  }, [refetchApprovedFunding, updateApprovedFunding, editableApprovedFunding]);
 
   const addApprovedFunding = api.approved.addApprovedFunding.useMutation({
     onError(error) {
@@ -114,19 +159,18 @@ function TableEditApprovedFunding({
       console.error(error);
     },
     onSuccess() {
-      toast.success(
-        toastMessage(
-          "Approved Funding Added",
-          "The approved funding has been added successfully."
-        )
-      );
-
+      // toast.success(
+      //   toastMessage(
+      //     "Approved Funding Added",
+      //     "The approved funding has been added successfully."
+      //   )
+      // );
       // Refresh UI data for modal
-      router.reload(); // This is a temporary, hacky solution
+      // router.reload(); // This is a temporary, hacky solution
     },
   });
 
-  const submitAddFiscalYear = useCallback(() => {
+  const submitAddFiscalYear = useCallback(async () => {
     if (!addFYCurrent) {
       toast.error(
         toastMessage(
@@ -148,21 +192,33 @@ function TableEditApprovedFunding({
     }
 
     // For each funding type, add a new approved fiscal year
-    activeFundingTypeIds.forEach((fundingTypeID) => {
-      addApprovedFunding.mutate({
-        projectID: project.id,
-        appro_funding_type: fundingTypeID,
-        appro_fiscal_year: addFYCurrent,
-        approved_amount: 0,
-      });
-    });
+    await Promise.all(
+      activeFundingTypeIds.map((fundingTypeID) => {
+        return addApprovedFunding.mutateAsync({
+          projectID: project.id,
+          appro_funding_type: fundingTypeID,
+          appro_fiscal_year: addFYCurrent,
+          approved_amount: 0,
+        });
+      })
+    );
+
+    toast.success(
+      toastMessage(
+        "Fiscal Year Added",
+        "The fiscal year has been added successfully."
+      )
+    );
 
     // Add the new fiscal year to the list of fiscal years
-    fiscalYears.push(addFYCurrent);
+    setFiscalYears((p) => [...p, addFYCurrent]);
 
     // Reset the add fiscal year state
     setAddFYCurrent(null);
+
+    await refetchApprovedFunding();
   }, [
+    refetchApprovedFunding,
     addFYCurrent,
     fiscalYears,
     activeFundingTypeIds,
@@ -170,7 +226,7 @@ function TableEditApprovedFunding({
     project,
   ]);
 
-  const submitAddFundingType = useCallback(() => {
+  const submitAddFundingType = useCallback(async () => {
     if (!addFTCurrent) {
       toast.error(
         toastMessage(
@@ -192,21 +248,34 @@ function TableEditApprovedFunding({
     }
 
     // For each fiscal year, add a new approved funding type
-    fiscalYears.forEach((fiscalYear) => {
-      addApprovedFunding.mutate({
-        projectID: project.id,
-        appro_funding_type: addFTCurrent,
-        appro_fiscal_year: fiscalYear,
-        approved_amount: 0,
-      });
-    });
+    await Promise.all(
+      fiscalYears.map((fiscalYear) => {
+        return addApprovedFunding.mutateAsync({
+          projectID: project.id,
+          appro_funding_type: addFTCurrent,
+          appro_fiscal_year: fiscalYear,
+          approved_amount: 0,
+        });
+      })
+    );
+
+    toast.success(
+      toastMessage(
+        "Approved Funding Added",
+        "The approved funding has been added successfully."
+      )
+    );
 
     // Add the new funding type to the list of funding types
-    activeFundingTypeIds.push(addFTCurrent);
+    setActiveFundingTypeIds((p) => [...p, addFTCurrent]);
 
     // Reset the add funding type state
     setAddFTCurrent(null);
+
+    // Refresh UI data for modal
+    await refetchApprovedFunding();
   }, [
+    refetchApprovedFunding,
     addFTCurrent,
     fiscalYears,
     activeFundingTypeIds,
@@ -225,42 +294,71 @@ function TableEditApprovedFunding({
       console.error(error);
     },
     onSuccess() {
-      toast.success(
-        toastMessage(
-          "Approved Funding Removed",
-          "The approved funding has been removed successfully."
-        )
-      );
-
+      // toast.success(
+      //   toastMessage(
+      //     "Approved Funding Removed",
+      //     "The approved funding has been removed successfully."
+      //   )
+      // );
       // Refresh UI data for modal
-      router.reload(); // This is a temporary, hacky solution
+      // router.reload(); // This is a temporary, hacky solution
     },
   });
 
   const submitRemoveFiscalYear = useCallback(
-    (fiscalYear: number) => {
-      editableApprovedFunding.forEach((approvedFund) => {
-        if (approvedFund.appro_fiscal_year !== fiscalYear) return;
+    async (fiscalYear: number) => {
+      await Promise.all(
+        editableApprovedFunding.map((approvedFund) => {
+          if (approvedFund.appro_fiscal_year !== fiscalYear) return;
 
-        removeApprovedFunding.mutate({
-          approvedID: approvedFund.id,
-        });
-      });
+          return removeApprovedFunding.mutateAsync({
+            approvedID: approvedFund.id,
+          });
+        })
+      );
+
+      toast.success(
+        toastMessage(
+          "Fiscal Year Removed",
+          "The fiscal year has been removed successfully."
+        )
+      );
+
+      // Refresh UI data for modal
+      await refetchApprovedFunding();
+
+      setFiscalYears((prev) => prev.filter((fy) => fy !== fiscalYear));
     },
-    [editableApprovedFunding, removeApprovedFunding]
+    [refetchApprovedFunding, editableApprovedFunding, removeApprovedFunding]
   );
 
   const submitRemoveFundingType = useCallback(
-    (fundingTypeID: number) => {
-      editableApprovedFunding.forEach((approvedFund) => {
-        if (approvedFund.appro_funding_type !== fundingTypeID) return;
+    async (fundingTypeID: number) => {
+      await Promise.all(
+        editableApprovedFunding.map((approvedFund) => {
+          if (approvedFund.appro_funding_type !== fundingTypeID) return;
 
-        removeApprovedFunding.mutate({
-          approvedID: approvedFund.id,
-        });
-      });
+          return removeApprovedFunding.mutateAsync({
+            approvedID: approvedFund.id,
+          });
+        })
+      );
+
+      toast.success(
+        toastMessage(
+          "Funding Type Removed",
+          "The funding type has been removed successfully."
+        )
+      );
+
+      // Refresh UI data for modal
+      await refetchApprovedFunding();
+
+      setActiveFundingTypeIds((prev) =>
+        prev.filter((ft) => ft !== fundingTypeID)
+      );
     },
-    [editableApprovedFunding, removeApprovedFunding]
+    [refetchApprovedFunding, editableApprovedFunding, removeApprovedFunding]
   );
 
   const submitAddApprovedFunding = useCallback(() => {
@@ -288,10 +386,10 @@ function TableEditApprovedFunding({
   ]);
 
   return (
-    <div className="flex flex-row items-center gap-2 pt-4 pb-2 text-left sm:px-6 sm:pt-6">
+    <div className="flex flex-row items-center gap-2 pb-2 pt-4 text-left sm:px-6 sm:pt-6">
       <div className="flex w-fit flex-col items-center gap-4 p-2 text-center">
         <div className="mt-2 flex flex-col items-center">
-          <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
+          <div className="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
               <div className="mb-4 sm:flex sm:items-center">
                 <div className="sm:flex-auto">
@@ -361,7 +459,7 @@ function TableEditApprovedFunding({
                     <button
                       type="button"
                       className="mt-2 inline-flex w-fit justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:w-auto sm:text-sm"
-                      onClick={submitAddApprovedFunding}
+                      onClick={() => void submitAddApprovedFunding()}
                     >
                       Submit Approved Funding
                     </button>
@@ -386,7 +484,7 @@ function TableEditApprovedFunding({
                               <span>FY&apos;{fiscalYear}</span>
                               <Trash2
                                 onClick={() =>
-                                  submitRemoveFiscalYear(fiscalYear)
+                                  void submitRemoveFiscalYear(fiscalYear)
                                 }
                                 className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
                               />
@@ -411,7 +509,7 @@ function TableEditApprovedFunding({
                               }}
                             />
                             <PlusCircle
-                              onClick={submitAddFiscalYear}
+                              onClick={() => void submitAddFiscalYear()}
                               className="h-4 w-4 cursor-pointer text-gray-400 hover:text-green-500"
                             />
                           </div>
@@ -435,7 +533,9 @@ function TableEditApprovedFunding({
                                 </span>
                                 <Trash2
                                   onClick={() =>
-                                    submitRemoveFundingType(activeFundingTypeId)
+                                    void submitRemoveFundingType(
+                                      activeFundingTypeId
+                                    )
                                   }
                                   className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
                                 />
@@ -499,7 +599,7 @@ function TableEditApprovedFunding({
                           <div className="flex items-center justify-center gap-2">
                             <div className="flex flex-col">
                               <select
-                                className="w-fit rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-fit min-w-[15rem] rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 value={addFTCurrent || ""}
                                 onChange={(e) =>
                                   setAddFTCurrent(Number(e.target.value))
@@ -518,7 +618,7 @@ function TableEditApprovedFunding({
                               </select>
                             </div>
                             <PlusCircle
-                              onClick={submitAddFundingType}
+                              onClick={() => void submitAddFundingType()}
                               className="h-4 w-4 cursor-pointer text-gray-400 hover:text-green-500"
                             />
                           </div>
@@ -545,7 +645,7 @@ function TableEditApprovedFunding({
                   <button
                     type="button"
                     className="inline-flex w-fit justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:w-auto sm:text-sm"
-                    onClick={submitUpdateApprovedFunding}
+                    onClick={() => void submitUpdateApprovedFunding()}
                   >
                     Save Updated Fields
                   </button>

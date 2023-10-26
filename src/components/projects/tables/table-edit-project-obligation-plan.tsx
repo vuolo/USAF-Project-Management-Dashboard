@@ -12,17 +12,26 @@ import type { obligation_plan } from "~/types/obligation_plan";
 import { formatCurrency } from "~/utils/currency";
 import DatePicker from "@hassanmojab/react-modern-calendar-datepicker";
 import { convertDateToDayValue, convertDayValueToDate } from "~/utils/date";
- 
+import type {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from "@tanstack/react-query";
+
 type TableProps = {
   project: view_project;
   obligationPlan?: obligation_plan[];
   fundingTypes?: funding_types[];
+  refetchObligationPlan: <TPageData>(
+    options?: RefetchOptions & RefetchQueryFilters<TPageData>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 };
 
 function TableEditObligationPlan({
   project,
   obligationPlan,
   fundingTypes,
+  refetchObligationPlan,
 }: TableProps) {
   const router = useRouter();
 
@@ -146,10 +155,10 @@ function TableEditObligationPlan({
   );
 
   return (
-    <div className="flex flex-row items-center gap-2 pt-2 pb-2 text-left sm:px-6">
+    <div className="flex flex-row items-center gap-2 pb-2 pt-2 text-left sm:px-6">
       <div className="flex w-fit flex-col justify-center gap-4 p-2 text-center">
         <div className="mt-2 flex flex-col justify-center">
-          <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
+          <div className="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
               <div className="mb-4 sm:flex sm:items-center">
                 <div className="sm:flex-auto">
