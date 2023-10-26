@@ -174,15 +174,39 @@ export const contractRouter = createTRPCRouter({
         await prisma.$executeRaw`
           INSERT INTO
             contract_award_timeline (
-              contract_award_id,
-              timeline_status ) 
+            contract_award_id,
+            timeline_status, 
+            requirement_plan, 
+            draft_rfp_released, 
+            approved_by_acb, 
+            rfp_released, 
+            proposal_received, 
+            tech_eval_comp, 
+            negotiation_comp, 
+            awarded ) 
           VALUES (
             ${input.contract_award_id},
-            "Projected" 
+            "Projected", 
+            ${input.requirement_plan}, 
+            ${input.draft_rfp_released}, 
+            ${input.approved_by_acb}, 
+            ${input.rfp_released}, 
+            ${input.proposal_received}, 
+            ${input.tech_eval_comp}, 
+            ${input.negotiation_comp}, 
+            ${input.awarded}
           ),
           (
             ${input.contract_award_id},
-            "Actual"
+            "Actual",
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL,
+            NULL
           )`,
       ]);
     }),
