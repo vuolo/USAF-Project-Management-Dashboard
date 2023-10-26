@@ -40,8 +40,14 @@ function TableEditExpenditurePlan({
 
   // Listen for changes in obligationPlan, and update edit state (the edit state is used to render the table on the modal)
   useEffect(() => {
-    if (!expenditurePlan || editableExpenditurePlan.length > 0) return;
-    setEditableExpenditurePlan([...expenditurePlan]);
+    if (!expenditurePlan) return;
+    setEditableExpenditurePlan((p) =>
+      [...p, ...expenditurePlan.filter((x) => !p.find((y) => y.id === x.id))]
+        // remove all from new array that are not in expenditurePlan (check ids)
+        .filter((ExPlan) =>
+          expenditurePlan.find((prevExPlan) => prevExPlan.id === ExPlan.id)
+        )
+    );
   }, [expenditurePlan, editableExpenditurePlan.length]);
 
   const updateExpenditure = api.expenditure.updateExpenditure.useMutation({
@@ -55,36 +61,44 @@ function TableEditExpenditurePlan({
       console.error(error);
     },
     onSuccess() {
-      toast.success(
-        toastMessage(
-          "Expenditure Plan Updated",
-          "The expenditure plan has been updated successfully."
-        )
-      );
-
       // Refresh UI data
-      router.reload(); // This is a hacky solution, but it works for now...
+      // router.reload(); // This is a hacky solution, but it works for now...
     },
   });
 
-  const submitUpdateExpenditurePlan = useCallback(() => {
-    editableExpenditurePlan.forEach((expenditure, expenIdx) => {
-      const prevExpenditure = expenditurePlan
-        ? expenditurePlan[expenIdx]
-        : null;
-      if (prevExpenditure?.date !== expenditure.date) {
-        expenditure.date.setDate(expenditure.date.getDate() + 1); // add a day
-      }
+  const submitUpdateExpenditurePlan = useCallback(async () => {
+    await Promise.all(
+      editableExpenditurePlan.map(async (plan, idx) => {
+        const prevExpenditure = expenditurePlan ? expenditurePlan[idx] : null;
+        if (prevExpenditure?.date !== plan.date) {
+          plan.date.setDate(plan.date.getDate());
+        }
 
-      updateExpenditure.mutate({
-        id: expenditure.id,
-        project_id: project.id,
-        expen_funding_date: expenditure.date,
-        expen_projected: Number(expenditure.Projected),
-        expen_actual: Number(expenditure.Actual),
-      });
-    });
-  }, [editableExpenditurePlan, updateExpenditure, project, expenditurePlan]);
+        return updateExpenditure.mutateAsync({
+          id: plan.id,
+          project_id: project.id,
+          expen_funding_date: plan.date,
+          expen_projected: Number(plan.Projected),
+          expen_actual: Number(plan.Actual),
+        });
+      })
+    );
+
+    toast.success(
+      toastMessage(
+        "Expenditure Plan Updated",
+        "The expenditure plan has been updated successfully."
+      )
+    );
+
+    await refetchExpenditurePlan();
+  }, [
+    editableExpenditurePlan,
+    updateExpenditure,
+    project,
+    expenditurePlan,
+    refetchExpenditurePlan,
+  ]);
 
   const addExpenditure = api.expenditure.addExpenditure.useMutation({
     onError(error) {
@@ -105,21 +119,23 @@ function TableEditExpenditurePlan({
       );
 
       // Refresh UI data
-      router.reload(); // This is a hacky solution, but it works for now...
+      // router.reload(); // This is a hacky solution, but it works for now...
     },
   });
 
-  const submitAddExpenditure = useCallback(() => {
+  const submitAddExpenditure = useCallback(async () => {
     const today = new Date();
-    today.setDate(today.getDate() + 1); // add a day
+    today.setDate(today.getDate());
 
-    addExpenditure.mutate({
+    await addExpenditure.mutateAsync({
       project_id: project.id,
       expen_funding_date: today,
       expen_projected: 0,
       expen_actual: undefined,
     });
-  }, [addExpenditure, project]);
+
+    await refetchExpenditurePlan();
+  }, [refetchExpenditurePlan, addExpenditure, project]);
 
   const deleteExpenditure = api.expenditure.deleteExpenditure.useMutation({
     onError(error) {
@@ -140,15 +156,17 @@ function TableEditExpenditurePlan({
       );
 
       // Refresh UI data
-      router.reload(); // This is a hacky solution, but it works for now...
+      // router.reload(); // This is a hacky solution, but it works for now...
     },
   });
 
   const submitDeleteExpenditure = useCallback(
-    (id: number) => {
-      deleteExpenditure.mutate({ id });
+    async (id: number) => {
+      await deleteExpenditure.mutateAsync({ id });
+
+      await refetchExpenditurePlan();
     },
-    [deleteExpenditure]
+    [refetchExpenditurePlan, deleteExpenditure]
   );
 
   return (
@@ -205,7 +223,7 @@ function TableEditExpenditurePlan({
                               />
                               <Trash2
                                 onClick={() =>
-                                  submitDeleteExpenditure(expen.id)
+                                  void submitDeleteExpenditure(expen.id)
                                 }
                                 className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
                               />
@@ -219,7 +237,7 @@ function TableEditExpenditurePlan({
                           <div className="flex items-center justify-center gap-2">
                             <span>Add Expenditure</span>
                             <PlusCircle
-                              onClick={submitAddExpenditure}
+                              onClick={() => void submitAddExpenditure()}
                               className="h-4 w-4 cursor-pointer text-gray-400 hover:text-green-500"
                             />
                           </div>
@@ -266,7 +284,7 @@ function TableEditExpenditurePlan({
                 <button
                   type="button"
                   className="inline-flex w-fit justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:w-auto sm:text-sm"
-                  onClick={submitUpdateExpenditurePlan}
+                  onClick={() => void submitUpdateExpenditurePlan()}
                 >
                   Save Updated Fields
                 </button>
