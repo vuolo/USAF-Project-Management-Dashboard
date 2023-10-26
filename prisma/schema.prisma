@@ -180,6 +180,8 @@ model project {
     project_milestones                                                                     project_milestones[]
     task_resource_table                                                                    task_resource_table[]
     user_project_link                                                                      user_project_link[]            @ignore
+    favorites                                                                              favorites[]
+    project_history                                                                        project_history?
 
     @@index([branch_id], map: "branch_id")
     @@index([contractor_id], map: "contractor_id")
@@ -291,6 +293,8 @@ model users {
     user_email        String?             @db.VarChar(80)
     user_project_link user_project_link[] @ignore
     contractor        contractor?         @relation(fields: [contractor_id], references: [id], onUpdate: Restrict, map: "users_ibfk_3")
+    favorites         favorites[]
+    project_history   project_history[]
 
     @@index([contractor_id], map: "contractor_id")
 }
@@ -405,6 +409,33 @@ model auditlog {
     succeeded Boolean
     time      DateTime
     query     String   @db.Text
+}
+
+// userid1 project1 time
+
+// DELETE * WHERE time < current - 7
+// userid1 project2 time
+
+model favorites {
+    userId    Int
+    user      users   @relation(fields: [userId], references: [id], onDelete: Cascade)
+    project   project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId Int     @unique
+
+    @@id([userId, projectId])
+}
+
+// update or insert project history
+// DELETE * WHERE time < currentTime - 7
+
+model project_history {
+    userId    Int
+    user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    project   project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId Int      @unique
+    time      DateTime
+
+    @@id([userId, projectId])
 }
 
 model insight {
