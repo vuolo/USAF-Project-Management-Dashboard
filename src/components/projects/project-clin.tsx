@@ -14,7 +14,9 @@ import type { view_clin } from "~/types/view_clin";
 function ProjectClin({ project_id }: { project_id: number }) {
   const router = useRouter();
   const user = useSession().data?.db_user;
-  const { data: clin_list } = api.clin.get.useQuery({ project_id });
+  const { data: clin_list, refetch: refetchClinList } = api.clin.get.useQuery({
+    project_id,
+  });
 
   // Add CLIN Modal functionality (states)
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -43,8 +45,8 @@ function ProjectClin({ project_id }: { project_id: number }) {
         )
       );
 
-      // Add the new clin details to the UI (using reload is a bit hacky, but it works)
-      router.reload();
+      // Add the new clin details to the UI
+      void refetchClinList();
     },
   });
 
@@ -158,8 +160,8 @@ function ProjectClin({ project_id }: { project_id: number }) {
         )
       );
 
-      // Add the new clin details to the UI (using reload is a bit hacky, but it works)
-      router.reload();
+      // Add the new clin details to the UI
+      void refetchClinList();
     },
   });
 
@@ -286,8 +288,8 @@ function ProjectClin({ project_id }: { project_id: number }) {
         )
       );
 
-      // Remove the deleted clin from the UI (using reload is a bit hacky, but it works)
-      router.reload();
+      // Remove the deleted clin from the UI
+      void refetchClinList();
     },
   });
 
