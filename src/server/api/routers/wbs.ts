@@ -42,6 +42,25 @@ export const wbsRouter = createTRPCRouter({
         data: input,
       });
     }),
+    deleteMany: protectedProcedure  // Delete all clin data for a project
+    .input(z.object({ project_id: z.number() }))
+    .mutation(async ({ input }) => {
+      return await prisma.task_resource_table.deleteMany({
+        where: {
+          project_id: input.project_id,
+        },
+      });
+    }),
+    deleteManyClin: protectedProcedure  // Delete specific clin data for a project
+    .input(z.object({ project_id: z.number(), clin_num: z.number() }))
+    .mutation(async ({ input }) => {
+      return await prisma.task_resource_table.deleteMany({
+        where: {
+          project_id: input.project_id,
+          clin_num: input.clin_num,
+        },
+      });
+    }),
 });
 
 // model task_resource_table {

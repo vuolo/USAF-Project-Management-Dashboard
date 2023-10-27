@@ -42,7 +42,30 @@ function ModalUploadProjectProPricer({
     },
   });
 
-  const submitFileUpload = (e: React.FormEvent<HTMLButtonElement>) => {
+  const deleteManyWBS = api.wbs.deleteMany.useMutation({
+    onSuccess: () => {
+      toast.success(
+        toastMessage(
+          "Successfully cleared WBS",
+          "The WBS has been successfully cleared of previous data."
+        )
+      );
+
+      closeModal();
+    },
+    onError: (error) => {
+      toast.error(
+        toastMessage(
+          "There was an error uploading the WBS",
+          "If you are having trouble uploading a WBS, please contact your system administrator."
+        )
+      );
+      console.error(error);
+    },
+  });
+  
+
+  const submitFileUpload = (e: React.FormEvent<HTMLButtonElement>, overwrite: boolean) => {
     e.preventDefault();
 
     // Get file from input with id="file"
@@ -62,6 +85,20 @@ function ModalUploadProjectProPricer({
 
     // Process the file on the client side
     void (async (file) => {
+      if (overwrite) {
+        try {
+          deleteManyWBS.mutate({ project_id: project.id });
+        } catch (error) {
+          toast.error(
+            toastMessage(
+              "There was an error deleting existing data",
+              (error as Error).message
+            )
+          );
+          return;
+        }
+      }
+
       try {
         const wbsArray = await parseProPricerFile(file, project.id);
         createManyWBS.mutate(
@@ -172,6 +209,9 @@ function ModalUploadProjectProPricer({
                         contains the correct WBS (Work Breakdown Structure)
                         data.
                       </p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        This will automatically update the projected expenditure. Any actual expenditure data will be retained as long as it corresponds to a month in the updated WBS.
+                      </p>
 
                       <div className="flex flex-col gap-2">
                         {/* <label
@@ -194,10 +234,17 @@ function ModalUploadProjectProPricer({
 
                           <button
                             type="button"
-                            onClick={submitFileUpload}
+                            onClick={(e) => submitFileUpload(e, false)}
                             className="ml-3 inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                           >
                             Upload
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => submitFileUpload(e, true)}
+                            className="ml-3 inline-flex items-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                          >
+                            Upload & Overwrite
                           </button>
                         </div>
                       </div>

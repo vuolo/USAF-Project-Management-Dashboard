@@ -15,12 +15,33 @@ export const clinRouter = createTRPCRouter({
   get: protectedProcedure
     .input(z.object({ project_id: z.number() }))
     .query(async ({ input }) => {
-      return await prisma.$queryRaw<view_clin[]>`
+      const clin_list = await prisma.$queryRaw<view_clin[]>`
         SELECT * 
         FROM view_clin
         WHERE project_id = ${input.project_id}
         ORDER BY clin_num
       `;
+      
+      if (clin_list) {
+        const clinSumMap = new Map<number, number>();
+        type SumResult = { summedValue: number };
+
+        for (let clin of clin_list) {
+          const result = await prisma.$queryRaw<SumResult[]>`
+          SELECT SUM(total_price) AS summedValue 
+          FROM task_resource_table
+          WHERE project_id = ${input.project_id} AND clin_num = ${clin.clin_num}
+        `;
+
+          clinSumMap.set(clin.clin_num, result?.[0]?.summedValue ?? 0);
+        }
+
+        for (let clin of clin_list) {
+          clin.clin_value = clinSumMap.get(clin.clin_num) || 0;
+        }
+      }
+
+      return clin_list;
     }),
   add: protectedProcedure
     .input(
@@ -83,6 +104,7 @@ export const clinRouter = createTRPCRouter({
     const wbsData = await prisma.$queryRaw<wbs[]>`
       SELECT 
         id,
+        clin_num,
         month as date,
         total_price as Projected
       FROM task_resource_table
@@ -93,7 +115,7 @@ export const clinRouter = createTRPCRouter({
     const groupedWbsData: Record<string, number> = {};
     wbsData.forEach((wbsItem) => {
       const date = new Date(wbsItem.date);
-      const key = `${date.getFullYear()}-${date.getMonth()}`;  // Key format: YYYY-MM
+      const key = `${date.getFullYear()}-${date.getMonth() + 1}`;  // Key format: YYYY-MM
       groupedWbsData[key] = (groupedWbsData[key] || 0) + Number(wbsItem.Projected);
     });
 
@@ -150,5 +172,43 @@ export const clinRouter = createTRPCRouter({
 
 
     await uploadToExpenditure(input.project_id, sortedGroupedWbsDataArray);
+  }),
+  generateClinFromWBS: protectedProcedure
+  .input(z.object({ project_id: z.number() }))
+  .mutation(async ({ input }) => {
+    const wbsData = await prisma.$queryRaw<wbs[]>`
+      SELECT clin_num 
+      FROM task_resource_table
+      WHERE project_id = ${input.project_id}
+    `;
+
+    const uniqueClinNums = [...new Set(wbsData.map(item => item.clin_num))];
+
+    await prisma.$executeRaw`
+      DELETE FROM clin_data 
+      WHERE project_id = ${input.project_id}
+    `;
+    
+    const uploadClins = async (project_id: number, uniqueClinNums: number[]) => {
+      for (const clin_number of uniqueClinNums) {
+        if (clin_number) {
+          await prisma.$executeRaw`
+          INSERT INTO clin_data (
+            clin_num,
+            project_id,
+            clin_type,
+            clin_scope, 
+            ind_gov_est) 
+          VALUES (
+            ${clin_number},
+            ${project_id},
+            'FFP',
+            'Placeholder Scope',
+            ${0})`;
+        }
+      }
+    }
+
+    await uploadClins(input.project_id, uniqueClinNums);
   }),
 });

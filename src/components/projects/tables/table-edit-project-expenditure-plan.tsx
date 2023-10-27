@@ -2,9 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
+import { api } from "~/utils/api";
+import type { expenditure_plan } from "~/types/expenditure_plan";
+import type { view_project } from "~/types/view_project";
+/* TODO: Go through and delete commented out code that is unnecessary
 import { format } from "date-fns";
 import { PlusCircle, Trash2 } from "lucide-react";
-import { api } from "~/utils/api";
+
 import type { approved_funding, funding_types } from "@prisma/client";
 import type { Decimal } from "@prisma/client/runtime";
 import type { view_project } from "~/types/view_project";
@@ -12,7 +16,7 @@ import type { obligation_plan } from "~/types/obligation_plan";
 import { formatCurrency } from "~/utils/currency";
 import DatePicker from "@hassanmojab/react-modern-calendar-datepicker";
 import { convertDateToDayValue, convertDayValueToDate } from "~/utils/date";
-import type { expenditure_plan } from "~/types/expenditure_plan";
+*/
 
 type TableProps = {
   project: view_project;
@@ -43,13 +47,15 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
       console.error(error);
     },
     onSuccess() {
+      /* MAYBE delete this, it just looks weird having a bunch of notifications pop up even though we're refreshing
       toast.success(
         toastMessage(
           "Expenditure Plan Updated",
           "The expenditure plan has been updated successfully."
         )
       );
-
+          
+      */
       // Refresh UI data
       router.reload(); // This is a hacky solution, but it works for now...
     },
@@ -73,7 +79,7 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
       });
     });
   }, [editableExpenditurePlan, updateExpenditure, project, expenditurePlan]);
-
+/*
   const addExpenditure = api.expenditure.addExpenditure.useMutation({
     onError(error) {
       toast.error(
@@ -138,7 +144,7 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
     },
     [deleteExpenditure]
   );
-
+*/
   return (
     <div className="flex flex-row items-center gap-2 pt-2 pb-2 text-left sm:px-6">
       <div className="flex w-fit flex-col gap-4 p-2 text-center">
@@ -153,7 +159,7 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
                 </div>
               </div>
 
-              <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+              <div className="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
                 {!editableExpenditurePlan ? (
                   <div className="flex h-64 items-center justify-center">
                     <div className="italic text-gray-500">Loading...</div>
@@ -174,7 +180,8 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
                           >
                             <div className="flex items-center justify-center gap-2">
                               {/* <span>{format(expen.date, "MM/dd/yyyy")}</span> */}
-                              <DatePicker
+                              <span>{formatDate(expen.date)}</span>
+                              {/*<DatePicker
                                 value={convertDateToDayValue(expen.date)}
                                 onChange={(dayValue) => {
                                   setEditableExpenditurePlan((prev) => {
@@ -190,17 +197,17 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
                                 inputPlaceholder="No Date"
                                 inputClassName="w-[6rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
                                 calendarClassName="z-50"
-                              />
-                              <Trash2
+                              />*/}
+                              {/*<Trash2
                                 onClick={() =>
                                   submitDeleteExpenditure(expen.id)
                                 }
                                 className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
-                              />
+                              />*/}
                             </div>
                           </th>
                         ))}
-                        <th
+                        {/*<th
                           scope="col"
                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                         >
@@ -211,7 +218,7 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
                               className="h-4 w-4 cursor-pointer text-gray-400 hover:text-green-500"
                             />
                           </div>
-                        </th>
+                        </th>*/}
                       </tr>
                     </thead>
                     <tbody className="bg-white">
@@ -240,9 +247,9 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
                                 )}
                               </td>
                             ))}
-                            <td className="px-3 py-4 text-sm text-gray-500">
+                            {/*<td className="px-3 py-4 text-sm text-gray-500">
                               <span>...</span>
-                            </td>
+                                </td>*/}
                           </tr>
                         ))}
                     </tbody>
@@ -286,6 +293,7 @@ function getRowValue(
           <input
             type="number"
             step={0.01}
+            readOnly
             className="w-32 rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={Number(expen.Projected)}
             onChange={(e) => {
@@ -340,4 +348,13 @@ function getRowName(idx: number) {
     default:
       return "";
   }
+}
+
+function formatDate(value: Date) {
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  const month = monthNames[value.getMonth()];
+  const year = value.getFullYear().toString();
+  
+  return `${month} ${year}`;
 }

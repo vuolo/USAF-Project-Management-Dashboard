@@ -44,7 +44,7 @@ function TableExpenditurePlan({ expenditurePlan }: TableProps) {
                           scope="col"
                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                         >
-                          {format(expen.date, "MM/dd/yyyy")}
+                          {formatDate(expen.date)}
                         </th>
                       ))}
                     </tr>
@@ -109,4 +109,13 @@ function getRowName(idx: number) {
     default:
       return "";
   }
+}
+
+function formatDate(value: Date) {
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  
+  const month = monthNames[value.getMonth()];
+  const year = value.getFullYear().toString();
+  
+  return `${month} ${year}`;
 }
