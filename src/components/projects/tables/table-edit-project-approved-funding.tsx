@@ -5,7 +5,7 @@ import { toastMessage } from "~/utils/toast";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { api } from "~/utils/api";
 import type { approved_funding, funding_types } from "@prisma/client";
-import type { Decimal } from "@prisma/client/runtime";
+import type { Prisma } from "@prisma/client";
 import type { view_project } from "~/types/view_project";
 import {
   QueryObserverResult,
@@ -571,7 +571,7 @@ function TableEditApprovedFunding({
                                                         ...approvedFund,
                                                         approved_amount: Number(
                                                           e.target.value
-                                                        ) as unknown as Decimal,
+                                                        ) as unknown as Prisma.Decimal,
                                                       }
                                                     : approvedFund
                                               )

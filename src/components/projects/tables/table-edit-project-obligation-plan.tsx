@@ -6,7 +6,6 @@ import { format } from "date-fns";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { api } from "~/utils/api";
 import type { approved_funding, funding_types } from "@prisma/client";
-import type { Decimal } from "@prisma/client/runtime";
 import type { view_project } from "~/types/view_project";
 import type { obligation_plan } from "~/types/obligation_plan";
 import { formatCurrency } from "~/utils/currency";

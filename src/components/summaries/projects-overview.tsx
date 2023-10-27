@@ -5,7 +5,7 @@ import { Star } from "lucide-react";
 
 import { api } from "~/utils/api";
 import { formatCurrency } from "~/utils/currency";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { classNames } from "~/utils/misc";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
@@ -26,13 +26,17 @@ function ProjectsOverview() {
   const [filterQuery, setFilterQuery] = useState("");
   const [filterType, setFilterType] = useState<FilterType>("project_name");
   const { data: branches } = api.branch.getAll.useQuery();
-  const { data: favorites, refetch: refetchFavoriteList } = api.user.getFavorites.useQuery();
-  const favoriteId = favorites?.map(x => x.projectId);
+  const { data: favorites, refetch: refetchFavoriteList } =
+    api.user.getFavorites.useQuery();
   const { data: projects, refetch } = api.project.search.useQuery({
     filterQuery,
     filterType,
   });
 
+  const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
+  useEffect(() => {
+    setFavoriteIds(favorites?.map((x) => x.projectId) ?? []);
+  }, [favorites]);
 
   function convertBranches() {
     if (!branches) return null;
@@ -43,70 +47,70 @@ function ProjectsOverview() {
     ));
   }
 
-  const addFavorites = api.user.addFavorite.useMutation(
-    {
-      onError(error) {
-        toast.error(
-          toastMessage(
-            "Error Adding Favorites",
-            "Please try again later. If the problem persists, please contact support."
-          )
-        );
-        console.error(error);
-      },
-      onSuccess() {
-        toast.success(
-          toastMessage(
-            "Favorite Added",
-            "The project favorite was added successfully."
-          )
-        );
-        
-        void refetchFavoriteList();
-      },
-    }
-  );
-  const removeFavorites = api.user.removeFavorite.useMutation(
-    {
-      onError(error) {
-        toast.error(
-          toastMessage(
-            "Error Removing Favorites",
-            "Please try again later. If the problem persists, please contact support."
-          )
-        );
-        console.error(error);
-      },
-      onSuccess() {
-        toast.success(
-          toastMessage(
-            "Favorite Removed",
-            "The project favorite was removed successfully."
-          )
-        );
+  const addFavorites = api.user.addFavorite.useMutation({
+    onError(error) {
+      toast.error(
+        toastMessage(
+          "Error Adding Favorites",
+          "Please try again later. If the problem persists, please contact support."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess() {
+      toast.success(
+        toastMessage(
+          "Favorite Added",
+          "The project favorite was added successfully."
+        )
+      );
 
-        void refetchFavoriteList();
-      },
-    }
-  );
+      void refetchFavoriteList();
+    },
+  });
+  const removeFavorites = api.user.removeFavorite.useMutation({
+    onError(error) {
+      toast.error(
+        toastMessage(
+          "Error Removing Favorites",
+          "Please try again later. If the problem persists, please contact support."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess() {
+      toast.success(
+        toastMessage(
+          "Favorite Removed",
+          "The project favorite was removed successfully."
+        )
+      );
+
+      void refetchFavoriteList();
+    },
+  });
   const [isClicked, setIsClicked] = useState(false);
 
-  const handleClick = (projectId:number, target: EventTarget & SVGSVGElement) => {
+  const handleClick = (
+    projectId: number,
+    target: EventTarget & SVGSVGElement
+  ) => {
     // Add favorite when it is not yellow
-    if(!target.classList.contains("fill-yellow-200")){
-      addFavorites.mutate ({
+    if (!target.classList.contains("fill-yellow-200")) {
+      addFavorites.mutate({
         projectId: projectId,
       });
       target.classList.add("fill-yellow-200");
-    } else { // Remove when it is yellow
-      removeFavorites.mutate ({
+    } else {
+      // Remove when it is yellow
+      removeFavorites.mutate({
         projectId: projectId,
       });
       target.classList.remove("fill-yellow-200");
     }
   };
   // const starColor = isHighlighted ? 'yellow' : '';
-    
+
   return (
     <>
       <div className="sm:flex sm:items-center">
@@ -313,7 +317,8 @@ function ProjectsOverview() {
                     </tr>
                   </thead>
                   <tbody className="bg-white">
-                    {projects && favorites &&
+                    {projects &&
+                      favorites &&
                       projects.map((project, projectIdx) => (
                         <tr
                           key={project.id}
@@ -322,10 +327,19 @@ function ProjectsOverview() {
                             `project-${project.id}`
                           )}
                         >
-                          <td className="pl-5 pr-0 cursor-pointer">
-                            <Star size={20} className={classNames(
-                              favoriteId?.includes(project.id) ? "fill-yellow-200" : "", "hover:fill-yellow-200" 
-                            )} onClick={(event: React.MouseEvent<SVGSVGElement>) => handleClick(project.id, event.currentTarget)}/>
+                          <td className="cursor-pointer pl-5 pr-0">
+                            <Star
+                              size={20}
+                              className={classNames(
+                                favoriteIds?.includes(project.id)
+                                  ? "fill-yellow-200"
+                                  : "",
+                                "hover:fill-yellow-200"
+                              )}
+                              onClick={(
+                                event: React.MouseEvent<SVGSVGElement>
+                              ) => handleClick(project.id, event.currentTarget)}
+                            />
                           </td>
                           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-brand-dark underline sm:pl-6">
                             <Link
@@ -360,7 +374,7 @@ function ProjectsOverview() {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                             <StatusIcon status={project.schedule_status} />
                           </td>
-                        </tr>                      
+                        </tr>
                       ))}
                   </tbody>
                 </table>

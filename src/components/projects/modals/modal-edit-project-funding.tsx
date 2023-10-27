@@ -14,7 +14,6 @@ import DatePicker, {
   type DayValue,
 } from "@hassanmojab/react-modern-calendar-datepicker";
 import type { approved_funding } from "@prisma/client";
-import type { Decimal } from "@prisma/client/runtime";
 import type { obligation_plan } from "~/types/obligation_plan";
 import type { expenditure_plan } from "~/types/expenditure_plan";
 import type { view_project } from "~/types/view_project";
