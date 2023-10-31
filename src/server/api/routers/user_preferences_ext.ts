@@ -64,12 +64,49 @@ export const user_preferences_ext = {
     const user = ctx.session?.db_user;
     if (!user) return null;
 
-    return await prisma.project.findMany({
+    // calculate the date 7 days ago
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    // delete old project history
+    await prisma.project_history.deleteMany({
       where: {
-        project_history: {
-          userId: user.id,
+        userId: user.id,
+        time: {
+          lt: sevenDaysAgo,
         },
       },
+    });
+
+    const group = await prisma.project_history.groupBy({
+      by: ['projectId'],
+      where: {
+        userId: user.id
+      },
+      _count: {
+        projectId: true
+      }
+    });
+
+    const groupIds = group.map((x) => x.projectId);
+
+    const projects = await prisma.project.findMany({
+      where: {
+        id: {
+          in: groupIds
+        }
+      },
+      select: {
+        id: true,
+        project_name: true
+      }
+    })
+
+    return projects.map((x) => {
+      return {
+        ...x,
+        count: group.find((y) => y.projectId == x.id)?._count.projectId ?? 0
+      }
     });
   }),
   addProjectHistory: protectedProcedure
@@ -82,23 +119,14 @@ export const user_preferences_ext = {
       const user = ctx.session?.db_user;
       if (!user) return null;
 
-      // insert or update:
-      const upsertResult = await prisma.project_history.upsert({
-        where: {
-          userId_projectId: {
-            userId: user.id,
-            projectId: input.id,
-          },
-        },
-        update: {
-          time: new Date(),
-        },
-        create: {
-          projectId: input.id,
+      // Create the new entry
+      await prisma.project_history.create({
+        data: {
           userId: user.id,
-          time: new Date(),
-        },
-      });
+          projectId: input.id,
+          time: new Date()
+        }
+      })
 
       // calculate the date 7 days ago
       const sevenDaysAgo = new Date();
@@ -113,6 +141,5 @@ export const user_preferences_ext = {
           },
         },
       });
-      return upsertResult;
     }),
 };

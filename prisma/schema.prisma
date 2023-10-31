@@ -181,7 +181,6 @@ model project {
     task_resource_table                                                                    task_resource_table[]
     user_project_link                                                                      user_project_link[]            @ignore
     favorites                                                                              favorites[]
-    project_history                                                                        project_history?
 
     @@index([branch_id], map: "branch_id")
     @@index([contractor_id], map: "contractor_id")
@@ -431,11 +430,11 @@ model favorites {
 model project_history {
     userId    Int
     user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-    project   project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-    projectId Int      @unique
+    //project   project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+    projectId Int
     time      DateTime
 
-    @@id([userId, projectId])
+    @@id([userId, projectId, time])
 }
 
 model insight {
