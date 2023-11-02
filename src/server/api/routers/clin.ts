@@ -25,7 +25,7 @@ export const clinRouter = createTRPCRouter({
       if (clin_list) {
         type SumResult = { summedValue: number };
 
-        for (let clin of clin_list) {
+        for (const clin of clin_list) {
           const result = await prisma.$queryRaw<SumResult[]>`
           SELECT SUM(total_price) AS summedValue 
           FROM task_resource_table
@@ -147,7 +147,7 @@ export const clinRouter = createTRPCRouter({
         const expen_funding_date = new Date(year, month - 1, 15); 
 
         // Find the actual expenditure for that month, if it exists
-        const actualForMonth = actualExpenditureData.find(item => {
+        const actualForMonth = actualExpenditureData.find((item: { expen_funding_date: string | number | Date; }) => {
           const date = new Date(item.expen_funding_date);
           return date.getFullYear() === year && date.getMonth() === month - 1;
         });

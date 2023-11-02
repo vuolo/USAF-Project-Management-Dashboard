@@ -73,10 +73,16 @@ export function convertStringToDate_short(input: string): Date | null {
   return new Date(year, month, 1);
 }
 
-export function convertDateToString(value: Date) {
+export function convertDateToString(value: Date): string {
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   
-  const month = monthNames[value.getMonth()];
+  const monthIndex = value.getMonth();
+  const month = monthNames[monthIndex];
+
+  if (month === undefined) {
+    throw new Error('Invalid month index');
+  }
+
   const year = value.getFullYear().toString();
   
   return `${month} ${year}`;

@@ -3,21 +3,13 @@ import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
 import { api } from "~/utils/api";
-import type { approved_funding, funding_types } from "@prisma/client";
-import type { Prisma } from "@prisma/client";
 import type { view_project } from "~/types/view_project";
-import type { obligation_plan } from "~/types/obligation_plan";
-import { formatCurrency } from "~/utils/currency";
-import DatePicker from "@hassanmojab/react-modern-calendar-datepicker";
-import { convertDateToDayValue, convertDayValueToDate } from "~/utils/date";
 import type { expenditure_plan } from "~/types/expenditure_plan";
 import type {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
 } from "@tanstack/react-query";
-import type { expenditure_plan } from "~/types/expenditure_plan";
-import type { view_project } from "~/types/view_project";
 import { convertDateToString } from "~/utils/date";
 
 type TableProps = {
