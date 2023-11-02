@@ -5,18 +5,6 @@ import { toastMessage } from "~/utils/toast";
 import { api } from "~/utils/api";
 import type { expenditure_plan } from "~/types/expenditure_plan";
 import type { view_project } from "~/types/view_project";
-/* TODO: Go through and delete commented out code that is unnecessary
-import { format } from "date-fns";
-import { PlusCircle, Trash2 } from "lucide-react";
-
-import type { approved_funding, funding_types } from "@prisma/client";
-import type { Decimal } from "@prisma/client/runtime";
-import type { view_project } from "~/types/view_project";
-import type { obligation_plan } from "~/types/obligation_plan";
-import { formatCurrency } from "~/utils/currency";
-import DatePicker from "@hassanmojab/react-modern-calendar-datepicker";
-import { convertDateToDayValue, convertDayValueToDate } from "~/utils/date";
-*/
 
 type TableProps = {
   project: view_project;
@@ -47,15 +35,6 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
       console.error(error);
     },
     onSuccess() {
-      /* MAYBE delete this, it just looks weird having a bunch of notifications pop up even though we're refreshing
-      toast.success(
-        toastMessage(
-          "Expenditure Plan Updated",
-          "The expenditure plan has been updated successfully."
-        )
-      );
-          
-      */
       // Refresh UI data
       router.reload(); // This is a hacky solution, but it works for now...
     },
@@ -79,72 +58,7 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
       });
     });
   }, [editableExpenditurePlan, updateExpenditure, project, expenditurePlan]);
-/*
-  const addExpenditure = api.expenditure.addExpenditure.useMutation({
-    onError(error) {
-      toast.error(
-        toastMessage(
-          "Error Adding Expenditure",
-          "There was an error adding the expenditure. Please try again later."
-        )
-      );
-      console.error(error);
-    },
-    onSuccess() {
-      toast.success(
-        toastMessage(
-          "Expenditure Added",
-          "An expenditure has been added successfully."
-        )
-      );
 
-      // Refresh UI data
-      router.reload(); // This is a hacky solution, but it works for now...
-    },
-  });
-
-  const submitAddExpenditure = useCallback(() => {
-    const today = new Date();
-    today.setDate(today.getDate() + 1); // add a day
-
-    addExpenditure.mutate({
-      project_id: project.id,
-      expen_funding_date: today,
-      expen_projected: 0,
-      expen_actual: undefined,
-    });
-  }, [addExpenditure, project]);
-
-  const deleteExpenditure = api.expenditure.deleteExpenditure.useMutation({
-    onError(error) {
-      toast.error(
-        toastMessage(
-          "Error Deleting Expenditure",
-          "There was an error deleting the expenditure. Please try again later."
-        )
-      );
-      console.error(error);
-    },
-    onSuccess() {
-      toast.success(
-        toastMessage(
-          "Expenditure Deleted",
-          "The expenditure has been deleted successfully."
-        )
-      );
-
-      // Refresh UI data
-      router.reload(); // This is a hacky solution, but it works for now...
-    },
-  });
-
-  const submitDeleteExpenditure = useCallback(
-    (id: number) => {
-      deleteExpenditure.mutate({ id });
-    },
-    [deleteExpenditure]
-  );
-*/
   return (
     <div className="flex flex-row items-center gap-2 pt-2 pb-2 text-left sm:px-6">
       <div className="flex w-fit flex-col gap-4 p-2 text-center">
@@ -179,46 +93,10 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
                             className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                           >
                             <div className="flex items-center justify-center gap-2">
-                              {/* <span>{format(expen.date, "MM/dd/yyyy")}</span> */}
                               <span>{formatDate(expen.date)}</span>
-                              {/*<DatePicker
-                                value={convertDateToDayValue(expen.date)}
-                                onChange={(dayValue) => {
-                                  setEditableExpenditurePlan((prev) => {
-                                    const date =
-                                      convertDayValueToDate(dayValue);
-                                    return prev.map((expen, idx) =>
-                                      date && idx === expenIdx
-                                        ? { ...expen, date }
-                                        : expen
-                                    );
-                                  });
-                                }}
-                                inputPlaceholder="No Date"
-                                inputClassName="w-[6rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                calendarClassName="z-50"
-                              />*/}
-                              {/*<Trash2
-                                onClick={() =>
-                                  submitDeleteExpenditure(expen.id)
-                                }
-                                className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
-                              />*/}
                             </div>
                           </th>
                         ))}
-                        {/*<th
-                          scope="col"
-                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                        >
-                          <div className="flex items-center justify-center gap-2">
-                            <span>Add Expenditure</span>
-                            <PlusCircle
-                              onClick={submitAddExpenditure}
-                              className="h-4 w-4 cursor-pointer text-gray-400 hover:text-green-500"
-                            />
-                          </div>
-                        </th>*/}
                       </tr>
                     </thead>
                     <tbody className="bg-white">
@@ -247,9 +125,6 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
                                 )}
                               </td>
                             ))}
-                            {/*<td className="px-3 py-4 text-sm text-gray-500">
-                              <span>...</span>
-                                </td>*/}
                           </tr>
                         ))}
                     </tbody>

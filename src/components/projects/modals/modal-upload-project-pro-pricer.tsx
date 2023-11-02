@@ -7,6 +7,7 @@ import { api } from "~/utils/api";
 import type { view_project } from "~/types/view_project";
 import { parseProPricerFile } from "~/utils/file";
 import { task_resource_table } from "@prisma/client";
+import { useRouter } from "next/router";
 
 type ModalProps = {
   project: view_project;
@@ -19,6 +20,8 @@ function ModalUploadProjectProPricer({
   isOpen,
   setIsOpen,
 }: ModalProps) {
+  const router = useRouter();
+  
   const createManyWBS = api.wbs.createMany.useMutation({
     onSuccess: () => {
       toast.success(
@@ -63,7 +66,28 @@ function ModalUploadProjectProPricer({
       console.error(error);
     },
   });
-  
+
+  const updateProjectedExpenditure = api.clin.updateProjFromClin.useMutation({
+    onError(error) {
+      toast.error(
+        toastMessage(
+          "Error updating projected expenditure.",
+          "There was an error fetching the WBS data and updating the projection. Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess() {
+      toast.success(
+        toastMessage(
+          "Projected Expenditure Updated.",
+          "The WBS data was fetched and expenditure projection was updated successfully."
+        )
+      );
+        
+      router.reload();
+    },
+  });
 
   const submitFileUpload = (e: React.FormEvent<HTMLButtonElement>, overwrite: boolean) => {
     e.preventDefault();
@@ -87,7 +111,7 @@ function ModalUploadProjectProPricer({
     void (async (file) => {
       if (overwrite) {
         try {
-          deleteManyWBS.mutate({ project_id: project.id });
+          await deleteManyWBS.mutateAsync({ project_id: project.id });
         } catch (error) {
           toast.error(
             toastMessage(
@@ -101,7 +125,7 @@ function ModalUploadProjectProPricer({
 
       try {
         const wbsArray = await parseProPricerFile(file, project.id);
-        createManyWBS.mutate(
+        await createManyWBS.mutateAsync(
           (wbsArray as task_resource_table[]).map((wbs) => ({
             project_id: project.id,
             task_id: wbs.task_id,
@@ -130,6 +154,20 @@ function ModalUploadProjectProPricer({
           )
         );
       }
+
+      try {
+        await updateProjectedExpenditure.mutateAsync({ project_id: project.id });
+      } 
+      catch (error) {
+        toast.error(
+          toastMessage(
+            "There was an error updating the projected expenditure",
+            (error as Error).message
+          )
+        );
+        return;
+      }
+
     })(file);
   };
 
@@ -214,12 +252,6 @@ function ModalUploadProjectProPricer({
                       </p>
 
                       <div className="flex flex-col gap-2">
-                        {/* <label
-                          htmlFor="file"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Upload ProPricer
-                        </label> */}
 
                         <div className="mt-1 flex flex-col items-center gap-3 sm:flex-row">
                           <span className="inline-block h-12 w-full rounded-md">

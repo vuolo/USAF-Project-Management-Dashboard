@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useState, useEffect } from "react";
+import { Fragment, useCallback, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -10,7 +10,6 @@ import { formatCurrency } from "~/utils/currency";
 import { List, ListPlus } from "lucide-react";
 import type { clin_data_clin_type } from "@prisma/client";
 import type { view_clin } from "~/types/view_clin";
-import ConfirmProjectedRefreshModal from "./modals/modal-confirm-refresh";
 import ConfirmGenerateClin from "./modals/modal-confirm-generate-clin";
 
 function ProjectClin({ project_id }: { project_id: number }) {
@@ -328,14 +327,6 @@ function ProjectClin({ project_id }: { project_id: number }) {
       });
   }, [deleteClin, deleteClinData, editModalInput_clinId]);
 
-  // Update Expenditure modal
-  const [refreshModalOpen, setRefreshModalOpen] = useState(false);
-  const closeRefreshModal = useCallback(
-    () => {
-      setRefreshModalOpen(false);
-    },[]
-  );
-
   // Auto Generate Clins modal
   const [generateModalOpen, setGenerateModalOpen] = useState(false);
   const closeGenerateModal = useCallback(
@@ -363,14 +354,6 @@ function ProjectClin({ project_id }: { project_id: number }) {
             className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand-dark px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-dark/80 focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto mr-2"
           >
             Generate Clins
-          </button>
-          {/* Refresh the clin data, The same function should also be triggered once new clin data is added/deleted */}
-          <button
-            type="button"
-            onClick={() => setRefreshModalOpen(true)}
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand-dark px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-dark/80 focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto mr-2"
-          >
-            Update Expenditure
           </button>
           <button
             onClick={openAddModal}
@@ -896,13 +879,6 @@ function ProjectClin({ project_id }: { project_id: number }) {
           </div>
         </Dialog>
       </Transition.Root>
-
-      {/* Update Projected Expenditure Modal*/}
-      <ConfirmProjectedRefreshModal
-        project_id={project_id}
-        isOpen={refreshModalOpen}
-        closeModal={closeRefreshModal}
-      />
 
       {/* Update Projected Expenditure Modal*/}
       <ConfirmGenerateClin

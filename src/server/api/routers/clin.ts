@@ -23,7 +23,6 @@ export const clinRouter = createTRPCRouter({
       `;
       
       if (clin_list) {
-        const clinSumMap = new Map<number, number>();
         type SumResult = { summedValue: number };
 
         for (let clin of clin_list) {
@@ -33,11 +32,7 @@ export const clinRouter = createTRPCRouter({
           WHERE project_id = ${input.project_id} AND clin_num = ${clin.clin_num}
         `;
 
-          clinSumMap.set(clin.clin_num, result?.[0]?.summedValue ?? 0);
-        }
-
-        for (let clin of clin_list) {
-          clin.clin_value = clinSumMap.get(clin.clin_num) || 0;
+          clin.clin_value = result?.[0]?.summedValue ?? 0;
         }
       }
 

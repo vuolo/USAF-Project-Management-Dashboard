@@ -42,14 +42,6 @@ function ProjectFunding({ project }: { project: view_project }) {
   >("obligation_bar");
 
   const [modalOpen, setModalOpen] = useState(false);
-
-  // Update Expenditure modal
-  const [refreshModalOpen, setRefreshModalOpen] = useState(false);
-  const closeRefreshModal = useCallback(
-    () => {
-      setRefreshModalOpen(false);
-    },[]
-  );
   
   return (
     <div className="rounded-md bg-white pb-6 text-center shadow-md">
@@ -58,21 +50,12 @@ function ProjectFunding({ project }: { project: view_project }) {
         <div className="flex items-center space-x-2">
           {project.contract_status !== "Closed" &&
             user?.user_role !== "Contractor" && (
-              <>
-                <button
-                  onClick={() => setRefreshModalOpen(true)}
-                  className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto"
-                >
-                  Update Expenditure
-                </button>
                 <button
                   onClick={() => setModalOpen(true)}
                   className="inline-flex items-center justify-center rounded-md border-2 border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-light focus:outline-none focus:ring-0 focus:ring-brand-light focus:ring-offset-2 sm:w-auto"
                 >
                   Edit
                 </button>
-
-              </>
             )}
         </div>
       </div>
@@ -223,13 +206,6 @@ function ProjectFunding({ project }: { project: view_project }) {
         approvedFunding={approvedFunding}
         isOpen={modalOpen}
         setIsOpen={setModalOpen}
-      />
-
-      {/* Update Projected Expenditure Modal*/}
-      <ConfirmProjectedRefreshModal
-        project_id={project.id}
-        isOpen={refreshModalOpen}
-        closeModal={closeRefreshModal}
       />
     </div>
   );
