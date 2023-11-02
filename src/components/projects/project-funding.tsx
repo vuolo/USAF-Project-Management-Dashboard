@@ -18,17 +18,18 @@ import ModalEditProjectFunding from "./modals/modal-edit-project-funding";
 
 function ProjectFunding({ project }: { project: view_project }) {
   const user = useSession().data?.db_user;
-  const { data: obligationPlan } = api.obligation.getObligationPlan.useQuery({
-    project_id: project.id,
-  });
-  const { data: expenditurePlan } = api.expenditure.getExpenditurePlan.useQuery(
-    {
+  const { data: obligationPlan, refetch: refetchObligationPlan } =
+    api.obligation.getObligationPlan.useQuery({
       project_id: project.id,
-    }
-  );
-  const { data: approvedFunding } = api.approved.getApprovedFunding.useQuery({
-    project_id: project.id,
-  });
+    });
+  const { data: expenditurePlan, refetch: refetchExpenditurePlan } =
+    api.expenditure.getExpenditurePlan.useQuery({
+      project_id: project.id,
+    });
+  const { data: approvedFunding, refetch: refetchApprovedFunding } =
+    api.approved.getApprovedFunding.useQuery({
+      project_id: project.id,
+    });
   const { data: approvedEstimates } = api.approved.getEstimates.useQuery({
     project_id: project.id,
   });
@@ -59,7 +60,7 @@ function ProjectFunding({ project }: { project: view_project }) {
         </div>
       </div>
 
-      <div className="flex flex-col justify-around gap-2 px-4 pt-4 pb-2 text-left sm:px-6 sm:pt-6 md:flex-row">
+      <div className="flex flex-col justify-around gap-2 px-4 pb-2 pt-4 text-left sm:px-6 sm:pt-6 md:flex-row">
         {false ? (
           <p className="text-center italic">This project has no funding yet.</p>
         ) : (
@@ -205,6 +206,9 @@ function ProjectFunding({ project }: { project: view_project }) {
         approvedFunding={approvedFunding}
         isOpen={modalOpen}
         setIsOpen={setModalOpen}
+        refetchApprovedFunding={refetchApprovedFunding}
+        refetchObligationPlan={refetchObligationPlan}
+        refetchExpenditurePlan={refetchExpenditurePlan}
       />
     </div>
   );

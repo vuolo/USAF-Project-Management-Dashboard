@@ -4,6 +4,18 @@ import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { api } from "~/utils/api";
+import type { approved_funding, funding_types } from "@prisma/client";
+import type { view_project } from "~/types/view_project";
+import type { obligation_plan } from "~/types/obligation_plan";
+import { formatCurrency } from "~/utils/currency";
+import DatePicker from "@hassanmojab/react-modern-calendar-datepicker";
+import { convertDateToDayValue, convertDayValueToDate } from "~/utils/date";
+import type {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from "@tanstack/react-query";
+
 import type { funding_types } from "@prisma/client";
 import type { view_project } from "~/types/view_project";
 import type { obligation_plan } from "~/types/obligation_plan";
@@ -14,12 +26,16 @@ type TableProps = {
   project: view_project;
   obligationPlan?: obligation_plan[];
   fundingTypes?: funding_types[];
+  refetchObligationPlan: <TPageData>(
+    options?: RefetchOptions & RefetchQueryFilters<TPageData>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 };
 
 function TableEditObligationPlan({
   project,
   obligationPlan,
   fundingTypes,
+  refetchObligationPlan,
 }: TableProps) {
   const router = useRouter();
 
@@ -29,8 +45,19 @@ function TableEditObligationPlan({
 
   // Listen for changes in obligationPlan, and update edit state (the edit state is used to render the table on the modal)
   useEffect(() => {
-    if (!obligationPlan || editableObligationPlan.length > 0) return;
-    setEditableObligationPlan([...obligationPlan]);
+    if (!obligationPlan) return;
+    setEditableObligationPlan((prev) =>
+      [
+        ...prev,
+        ...obligationPlan.filter(
+          (obPlan) => !prev.find((prevObPlan) => prevObPlan.id === obPlan.id)
+        ),
+      ]
+        // remove all from new array that are not in obligationPlan (check ids)
+        .filter((obPlan) =>
+          obligationPlan.find((prevObPlan) => prevObPlan.id === obPlan.id)
+        )
+    );
   }, [obligationPlan, editableObligationPlan.length]);
 
   const updateObligation = api.obligation.updateObligation.useMutation({
@@ -44,36 +71,53 @@ function TableEditObligationPlan({
       console.error(error);
     },
     onSuccess() {
-      toast.success(
-        toastMessage(
-          "Obligation Plan Updated",
-          "The obligation plan has been updated successfully."
-        )
-      );
-
+      // toast.success(
+      //   toastMessage(
+      //     "Obligation Plan Updated",
+      //     "The obligation plan has been updated successfully."
+      //   )
+      // );
       // Refresh UI data
-      router.reload(); // This is a hacky solution, but it works for now...
+      // router.reload(); // This is a hacky solution, but it works for now...
     },
   });
 
-  const submitUpdateObligationPlan = useCallback(() => {
-    editableObligationPlan.forEach((obligation, obliIdx) => {
-      const prevObligation = obligationPlan ? obligationPlan[obliIdx] : null;
-      if (prevObligation?.date !== obligation.date) {
-        obligation.date.setDate(obligation.date.getDate() + 1); // add a day
-      }
+  const submitUpdateObligationPlan = useCallback(async () => {
+    await Promise.all(
+      editableObligationPlan.map((obligation, obliIdx) => {
+        const prevObligation = obligationPlan ? obligationPlan[obliIdx] : null;
+        if (prevObligation?.date !== obligation.date) {
+          obligation.date.setDate(obligation.date.getDate());
+        }
 
-      updateObligation.mutate({
-        id: obligation.id,
-        project_id: project.id,
-        obli_funding_date: obligation.date,
-        obli_funding_type: obligation.FundingType,
-        obli_fiscal_year: obligation.FiscalYear,
-        obli_projected: Number(obligation.Projected),
-        obli_actual: Number(obligation.Actual),
-      });
-    });
-  }, [editableObligationPlan, updateObligation, project, obligationPlan]);
+        return updateObligation.mutateAsync({
+          id: obligation.id,
+          project_id: project.id,
+          obli_funding_date: obligation.date,
+          obli_funding_type: obligation.FundingType,
+          obli_fiscal_year: obligation.FiscalYear,
+          obli_projected: Number(obligation.Projected),
+          obli_actual: Number(obligation.Actual),
+        });
+      })
+    );
+
+    toast.success(
+      toastMessage(
+        "Obligation Plan Updated",
+        "The obligation plan has been updated successfully."
+      )
+    );
+
+    // Refresh UI data
+    await refetchObligationPlan();
+  }, [
+    refetchObligationPlan,
+    editableObligationPlan,
+    updateObligation,
+    project,
+    obligationPlan,
+  ]);
 
   const addObligation = api.obligation.addObligation.useMutation({
     onError(error) {
@@ -94,15 +138,15 @@ function TableEditObligationPlan({
       );
 
       // Refresh UI data
-      router.reload(); // This is a hacky solution, but it works for now...
+      // router.reload(); // This is a hacky solution, but it works for now...
     },
   });
 
-  const submitAddObligation = useCallback(() => {
+  const submitAddObligation = useCallback(async () => {
     const today = new Date();
     today.setDate(15); // set to middle of the month, avoids timezone issues
 
-    addObligation.mutate({
+    await addObligation.mutateAsync({
       project_id: project.id,
       obli_funding_date: today,
       obli_funding_type: "0",
@@ -110,7 +154,9 @@ function TableEditObligationPlan({
       obli_projected: 0,
       obli_actual: 0,
     });
-  }, [addObligation, project]);
+
+    await refetchObligationPlan();
+  }, [refetchObligationPlan, addObligation, project]);
 
   const deleteObligation = api.obligation.deleteObligation.useMutation({
     onError(error) {
@@ -131,22 +177,24 @@ function TableEditObligationPlan({
       );
 
       // Refresh UI data
-      router.reload(); // This is a hacky solution, but it works for now...
+      // router.reload(); // This is a hacky solution, but it works for now...
     },
   });
 
   const submitDeleteObligation = useCallback(
-    (id: number) => {
-      deleteObligation.mutate({ id });
+    async (id: number) => {
+      await deleteObligation.mutateAsync({ id });
+
+      await refetchObligationPlan();
     },
-    [deleteObligation]
+    [refetchObligationPlan, deleteObligation]
   );
 
   return (
-    <div className="flex flex-row items-center gap-2 pt-2 pb-2 text-left sm:px-6">
+    <div className="flex flex-row items-center gap-2 pb-2 pt-2 text-left sm:px-6">
       <div className="flex w-fit flex-col justify-center gap-4 p-2 text-center">
         <div className="mt-2 flex flex-col justify-center">
-          <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
+          <div className="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
               <div className="mb-4 sm:flex sm:items-center">
                 <div className="sm:flex-auto">
@@ -194,7 +242,9 @@ function TableEditObligationPlan({
                               />
 
                               <Trash2
-                                onClick={() => submitDeleteObligation(obli.id)}
+                                onClick={() =>
+                                  void submitDeleteObligation(obli.id)
+                                }
                                 className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
                               />
                             </div>
@@ -207,7 +257,7 @@ function TableEditObligationPlan({
                           <div className="flex items-center justify-center gap-2">
                             <span>Add Obligation</span>
                             <PlusCircle
-                              onClick={submitAddObligation}
+                              onClick={() => void submitAddObligation()}
                               className="h-4 w-4 cursor-pointer text-gray-400 hover:text-green-500"
                             />
                           </div>
@@ -258,7 +308,7 @@ function TableEditObligationPlan({
                 <button
                   type="button"
                   className="inline-flex w-fit justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:w-auto sm:text-sm"
-                  onClick={submitUpdateObligationPlan}
+                  onClick={() => void submitUpdateObligationPlan()}
                 >
                   Save Updated Fields
                 </button>

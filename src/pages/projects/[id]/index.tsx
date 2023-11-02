@@ -16,7 +16,15 @@ function Project() {
   const user = useSession().data?.db_user;
   const router = useRouter();
   const id = parseInt(router.query.id as string);
-  const { data: project } = api.project.get_view.useQuery({ id });
+  const addProjectHistory = api.user.addProjectHistory.useMutation();
+  const { data: project } = api.project.get_view.useQuery({ id }, {
+    onSuccess: () => {
+      console.log("Adding favorite");
+      addProjectHistory.mutate({
+        id: id
+      })
+    }
+  });
 
   const [showModal, setShowModal] = useState(false);
 

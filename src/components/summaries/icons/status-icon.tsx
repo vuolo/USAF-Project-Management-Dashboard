@@ -6,7 +6,7 @@ function StatusIcon({ status }: { status: string }) {
     case "ONTRACK":
     case "ON-BUDGET":
     case "green":
-      return (<div><Circle style={{ fill: "green", color: "green" }}
+      return (<div><Circle style={{ fill: "green", color: "green"}}
         data-tooltip-id="icon-tooltip"
         data-tooltip-content={status} />
         <Tooltip id="icon-tooltip" style={{ opacity: 80 }} /></div>);

@@ -10,6 +10,8 @@ import ProjectsOverview from "~/components/summaries/projects-overview";
 import TailoredView from "~/components/summaries/tailored-view";
 import React from "react";
 import { sleep } from "~/utils/misc";
+import { api } from "~/utils/api";
+import UpcomingEvents from "~/components/upcoming-events";
 
 const Home: NextPage = () => {
   const user = useSession().data?.db_user;
@@ -60,6 +62,7 @@ const Home: NextPage = () => {
       <div className="flex flex-col gap-6 px-2 pt-2 pb-2 sm:justify-around sm:pt-6 lg:flex-row">
         {/* Left */}
         <div className="flex flex-col gap-6">
+          <UpcomingEvents />
           <DependencySummary />
           <ScheduleSummary />
         </div>

@@ -166,32 +166,63 @@ const getDate = (
   }
 };
 
+const isValidDate = (date: Date | undefined): boolean => {
+  return date !== undefined && new Date(date).getFullYear() !== 1969;
+};
+
+const getDaysElapsed = (start: Date, end: Date, current: Date): number => {
+  return Math.round(
+    Math.min(Math.max(((+current - +start) / (+end - +start)) * 100, 0), 100)
+  );
+};
+
 const getPercentage = (successor: all_successors, isPredecessor: boolean) => {
   const currDate = new Date();
-  const actualStartKey = isPredecessor
-    ? "pred_actual_start"
-    : "succ_actual_start";
+  const actualStartKey = isPredecessor ? "pred_actual_start" : "succ_actual_start";
   const actualEndKey = isPredecessor ? "pred_actual_end" : "succ_actual_end";
+  const projStartKey = isPredecessor ? "pred_proj_start" : "succ_proj_start";
   const projEndKey = isPredecessor ? "pred_proj_end" : "succ_proj_end";
 
-  if (!successor[actualStartKey] && !successor[projEndKey]) {
-    return 0;
-  } else if (successor[actualEndKey] !== null) {
-    if (currDate < new Date(successor[actualEndKey])) {
-      const start = new Date(successor[actualStartKey]);
-      const end = new Date(successor[actualEndKey]);
-      const daysElapsed = (+currDate - +start) / (+end - +start);
-      return Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100));
-    } else return 100;
-  } else if (successor[projEndKey] !== null) {
-    if (currDate < new Date(successor[projEndKey])) {
-      const start = new Date(successor[actualStartKey]);
-      const end = new Date(successor[projEndKey]);
-      const daysElapsed = (+currDate - +start) / (+end - +start);
-      return (
-        "Projected " +
-        Math.round(Math.min(Math.max(daysElapsed * 100, 0), 100)).toString()
+  const validActualStart = isValidDate(successor[actualStartKey]);
+  const validActualEnd = isValidDate(successor[actualEndKey]);
+  const validProjectedEnd = isValidDate(successor[projEndKey]);
+
+  if (!validActualStart && !validProjectedEnd) return 0;
+  
+  if (validActualEnd) {
+    if (currDate <= new Date(successor[actualEndKey])) {
+      return getDaysElapsed(
+        new Date(successor[actualStartKey]),
+        new Date(successor[actualEndKey]),
+        currDate
       );
-    } else return "Projected 100";
-  } else return 0;
+    }
+    return 100;
+  }
+
+  if (validProjectedEnd) {
+    let projectedStart: Date;
+    
+    validActualStart ? 
+      projectedStart = successor[actualStartKey] : 
+      projectedStart = successor[projStartKey];
+
+    if (isValidDate(projectedStart)) {
+      if (currDate >= new Date(projectedStart)) {
+        if (currDate <= new Date(successor[projEndKey])) {
+          return `Projected ${getDaysElapsed(
+            new Date(projectedStart),
+            new Date(successor[projEndKey]),
+            currDate
+          )}`;
+        }
+        return "Projected 100";
+      }
+      // If projected start is in the future
+      return "Projected 0";
+    }
+    return "Projected 100";
+  }
+
+  return 0;
 };

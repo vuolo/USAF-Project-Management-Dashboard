@@ -6,6 +6,7 @@ import type { view_project } from "~/types/view_project";
 import { api } from "~/utils/api";
 import { sendEmail } from "~/utils/email";
 import { getIPTMembers } from "~/utils/iptMembers";
+import { project_ext } from "./project_ext";
 
 export const projectRouter = createTRPCRouter({
   list_view: protectedProcedure.query(async ({ ctx }) => {
@@ -364,4 +365,5 @@ export const projectRouter = createTRPCRouter({
             >`SELECT * FROM view_project WHERE contractor_id = ${current_id}`;
       }
     }),
+    ...project_ext
 });

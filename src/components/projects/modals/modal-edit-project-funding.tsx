@@ -14,7 +14,6 @@ import DatePicker, {
   type DayValue,
 } from "@hassanmojab/react-modern-calendar-datepicker";
 import type { approved_funding } from "@prisma/client";
-import type { Decimal } from "@prisma/client/runtime";
 import type { obligation_plan } from "~/types/obligation_plan";
 import type { expenditure_plan } from "~/types/expenditure_plan";
 import type { view_project } from "~/types/view_project";
@@ -22,6 +21,11 @@ import type { view_project } from "~/types/view_project";
 import TableEditApprovedFunding from "../tables/table-edit-project-approved-funding";
 import TableEditObligationPlan from "../tables/table-edit-project-obligation-plan";
 import TableEditExpenditurePlan from "../tables/table-edit-project-expenditure-plan";
+import type {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from "@tanstack/react-query";
 
 type ModalProps = {
   project: view_project;
@@ -30,6 +34,15 @@ type ModalProps = {
   approvedFunding?: approved_funding[];
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  refetchApprovedFunding: <TPageData>(
+    options?: RefetchOptions & RefetchQueryFilters<TPageData>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
+  refetchObligationPlan: <TPageData>(
+    options?: RefetchOptions & RefetchQueryFilters<TPageData>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
+  refetchExpenditurePlan: <TPageData>(
+    options?: RefetchOptions & RefetchQueryFilters<TPageData>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 };
 
 function ModalEditProjectFunding({
@@ -39,6 +52,9 @@ function ModalEditProjectFunding({
   approvedFunding,
   isOpen,
   setIsOpen,
+  refetchApprovedFunding,
+  refetchObligationPlan,
+  refetchExpenditurePlan,
 }: ModalProps) {
   const { data: fundingTypes } = api.funding_type.getAll.useQuery();
 
@@ -75,7 +91,7 @@ function ModalEditProjectFunding({
         initialFocus={closeButtonRef}
         onClose={closeModal}
       >
-        <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+        <div className="flex min-h-screen items-center justify-center px-4 pb-20 pt-4 text-center sm:block sm:p-0">
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -107,7 +123,7 @@ function ModalEditProjectFunding({
             <div className="overflow-x-auto relative my-8 inline-block w-full max-w-full transform rounded-lg bg-white text-left align-middle shadow-xl transition-all">
               <div className="w-fit rounded-lg bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex items-start">
-                  <div className="mr-2 mt-3 ml-4 w-full text-left">
+                  <div className="ml-4 mr-2 mt-3 w-full text-left">
                     <Dialog.Title
                       as="h3"
                       className="flex items-center gap-4 text-lg font-medium leading-6 text-gray-900"
@@ -126,6 +142,7 @@ function ModalEditProjectFunding({
                       project={project}
                       approvedFunding={approvedFunding}
                       fundingTypes={fundingTypes}
+                      refetchApprovedFunding={refetchApprovedFunding}
                     />
 
                     {/* Edit Obligation Plan Table */}
@@ -133,6 +150,7 @@ function ModalEditProjectFunding({
                       project={project}
                       obligationPlan={obligationPlan}
                       fundingTypes={fundingTypes}
+                      refetchObligationPlan={refetchObligationPlan}
                     />
 
                     {/* Edit Expenditure Plan Table */}
@@ -140,6 +158,7 @@ function ModalEditProjectFunding({
                       <TableEditExpenditurePlan
                         project={project}
                         expenditurePlan={expenditurePlan}
+                        refetchExpenditurePlan={refetchExpenditurePlan}
                       />
                     )}
                   </div>
@@ -149,7 +168,7 @@ function ModalEditProjectFunding({
                   <button
                     ref={closeButtonRef}
                     type="button"
-                    className="mt-3 ml-3 inline-flex w-fit justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    className="ml-3 mt-3 inline-flex w-fit justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sm:ml-3 sm:mt-0 sm:w-auto sm:text-sm"
                     onClick={closeModal}
                   >
                     Close

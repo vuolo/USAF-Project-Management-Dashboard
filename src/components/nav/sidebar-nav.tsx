@@ -24,7 +24,7 @@ function SidebarNav() {
       <div
         className="invisible absolute hidden sm:visible sm:block"
         style={{
-          zIndex: "999999",
+          zIndex: "1",
           height: "100%",
           display: "flex",
           flexDirection: "column",

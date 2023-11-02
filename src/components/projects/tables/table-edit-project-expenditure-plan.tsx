@@ -3,6 +3,19 @@ import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
 import { api } from "~/utils/api";
+import type { approved_funding, funding_types } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
+import type { view_project } from "~/types/view_project";
+import type { obligation_plan } from "~/types/obligation_plan";
+import { formatCurrency } from "~/utils/currency";
+import DatePicker from "@hassanmojab/react-modern-calendar-datepicker";
+import { convertDateToDayValue, convertDayValueToDate } from "~/utils/date";
+import type { expenditure_plan } from "~/types/expenditure_plan";
+import type {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from "@tanstack/react-query";
 import type { expenditure_plan } from "~/types/expenditure_plan";
 import type { view_project } from "~/types/view_project";
 import { convertDateToString } from "~/utils/date";
@@ -10,9 +23,16 @@ import { convertDateToString } from "~/utils/date";
 type TableProps = {
   project: view_project;
   expenditurePlan?: expenditure_plan[];
+  refetchExpenditurePlan: <TPageData>(
+    options?: RefetchOptions & RefetchQueryFilters<TPageData>
+  ) => Promise<QueryObserverResult<unknown, unknown>>;
 };
 
-function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
+function TableEditExpenditurePlan({
+  project,
+  expenditurePlan,
+  refetchExpenditurePlan,
+}: TableProps) {
   const router = useRouter();
 
   const [editableExpenditurePlan, setEditableExpenditurePlan] = useState<
@@ -21,8 +41,14 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
 
   // Listen for changes in obligationPlan, and update edit state (the edit state is used to render the table on the modal)
   useEffect(() => {
-    if (!expenditurePlan || editableExpenditurePlan.length > 0) return;
-    setEditableExpenditurePlan([...expenditurePlan]);
+    if (!expenditurePlan) return;
+    setEditableExpenditurePlan((p) =>
+      [...p, ...expenditurePlan.filter((x) => !p.find((y) => y.id === x.id))]
+        // remove all from new array that are not in expenditurePlan (check ids)
+        .filter((ExPlan) =>
+          expenditurePlan.find((prevExPlan) => prevExPlan.id === ExPlan.id)
+        )
+    );
   }, [expenditurePlan, editableExpenditurePlan.length]);
 
   const updateExpenditure = api.expenditure.updateExpenditure.useMutation({
@@ -37,34 +63,49 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
     },
     onSuccess() {
       // Refresh UI data
-      router.reload(); // This is a hacky solution, but it works for now...
+      // router.reload(); // This is a hacky solution, but it works for now...
     },
   });
 
-  const submitUpdateExpenditurePlan = useCallback(() => {
-    editableExpenditurePlan.forEach((expenditure, expenIdx) => {
-      const prevExpenditure = expenditurePlan
-        ? expenditurePlan[expenIdx]
-        : null;
-      if (prevExpenditure?.date !== expenditure.date) {
-        expenditure.date.setDate(expenditure.date.getDate() + 1); // add a day
-      }
+  const submitUpdateExpenditurePlan = useCallback(async () => {
+    await Promise.all(
+      editableExpenditurePlan.map(async (plan, idx) => {
+        const prevExpenditure = expenditurePlan ? expenditurePlan[idx] : null;
+        if (prevExpenditure?.date !== plan.date) {
+          plan.date.setDate(plan.date.getDate());
+        }
 
-      updateExpenditure.mutate({
-        id: expenditure.id,
-        project_id: project.id,
-        expen_funding_date: expenditure.date,
-        expen_projected: Number(expenditure.Projected),
-        expen_actual: Number(expenditure.Actual),
-      });
-    });
-  }, [editableExpenditurePlan, updateExpenditure, project, expenditurePlan]);
+        return updateExpenditure.mutateAsync({
+          id: plan.id,
+          project_id: project.id,
+          expen_funding_date: plan.date,
+          expen_projected: Number(plan.Projected),
+          expen_actual: Number(plan.Actual),
+        });
+      })
+    );
+
+    toast.success(
+      toastMessage(
+        "Expenditure Plan Updated",
+        "The expenditure plan has been updated successfully."
+      )
+    );
+
+    await refetchExpenditurePlan();
+  }, [
+    editableExpenditurePlan,
+    updateExpenditure,
+    project,
+    expenditurePlan,
+    refetchExpenditurePlan,
+  ]);
 
   return (
-    <div className="flex flex-row items-center gap-2 pt-2 pb-2 text-left sm:px-6">
+    <div className="flex flex-row items-center gap-2 pb-2 pt-2 text-left sm:px-6">
       <div className="flex w-fit flex-col gap-4 p-2 text-center">
         <div className="mt-2 flex flex-col justify-center">
-          <div className="-my-2 -mx-4 sm:-mx-6 lg:-mx-8">
+          <div className="-mx-4 -my-2 sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
               <div className="mb-4 sm:flex sm:items-center">
                 <div className="sm:flex-auto">
@@ -137,7 +178,7 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
                 <button
                   type="button"
                   className="inline-flex w-fit justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 sm:w-auto sm:text-sm"
-                  onClick={submitUpdateExpenditurePlan}
+                  onClick={() => void submitUpdateExpenditurePlan()}
                 >
                   Save Updated Fields
                 </button>
