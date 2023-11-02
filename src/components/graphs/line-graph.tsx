@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { formatCurrency } from "~/utils/currency";
+import { convertDateToString } from "~/utils/date";
 
 type Props = {
   data: any[];
@@ -23,14 +24,18 @@ export default function LineGraph({ data, dataKey1, dataKey2 }: Props) {
     }
     return value;
   };
+
+  const dateToMonthString = (date: string) => {
+    return convertDateToString(new Date(date));
+  };
   
   return (
     <ResponsiveContainer height="90%" aspect={4 / 1}>
       <LineChart data={data}>
-        <XAxis dataKey="date" />
+        <XAxis dataKey="date" tickFormatter={dateToMonthString}/>
         <YAxis />
         <Legend />
-        <Tooltip formatter={customTooltipFormatter}/>
+        <Tooltip formatter={customTooltipFormatter} labelFormatter={dateToMonthString}/>
         <Line
           type="monotone"
           dataKey={dataKey1}

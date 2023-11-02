@@ -5,6 +5,7 @@ import { toastMessage } from "~/utils/toast";
 import { api } from "~/utils/api";
 import type { expenditure_plan } from "~/types/expenditure_plan";
 import type { view_project } from "~/types/view_project";
+import { convertDateToString } from "~/utils/date";
 
 type TableProps = {
   project: view_project;
@@ -93,7 +94,7 @@ function TableEditExpenditurePlan({ project, expenditurePlan }: TableProps) {
                             className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                           >
                             <div className="flex items-center justify-center gap-2">
-                              <span>{formatDate(expen.date)}</span>
+                              <span>{convertDateToString(expen.date)}</span>
                             </div>
                           </th>
                         ))}
@@ -223,13 +224,4 @@ function getRowName(idx: number) {
     default:
       return "";
   }
-}
-
-function formatDate(value: Date) {
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  
-  const month = monthNames[value.getMonth()];
-  const year = value.getFullYear().toString();
-  
-  return `${month} ${year}`;
 }

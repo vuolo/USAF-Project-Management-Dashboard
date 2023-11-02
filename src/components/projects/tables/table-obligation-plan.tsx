@@ -4,8 +4,7 @@ import { formatCurrency} from "~/utils/currency";
 import { format } from "date-fns";
 import type { funding_types } from "@prisma/client";
 import type { view_project } from "~/types/view_project";
-import { renderToString } from 'react-dom/server';
-import { string } from "zod";
+import { convertDateToString } from "~/utils/date";
 
 type TableProps = {
   project: view_project;
@@ -54,7 +53,8 @@ function TableObligationPlan({ project, obligationPlan }: TableProps) {
                           scope="col"
                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                         >
-                          {format(obli.date, "MM/dd/yyyy")}
+                          {/*format(obli.date, "MM/dd/yyyy")*/}
+                          {convertDateToString(obli.date)}
                         </th>
                       ))}
                     </tr>
@@ -125,11 +125,15 @@ function getRowValue(
 
     // Actual
     case 3:
-      const currentDate = new Date();  
-      const formattedText = formatCurrency(obli.Actual); 
+      const currentDate = new Date();
+      const obliDate = new Date(obli.date);
       
-      if (currentDate >= obli.date && formattedText === '$0.00') {
-        // If obli.date is greater than today's date, format the text in red
+      const formattedText = formatCurrency(obli.Actual);
+      
+      // If we are beyond that month and no obligation for that month then format it in red
+      if ((currentDate.getFullYear() > obliDate.getFullYear()) || 
+          (currentDate.getFullYear() === obliDate.getFullYear() && currentDate.getMonth() > obliDate.getMonth()) && 
+          formattedText === '$0.00') {
         return formatRed('Missing Obligation ($0.00)');
       }
       return formatCurrency(obli.Actual);

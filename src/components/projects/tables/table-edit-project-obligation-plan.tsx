@@ -2,16 +2,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
-import { format } from "date-fns";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { api } from "~/utils/api";
-import type { approved_funding, funding_types } from "@prisma/client";
-import type { Decimal } from "@prisma/client/runtime";
+import type { funding_types } from "@prisma/client";
 import type { view_project } from "~/types/view_project";
 import type { obligation_plan } from "~/types/obligation_plan";
-import { formatCurrency } from "~/utils/currency";
-import DatePicker from "@hassanmojab/react-modern-calendar-datepicker";
-import { convertDateToDayValue, convertDayValueToDate } from "~/utils/date";
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
  
 type TableProps = {
   project: view_project;
@@ -103,7 +100,7 @@ function TableEditObligationPlan({
 
   const submitAddObligation = useCallback(() => {
     const today = new Date();
-    today.setDate(today.getDate() + 1); // add a day
+    today.setDate(15); // set to middle of the month, avoids timezone issues
 
     addObligation.mutate({
       project_id: project.id,
@@ -181,24 +178,21 @@ function TableEditObligationPlan({
                             className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                           >
                             <div className="flex items-center justify-center gap-2">
-                              {/* <span>{format(obli.date, "MM/dd/yyyy")}</span> */}
                               <DatePicker
-                                value={convertDateToDayValue(obli.date)}
-                                onChange={(dayValue) => {
+                                selected={new Date(obli.date)}
+                                onChange={(date: Date) => {
                                   setEditableObligationPlan((prev) => {
-                                    const date =
-                                      convertDayValueToDate(dayValue);
-                                    return prev.map((obli, idx) =>
-                                      date && idx === obliIdx
-                                        ? { ...obli, date }
-                                        : obli
+                                    return prev.map((prevObli, idx) =>
+                                      idx === obliIdx ? { ...prevObli, date } : prevObli
                                     );
                                   });
                                 }}
-                                inputPlaceholder="No Date"
-                                inputClassName="w-[6rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                calendarClassName="z-50"
+                                dateFormat="MM/yyyy"
+                                showMonthYearPicker
+                                className="w-[6rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                                wrapperClassName="z-50"
                               />
+
                               <Trash2
                                 onClick={() => submitDeleteObligation(obli.id)}
                                 className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"

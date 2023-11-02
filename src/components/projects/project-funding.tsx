@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { format } from "date-fns";
 import { api } from "~/utils/api";
@@ -15,7 +15,6 @@ import TableApprovedFunding from "./tables/table-approved-funding";
 import TableObligationPlan from "./tables/table-obligation-plan";
 import TableExpenditurePlan from "./tables/table-expenditure-plan";
 import ModalEditProjectFunding from "./modals/modal-edit-project-funding";
-import ConfirmProjectedRefreshModal from "./modals/modal-confirm-refresh";
 
 function ProjectFunding({ project }: { project: view_project }) {
   const user = useSession().data?.db_user;

@@ -1,5 +1,5 @@
 import { formatCurrency } from "~/utils/currency";
-import { format } from "date-fns";
+import { convertDateToString } from "~/utils/date";
 import type { expenditure_plan } from "~/types/expenditure_plan";
 
 type TableProps = {
@@ -44,7 +44,7 @@ function TableExpenditurePlan({ expenditurePlan }: TableProps) {
                           scope="col"
                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                         >
-                          {formatDate(expen.date)}
+                          {convertDateToString(expen.date)}
                         </th>
                       ))}
                     </tr>
@@ -109,13 +109,4 @@ function getRowName(idx: number) {
     default:
       return "";
   }
-}
-
-function formatDate(value: Date) {
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  
-  const month = monthNames[value.getMonth()];
-  const year = value.getFullYear().toString();
-  
-  return `${month} ${year}`;
 }
