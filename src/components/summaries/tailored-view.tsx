@@ -23,20 +23,62 @@ function TailoredView() {
     filterType,
   });
   const user = useSession().data?.db_user;
+  const { data: recentProjects } = api.user.getProjectHistory.useQuery();
+  // const visitedProject = recentProjects?.map(x => x.id);
+  const [recentlyVisited, setRecentlyVisited] = useState<number[]>([]);
+  useEffect(() => {
+    setRecentlyVisited(recentProjects?.map((x) => x.id) ?? []);
+  }, [recentProjects]);
 
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   useEffect(() => {
     setFavoriteIds(favorites?.map((x) => x.projectId) ?? []);
   }, [favorites]);
+  const visitedCount = recentProjects?.map(x => x.count);
 
   return (
     <div className="flex">
       <div className="mx-6 mt-5 w-3/6 rounded-md bg-white text-center shadow-md">
         <div className="rounded-t-md bg-brand-dark px-8 py-2 font-medium text-white">
-          <h1>Recently Visited</h1>
+          <h1>
+            Most Frequently Visited {"("}
+            {recentProjects?.length}
+            {")"}
+          </h1>
         </div>
         <div className="w-full items-center justify-between gap-6 pb-1 sm:min-w-[35rem]">
-          Recently visited list
+          <table className="min-w-full divide-y divide-gray-300">
+            <thead className="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  className="py-2 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-5"
+                >
+                  Name
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+            {recentProjects &&
+              recentProjects
+                .sort((a, b) => b.count - a.count)
+                .map((project, index) => (
+                  <tr
+                    className={classNames(
+                      index % 2 === 1 ? "bg-[#F7F7F7]" : "bg-white"
+                    )}
+                    key={index}
+                  >
+                    <td className="flex justify-between whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-brand-dark sm:pl-6">
+                      <Link className="underline hover:text-brand-dark/80" href={`/projects/${project.id}`}>
+                        {project.project_name}
+                      </Link>
+                      (# Visited: {project.count}) 
+                    </td>
+                  </tr>
+                ))}
+              </tbody>  
+          </table>   
         </div>
       </div>
       <div className="mx-6 mt-5 w-3/6 rounded-md bg-white shadow-md">
@@ -90,7 +132,7 @@ function TailoredView() {
                     key={index}
                   >
                     <td className="flex items-start whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-brand-dark underline sm:pl-6">
-                      <Link href={`/projects/${project.id}`}>
+                      <Link className="hover:text-brand-dark/80" href={`/projects/${project.id}`}>
                         {project.project_name}
                       </Link>
                     </td>
