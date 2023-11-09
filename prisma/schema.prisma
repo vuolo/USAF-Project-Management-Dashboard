@@ -419,7 +419,7 @@ model favorites {
     userId    Int
     user      users   @relation(fields: [userId], references: [id], onDelete: Cascade)
     project   project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-    projectId Int     @unique
+    projectId Int
 
     @@id([userId, projectId])
 }
