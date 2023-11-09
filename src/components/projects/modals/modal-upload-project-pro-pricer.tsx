@@ -7,6 +7,7 @@ import { api } from "~/utils/api";
 import type { view_project } from "~/types/view_project";
 import { parseProPricerFile } from "~/utils/file";
 import { task_resource_table } from "@prisma/client";
+import { useRouter } from "next/router";
 
 type ModalProps = {
   project: view_project;
@@ -19,6 +20,8 @@ function ModalUploadProjectProPricer({
   isOpen,
   setIsOpen,
 }: ModalProps) {
+  const router = useRouter();
+  
   const createManyWBS = api.wbs.createMany.useMutation({
     onSuccess: () => {
       toast.success(
@@ -42,7 +45,51 @@ function ModalUploadProjectProPricer({
     },
   });
 
-  const submitFileUpload = (e: React.FormEvent<HTMLButtonElement>) => {
+  const deleteManyWBS = api.wbs.deleteMany.useMutation({
+    onSuccess: () => {
+      toast.success(
+        toastMessage(
+          "Successfully cleared WBS",
+          "The WBS has been successfully cleared of previous data."
+        )
+      );
+
+      closeModal();
+    },
+    onError: (error) => {
+      toast.error(
+        toastMessage(
+          "There was an error uploading the WBS",
+          "If you are having trouble uploading a WBS, please contact your system administrator."
+        )
+      );
+      console.error(error);
+    },
+  });
+
+  const updateProjectedExpenditure = api.clin.updateProjFromClin.useMutation({
+    onError(error) {
+      toast.error(
+        toastMessage(
+          "Error updating projected expenditure.",
+          "There was an error fetching the WBS data and updating the projection. Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess() {
+      toast.success(
+        toastMessage(
+          "Projected Expenditure Updated.",
+          "The WBS data was fetched and expenditure projection was updated successfully."
+        )
+      );
+        
+      router.reload();
+    },
+  });
+
+  const submitFileUpload = (e: React.FormEvent<HTMLButtonElement>, overwrite: boolean) => {
     e.preventDefault();
 
     // Get file from input with id="file"
@@ -62,9 +109,23 @@ function ModalUploadProjectProPricer({
 
     // Process the file on the client side
     void (async (file) => {
+      if (overwrite) {
+        try {
+          await deleteManyWBS.mutateAsync({ project_id: project.id });
+        } catch (error) {
+          toast.error(
+            toastMessage(
+              "There was an error deleting existing data",
+              (error as Error).message
+            )
+          );
+          return;
+        }
+      }
+
       try {
         const wbsArray = await parseProPricerFile(file, project.id);
-        createManyWBS.mutate(
+        await createManyWBS.mutateAsync(
           (wbsArray as task_resource_table[]).map((wbs) => ({
             project_id: project.id,
             task_id: wbs.task_id,
@@ -93,6 +154,20 @@ function ModalUploadProjectProPricer({
           )
         );
       }
+
+      try {
+        await updateProjectedExpenditure.mutateAsync({ project_id: project.id });
+      } 
+      catch (error) {
+        toast.error(
+          toastMessage(
+            "There was an error updating the projected expenditure",
+            (error as Error).message
+          )
+        );
+        return;
+      }
+
     })(file);
   };
 
@@ -172,14 +247,11 @@ function ModalUploadProjectProPricer({
                         contains the correct WBS (Work Breakdown Structure)
                         data.
                       </p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        This will automatically update the projected expenditure. Any actual expenditure data will be retained as long as it corresponds to a month in the updated WBS.
+                      </p>
 
                       <div className="flex flex-col gap-2">
-                        {/* <label
-                          htmlFor="file"
-                          className="block text-sm font-medium text-gray-700"
-                        >
-                          Upload ProPricer
-                        </label> */}
 
                         <div className="mt-1 flex flex-col items-center gap-3 sm:flex-row">
                           <span className="inline-block h-12 w-full rounded-md">
@@ -194,10 +266,17 @@ function ModalUploadProjectProPricer({
 
                           <button
                             type="button"
-                            onClick={submitFileUpload}
+                            onClick={(e) => submitFileUpload(e, false)}
                             className="ml-3 inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                           >
                             Upload
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => submitFileUpload(e, true)}
+                            className="ml-3 inline-flex items-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                          >
+                            Upload & Overwrite
                           </button>
                         </div>
                       </div>

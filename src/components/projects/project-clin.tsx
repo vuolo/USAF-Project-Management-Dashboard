@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useState, useEffect } from "react";
+import { Fragment, useCallback, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
@@ -10,6 +10,7 @@ import { formatCurrency } from "~/utils/currency";
 import { List, ListPlus } from "lucide-react";
 import type { clin_data_clin_type } from "@prisma/client";
 import type { view_clin } from "~/types/view_clin";
+import ConfirmGenerateClin from "./modals/modal-confirm-generate-clin";
 
 function ProjectClin({ project_id }: { project_id: number }) {
   const router = useRouter();
@@ -293,12 +294,50 @@ function ProjectClin({ project_id }: { project_id: number }) {
     },
   });
 
-  const submitDeleteClin = useCallback(() => {
+  const deleteClinData = api.wbs.deleteManyClin.useMutation({
+    onError(error) {
+      toast.error(
+        toastMessage(
+          "Error deleting CLIN.",
+          "There was an error deleting the CLIN. Please try again."
+        )
+      );
+      console.error(error);
+    },
+    onSuccess() {
+      toast.success(
+        toastMessage(
+          "CLIN deleted successfully.",
+          "The CLIN was deleted successfully."
+        )
+      );
+
+      // Remove the deleted clin from the UI (using reload is a bit hacky, but it works)
+      //router.reload();
+    },
+  });
+
+  const submitDeleteClin = useCallback((clin_num: string | undefined) => {
+    if (clin_num) {
+      deleteClinData.mutate({
+        project_id: project_id,
+        clin_num: Number(clin_num)
+      });
+    }
+
     if (editModalInput_clinId)
       deleteClin.mutate({
         id: editModalInput_clinId,
       });
-  }, [deleteClin, editModalInput_clinId]);
+  }, [deleteClin, deleteClinData, editModalInput_clinId]);
+
+  // Auto Generate Clins modal
+  const [generateModalOpen, setGenerateModalOpen] = useState(false);
+  const closeGenerateModal = useCallback(
+    () => {
+      setGenerateModalOpen(false);
+    },[]
+  );
 
   return (
     <>
@@ -313,6 +352,13 @@ function ProjectClin({ project_id }: { project_id: number }) {
           </p>
         </div>
         <div className="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+          <button
+            type="button"
+            onClick={() => setGenerateModalOpen(true)}
+            className="inline-flex items-center justify-center rounded-md border border-transparent bg-brand-dark px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-dark/80 focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto mr-2"
+          >
+            Generate Clins
+          </button>
           <button
             onClick={openAddModal}
             type="button"
@@ -829,7 +875,7 @@ function ProjectClin({ project_id }: { project_id: number }) {
                     type="button"
                     className="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
                     onClick={() => {
-                      submitDeleteClin();
+                      submitDeleteClin(editModalInput_clinNumber);
                       closeEditModal(false);
                     }}
                   >
@@ -855,6 +901,14 @@ function ProjectClin({ project_id }: { project_id: number }) {
           </div>
         </Dialog>
       </Transition.Root>
+
+      {/* Update Projected Expenditure Modal*/}
+      <ConfirmGenerateClin
+        project_id={project_id}
+        isOpen={generateModalOpen}
+        closeModal={closeGenerateModal}
+      />
+
     </>
   );
 }

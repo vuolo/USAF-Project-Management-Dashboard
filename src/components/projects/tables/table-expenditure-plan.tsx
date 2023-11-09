@@ -1,5 +1,5 @@
 import { formatCurrency } from "~/utils/currency";
-import { format } from "date-fns";
+import { convertDateToString } from "~/utils/date";
 import type { expenditure_plan } from "~/types/expenditure_plan";
 
 type TableProps = {
@@ -44,7 +44,7 @@ function TableExpenditurePlan({ expenditurePlan }: TableProps) {
                           scope="col"
                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                         >
-                          {format(expen.date, "MM/dd/yyyy")}
+                          {convertDateToString(expen.date)}
                         </th>
                       ))}
                     </tr>

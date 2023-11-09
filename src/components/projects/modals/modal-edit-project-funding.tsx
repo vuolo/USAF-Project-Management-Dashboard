@@ -1,18 +1,7 @@
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/router";
 import { Dialog, Transition } from "@headlessui/react";
-import { toast } from "react-toastify";
-import { toastMessage } from "~/utils/toast";
-import { Landmark, Plus, PlusCircle, Trash2 } from "lucide-react";
-import {
-  convertDateToDayValue,
-  convertDayValueToDate,
-  isInvalidDate,
-} from "~/utils/date";
+import { Landmark } from "lucide-react";
 import { api } from "~/utils/api";
-import DatePicker, {
-  type DayValue,
-} from "@hassanmojab/react-modern-calendar-datepicker";
 import type { approved_funding } from "@prisma/client";
 import type { obligation_plan } from "~/types/obligation_plan";
 import type { expenditure_plan } from "~/types/expenditure_plan";
@@ -120,8 +109,8 @@ function ModalEditProjectFunding({
             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
           >
-            <div className="relative my-8 inline-block w-full max-w-full transform rounded-lg bg-white text-left align-middle shadow-xl transition-all">
-              <div className="w-fit rounded-lg bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+            <div className="overflow-x-auto relative my-8 inline-block w-full max-w-full transform rounded-lg bg-white text-left align-middle shadow-xl transition-all">
+              <div className="w-fit rounded-lg bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex items-start">
                   <div className="ml-4 mr-2 mt-3 w-full text-left">
                     <Dialog.Title

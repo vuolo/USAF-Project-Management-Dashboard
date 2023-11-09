@@ -77,8 +77,8 @@ export async function parseProPricerFile(
       task_description: (row as string[])[1] || "",
       month:
         (row as Date[])[2] && i !== 0
-          ? (row as Date[])[2] || undefined
-          : undefined,
+        ? ((date: Date) => new Date(date.getFullYear(), date.getMonth(), 15))((row as Date[])[2] as Date)
+        : undefined,
       wbs: (row as string[])[3] || "",
       clin_num: (row as string[])[4] ? Number((row as string[])[4]) : undefined,
       source_type: (row as string[])[5] || "",

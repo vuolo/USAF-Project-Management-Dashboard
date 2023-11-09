@@ -2,22 +2,15 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { toastMessage } from "~/utils/toast";
-import { format } from "date-fns";
-import { PlusCircle, Trash2 } from "lucide-react";
 import { api } from "~/utils/api";
-import type { approved_funding, funding_types } from "@prisma/client";
-import type { Prisma } from "@prisma/client";
 import type { view_project } from "~/types/view_project";
-import type { obligation_plan } from "~/types/obligation_plan";
-import { formatCurrency } from "~/utils/currency";
-import DatePicker from "@hassanmojab/react-modern-calendar-datepicker";
-import { convertDateToDayValue, convertDayValueToDate } from "~/utils/date";
 import type { expenditure_plan } from "~/types/expenditure_plan";
 import type {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
 } from "@tanstack/react-query";
+import { convertDateToString } from "~/utils/date";
 
 type TableProps = {
   project: view_project;
@@ -100,75 +93,6 @@ function TableEditExpenditurePlan({
     refetchExpenditurePlan,
   ]);
 
-  const addExpenditure = api.expenditure.addExpenditure.useMutation({
-    onError(error) {
-      toast.error(
-        toastMessage(
-          "Error Adding Expenditure",
-          "There was an error adding the expenditure. Please try again later."
-        )
-      );
-      console.error(error);
-    },
-    onSuccess() {
-      toast.success(
-        toastMessage(
-          "Expenditure Added",
-          "An expenditure has been added successfully."
-        )
-      );
-
-      // Refresh UI data
-      // router.reload(); // This is a hacky solution, but it works for now...
-    },
-  });
-
-  const submitAddExpenditure = useCallback(async () => {
-    const today = new Date();
-    today.setDate(today.getDate());
-
-    await addExpenditure.mutateAsync({
-      project_id: project.id,
-      expen_funding_date: today,
-      expen_projected: 0,
-      expen_actual: undefined,
-    });
-
-    await refetchExpenditurePlan();
-  }, [refetchExpenditurePlan, addExpenditure, project]);
-
-  const deleteExpenditure = api.expenditure.deleteExpenditure.useMutation({
-    onError(error) {
-      toast.error(
-        toastMessage(
-          "Error Deleting Expenditure",
-          "There was an error deleting the expenditure. Please try again later."
-        )
-      );
-      console.error(error);
-    },
-    onSuccess() {
-      toast.success(
-        toastMessage(
-          "Expenditure Deleted",
-          "The expenditure has been deleted successfully."
-        )
-      );
-
-      // Refresh UI data
-      // router.reload(); // This is a hacky solution, but it works for now...
-    },
-  });
-
-  const submitDeleteExpenditure = useCallback(
-    async (id: number) => {
-      await deleteExpenditure.mutateAsync({ id });
-
-      await refetchExpenditurePlan();
-    },
-    [refetchExpenditurePlan, deleteExpenditure]
-  );
-
   return (
     <div className="flex flex-row items-center gap-2 pb-2 pt-2 text-left sm:px-6">
       <div className="flex w-fit flex-col gap-4 p-2 text-center">
@@ -183,7 +107,7 @@ function TableEditExpenditurePlan({
                 </div>
               </div>
 
-              <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+              <div className="overflow-x-auto shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
                 {!editableExpenditurePlan ? (
                   <div className="flex h-64 items-center justify-center">
                     <div className="italic text-gray-500">Loading...</div>
@@ -203,45 +127,10 @@ function TableEditExpenditurePlan({
                             className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                           >
                             <div className="flex items-center justify-center gap-2">
-                              {/* <span>{format(expen.date, "MM/dd/yyyy")}</span> */}
-                              <DatePicker
-                                value={convertDateToDayValue(expen.date)}
-                                onChange={(dayValue) => {
-                                  setEditableExpenditurePlan((prev) => {
-                                    const date =
-                                      convertDayValueToDate(dayValue);
-                                    return prev.map((expen, idx) =>
-                                      date && idx === expenIdx
-                                        ? { ...expen, date }
-                                        : expen
-                                    );
-                                  });
-                                }}
-                                inputPlaceholder="No Date"
-                                inputClassName="w-[6rem] border-gray-300 rounded-md shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                                calendarClassName="z-50"
-                              />
-                              <Trash2
-                                onClick={() =>
-                                  void submitDeleteExpenditure(expen.id)
-                                }
-                                className="h-4 w-4 cursor-pointer text-gray-400 hover:text-red-500"
-                              />
+                              <span>{convertDateToString(expen.date)}</span>
                             </div>
                           </th>
                         ))}
-                        <th
-                          scope="col"
-                          className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                        >
-                          <div className="flex items-center justify-center gap-2">
-                            <span>Add Expenditure</span>
-                            <PlusCircle
-                              onClick={() => void submitAddExpenditure()}
-                              className="h-4 w-4 cursor-pointer text-gray-400 hover:text-green-500"
-                            />
-                          </div>
-                        </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white">
@@ -270,9 +159,6 @@ function TableEditExpenditurePlan({
                                 )}
                               </td>
                             ))}
-                            <td className="px-3 py-4 text-sm text-gray-500">
-                              <span>...</span>
-                            </td>
                           </tr>
                         ))}
                     </tbody>
@@ -316,6 +202,7 @@ function getRowValue(
           <input
             type="number"
             step={0.01}
+            readOnly
             className="w-32 rounded-md border border-gray-300 px-2 py-1 text-sm text-gray-900 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={Number(expen.Projected)}
             onChange={(e) => {
