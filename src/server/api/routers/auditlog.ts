@@ -23,19 +23,50 @@ export const auditlogRouter = createTRPCRouter({
         month: z.number(),
         day: z.number()
       })
+    }).optional(),
+    pagination: z.object({
+      pageIndex: z.number(),
+      pageSize: z.number(),
+      cursor: z.number().optional().nullable()
     }).optional()
   })
-  ).query(async ({input}) => {
-    return input.filterQuery && input.filterType === "user_email" ? await prisma.$queryRaw<auditlog[]>`
-        SELECT a.* from auditlog a WHERE a.user LIKE ${"%" + input.filterQuery + "%"} ORDER BY a.time DESC` :
-
-      input.filterQuery && input.filterType === "endpoint" ? await prisma.$queryRaw<auditlog[]>`
-        SELECT a.* from auditlog a WHERE a.endpoint LIKE ${"%" + input.filterQuery + "%"} ORDER BY a.time DESC` :
-
-      //input.filterQuery && input.filterType === "succeeded" ? await prisma.$queryRaw<auditlog[]>`
-        //SELECT a.* from auditlog a WHERE a.succeeded LIKE ${"%" + input.filterQuery + "%"}` :
-        
-      input.filterType === "time" && input.dateRange ? await prisma.auditlog.findMany({
+  ).query(async ({ input }) => {
+    if (input.filterQuery && input.filterType === "user_email") {
+      return await prisma.auditlog.findMany({
+        where: {
+          user: {
+            contains: input.filterQuery
+          }
+        },
+        orderBy: {
+          time: "desc"
+        },
+        cursor: input.pagination?.cursor ? {
+          id: input.pagination?.cursor
+        } : undefined,
+        take: input.pagination?.pageSize,
+        skip: input.pagination?.cursor ? 1 : 0
+      });
+    }
+    else if (input.filterQuery && input.filterType === "endpoint") {
+      return await prisma.auditlog.findMany({
+        where: {
+          endpoint: {
+            contains: input.filterQuery
+          }
+        },
+        orderBy: {
+          time: "desc"
+        },
+        cursor: input.pagination?.cursor ? {
+          id: input.pagination?.cursor
+        } : undefined,
+        take: input.pagination?.pageSize,
+        skip: input.pagination?.cursor ? 1 : 0
+      })
+    }
+    else if (input.filterType === "time" && input.dateRange) {
+      await prisma.auditlog.findMany({
         where: {
           time: {
             lte: new Date(input.dateRange.to.year, input.dateRange.to.month - 1, input.dateRange.to.day),
@@ -44,13 +75,43 @@ export const auditlogRouter = createTRPCRouter({
         },
         orderBy: {
           time: 'desc'
-        }
-      }) :
+        },
+        cursor: input.pagination?.cursor ? {
+          id: input.pagination?.cursor
+        } : undefined,
+        take: input.pagination?.pageSize,
+        skip: input.pagination?.cursor ? 1 : 0
+      })
+    }
+    else if (input.filterQuery && input.filterType === "query") {
+      return await prisma.auditlog.findMany({
+        where: {
+          query: {
+            contains: input.filterQuery
+          }
+        },
+        orderBy: {
+          time: "desc"
+        },
+        cursor: input.pagination?.cursor ? {
+          id: input.pagination?.cursor
+        } : undefined,
+        take: input.pagination?.pageSize,
+        skip: input.pagination?.cursor ? 1 : 0
+      })
+    }
 
-      input.filterQuery && input.filterType === "query" ? await prisma.$queryRaw<auditlog[]>`
-        SELECT a.* from auditlog a WHERE a.query LIKE ${"%" + input.filterQuery + "%"} ORDER BY a.time DESC` :
+    // console.log(`cursor: ${input.pagination?.cursor ?? "N/A"}\npageIndex: ${input.pagination?.pageIndex ?? "N/A"}\npageSize: ${input.pagination?.pageSize ?? "N/A"}`);
 
-      await prisma.$queryRaw<auditlog[]>`
-        SELECT a.* from auditlog a ORDER BY a.time DESC`
+    return await prisma.auditlog.findMany({
+      orderBy: {
+        time: "desc"
+      },
+      cursor: input.pagination?.cursor ? {
+        id: input.pagination?.cursor
+      } : undefined,
+      take: input.pagination?.pageSize,
+      skip: input.pagination?.cursor ? 1 : 0
+    })
   }),
 });

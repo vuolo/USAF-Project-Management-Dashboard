@@ -1,14 +1,10 @@
 import { api } from "~/utils/api";
-import ModalEditUser from "../modals/modal-edit-user";
-import { Trash2 } from "lucide-react";
-import { useState } from "react";
-import { users } from "@prisma/client";
-import ModalConfirmDeleteUser from "../modals/modal-confirm-delete-user";
-import ModalAddAdmin from "../modals/modal-add-admin";
-import ModalAddIPTMember from "../modals/modal-add-IPT";
-import ModalAddContractor from "../modals/modal-add-contractor";
+import { useCallback, useEffect, useState } from "react";
 import ModalQuery from "../modals/modal-query";
-import DatePicker, { Calendar, type DayValue, type DayRange } from "@hassanmojab/react-modern-calendar-datepicker";
+import DatePicker, { type DayRange } from "@hassanmojab/react-modern-calendar-datepicker";
+import DebouncedInput from "~/components/ui/debounced-input";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
+import { classNames } from "~/utils/misc";
 
 type FilterType = "user_email" | "query" | "endpoint" | "succeeded" | "time";
 
@@ -21,10 +17,11 @@ function AuditLogTable() {
     from: null,
     to: null
   });
-
-  const refetchQuery = () => {
-    void refetch();
-  };
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [cursor, setCursor] = useState<number | null | undefined>(null);
+  const [prevCursors, setPrevCursors] = useState<Record<string, number>>({});
+  const [nextCursor, setNextCursor] = useState<number | null | undefined>(null);
 
   // Original query
   const { data: allLogs, refetch } = api.auditlog.search.useQuery({
@@ -41,56 +38,124 @@ function AuditLogTable() {
         month: dateRange.to.month,
         day: dateRange.to.day
       }
-    } : undefined
+    } : undefined,
+    pagination: {
+      pageIndex: pageIndex,
+      pageSize: pageSize,
+      cursor: cursor
+    }
+  }, {
+    onSuccess: (data) => {
+      setNextCursor(data[data.length - 1]?.id);
+    }
   });
+
+  const resetPagination = useCallback(() => {
+    setPageIndex(0);
+    setCursor(null);
+    setPrevCursors({});
+    setNextCursor(null);
+  }, []);
+
+  const onPaginationChange = useCallback((pageIndex: number, direction: -1 | 1) => {
+    setPageIndex(pageIndex);
+    setCursor(direction == -1 ? prevCursors[pageIndex] : nextCursor);
+    setPrevCursors(
+      prevCursors => ({
+        ...prevCursors,
+        [pageIndex]: direction == -1 ? prevCursors[pageIndex] : nextCursor
+      })
+    );
+  }, [
+    prevCursors,
+    nextCursor
+  ]);
 
   return (
     <>
-      <div className="mt-4 flex w-fit gap-2 px-2">
-        <input
-          type="text"
-          name="filter"
-          id="filter"
-          className="block w-full flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:min-w-full sm:text-sm"
-          placeholder="Search..."
-          onChange={(e) => {
-            setFilterQuery(e.target.value);
+      <div className="mt-4 flex w-full gap-2 px-2 justify-between">
+        <div className="flex gap-2 items-end">
+          {/* Filter */}
+          <DebouncedInput
+            icon={MagnifyingGlassIcon}
+            type="text"
+            placeholder="Search"
+            value={filterQuery ?? ""}
+            onChange={(value) => {
+              if (value === filterQuery) return;
+              
+              setFilterQuery(String(value));
+              resetPagination();
 
-            void refetch();
-          }}
-        />
-        <select
-          id="filter-select"
-          name="filter-select"
-          className="block flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
-          value={filterType}
-          onChange={(e) => {
-            setFilterType(e.target.value as FilterType);
-          }}
-        >
-          {/* Filter Type */}
-          <option value="user_email">User Email</option>
-          <option value="endpoint">Endpoint</option>
-          {/* <option value="succeeded" disabled>Succeeded</option> */}
-          <option value="time">Time</option>
-          <option value="query">Query</option>
-        </select>
-        {filterType == "time" ? (
-          <>
+              void refetch();
+            }}
+            className={classNames("w-72",
+            filterType == "time" ? "hidden" : "block"
+            )}
+          />
+
+          <select
+            id="filter-select"
+            name="filter-select"
+            className="block flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+            value={filterType}
+            onChange={(e) => {
+              setFilterType(e.target.value as FilterType);
+              resetPagination();
+            }}
+          >
+            {/* Filter Type */}
+            <option value="user_email">User Email</option>
+            <option value="endpoint">Endpoint</option>
+            {/* <option value="succeeded" disabled>Succeeded</option> */}
+            <option value="time">Time</option>
+            <option value="query">Query</option>
+          </select>
+
+          {filterType == "time" ?
             <div>
               <DatePicker
                 value={dateRange}
                 onChange={setDateRange}
                 inputPlaceholder="Select a range"
               />
-            </div>
-          </>
-        ) : null}
+            </div> : null}
+        </div>
+
+        {/* Pagination */}
+        <div className="mt-4 flex w-fit gap-2 px-2 items-center">
+
+          <button
+            onClick={() => {
+              onPaginationChange(pageIndex - 1, -1);
+            }}
+            disabled={pageIndex === 0}
+            className="block disabled:opacity-[30%] flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+          >
+            Previous
+          </button>
+
+          <button
+            onClick={() => {
+              onPaginationChange(pageIndex + 1, 1);
+            }}
+            disabled={nextCursor === null || (allLogs && allLogs?.length < pageSize)}
+            className="block disabled:opacity-[30%] flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+            
+          >
+            Next
+          </button>
+
+          {/* Current page display indicator */}
+          <div className="flex w-fit gap-2 px-2 text-sm text-gray-700">
+            Page {pageIndex + 1}
+          </div>
+        </div>
       </div>
-      <div className="mt-4 flex flex-col">
+      <div className="mt-4 flex flex-col overflow-hidden">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+            <div className="shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               {!allLogs ? (
                 <div className="flex h-64 items-center justify-center">
                   <div className="italic text-gray-500">Loading...</div>
@@ -179,6 +244,7 @@ function AuditLogTable() {
           </div>
         </div>
       </div>
+
       <ModalQuery
         isOpen={queryModalOpen}
         setIsOpen={setQueryModalOpen}

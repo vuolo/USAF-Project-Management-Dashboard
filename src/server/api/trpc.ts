@@ -112,13 +112,22 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   });
 });
 
+const pathExclusions = [
+  "user.addProjectHistory",
+  "user.getProjectHistory",
+  "user.getFavorites",
+  "user.addFavorite",
+  "user.removeFavorite"
+];
+
 const loggerMiddleware = t.middleware(
   async ({ ctx, path, type, next, input, rawInput }) => {
     const result = await next({
       ctx,
     });
 
-    if (type == "mutation") {
+    // Check if its a mutation and filter out adding project history
+    if (type == "mutation" && !(path in pathExclusions)) {
       const inputdata = {
         user: ctx.session?.db_user?.user_email
           ? ctx.session.db_user.user_email
