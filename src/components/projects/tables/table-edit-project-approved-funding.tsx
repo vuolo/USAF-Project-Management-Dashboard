@@ -159,14 +159,15 @@ function TableEditApprovedFunding({
       console.error(error);
     },
     onSuccess() {
-      // toast.success(
-      //   toastMessage(
-      //     "Approved Funding Added",
-      //     "The approved funding has been added successfully."
-      //   )
-      // );
+      toast.success(
+        toastMessage(
+          "Approved Funding Added",
+          "The approved funding has been added successfully."
+        )
+      );
       // Refresh UI data for modal
       // router.reload(); // This is a temporary, hacky solution
+      void refetchApprovedFunding();
     },
   });
 
