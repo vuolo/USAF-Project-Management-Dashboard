@@ -91,7 +91,7 @@ export default function ConfirmGenerateClin({
                       </Dialog.Title>
                       <div className="mt-2">
                         <p className="text-sm text-gray-500 mt-2"> 
-                          This will overwrite the current CLIN entry&apos;s with auto generated ones based on the current WBS data. You will need to edit the type, scope, and cost estimate.
+                          This will overwrite the current CLIN entries with auto generated ones based on the current WBS data. You will need to edit the type, scope, and cost estimate.
                         </p>
                       </div>
                     </div>
