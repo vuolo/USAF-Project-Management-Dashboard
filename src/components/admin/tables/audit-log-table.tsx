@@ -24,7 +24,7 @@ function AuditLogTable() {
   const [nextCursor, setNextCursor] = useState<number | null | undefined>(null);
 
   // Original query
-  const { data: allLogs, refetch } = api.auditlog.search.useQuery({
+  const { data: allLogs, refetch, isLoading: isLoadingAuditLogSearch } = api.auditlog.search.useQuery({
     filterQuery,
     filterType,
     dateRange: dateRange.from && dateRange.to ? {
@@ -94,10 +94,21 @@ function AuditLogTable() {
             )}
           />
 
+          
+          {filterType == "time" ?
+            <div>
+              <DatePicker
+                value={dateRange}
+                onChange={setDateRange}
+                inputPlaceholder="Select a range"
+                inputClassName="rounded-md"
+              />
+            </div> : null}
+
           <select
             id="filter-select"
             name="filter-select"
-            className="block flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
+            className="block flex-1 rounded-md border border-gray-300 pl-3 pr-8 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
             value={filterType}
             onChange={(e) => {
               setFilterType(e.target.value as FilterType);
@@ -112,14 +123,6 @@ function AuditLogTable() {
             <option value="query">Query</option>
           </select>
 
-          {filterType == "time" ?
-            <div>
-              <DatePicker
-                value={dateRange}
-                onChange={setDateRange}
-                inputPlaceholder="Select a range"
-              />
-            </div> : null}
         </div>
 
         {/* Pagination */}
@@ -129,7 +132,7 @@ function AuditLogTable() {
             onClick={() => {
               onPaginationChange(pageIndex - 1, -1);
             }}
-            disabled={pageIndex === 0}
+            disabled={pageIndex === 0 || isLoadingAuditLogSearch}
             className="block disabled:opacity-[30%] flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
           >
             Previous
@@ -139,7 +142,7 @@ function AuditLogTable() {
             onClick={() => {
               onPaginationChange(pageIndex + 1, 1);
             }}
-            disabled={nextCursor === null || (allLogs && allLogs?.length < pageSize)}
+            disabled={nextCursor === null || (allLogs && allLogs?.length < pageSize) || isLoadingAuditLogSearch}
             className="block disabled:opacity-[30%] flex-1 rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-0 focus:ring-blue-500 sm:text-sm"
             
           >
