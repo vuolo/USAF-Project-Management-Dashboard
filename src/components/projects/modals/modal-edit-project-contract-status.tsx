@@ -295,7 +295,7 @@ function ModalEditProjectContractStatus({
                                           scope="col"
                                           className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                                         >
-                                          Approved at ABC
+                                          Approved at ACB
                                         </th>
                                         <th
                                           scope="col"

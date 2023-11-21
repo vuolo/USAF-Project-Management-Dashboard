@@ -61,8 +61,11 @@ import { Tooltip } from "react-tooltip";
 import Link from "next/link";
 import { LightbulbOffIcon } from "lucide-react";
 import { classNames } from "~/utils/misc";
+import { useRouter } from "next/router";
 
 export default function Insights() {
+  const router = useRouter();
+
   // Get Insights (executes on page load)
   const [insights, setInsights] = useState<insight[]>([]);
   const getInsights = api.insight.getInsights.useQuery(undefined, {
@@ -84,9 +87,10 @@ export default function Insights() {
       toast.success(
         toastMessage("Added Insight", `'${data.result.name}' was added.`)
       );
-      void getInsights.refetch();
-      setShowAddSlideOver(false);
-      addInsightForm.reset();
+      void router.push(`/insights/${data.result.id}`);
+      // void getInsights.refetch();
+      // setShowAddSlideOver(false);
+      // addInsightForm.reset();
     },
     onError: (error) => {
       toast.error(toastMessage("Error Adding Insight", error.message));
@@ -593,7 +597,7 @@ export default function Insights() {
               />
 
               {/* - [Options] - */}
-              <Controller
+              {/* <Controller
                 name="options"
                 control={addInsightForm.control}
                 defaultValue={{ building: "", location: "", room: "" }}
@@ -664,15 +668,15 @@ export default function Insights() {
                             <DoorOpenIcon className="ml-2 h-3 w-3 text-gray-500" />
                           </div>
                         }
-                      /> */}
+                      /> *
                     </div>
                   </div>
                 )}
-              />
+              /> */}
 
               {/* Submit Button */}
               <Button
-                text={addInsight.isLoading ? "Submitting..." : "Submit"}
+                text={addInsight.isLoading ? "Creating..." : "Create (and begin customizing)"}
                 type="submit"
                 icon={addInsight.isLoading ? Loader2Icon : undefined}
                 iconClassName={"animate-spin"}
@@ -722,7 +726,7 @@ export default function Insights() {
               />
 
               {/* - [Options] - */}
-              <Controller
+              {/*<Controller
                 name="options"
                 control={editInsightForm.control}
                 defaultValue={{ building: "", location: "", room: "" }}
@@ -793,16 +797,16 @@ export default function Insights() {
                             <DoorOpenIcon className="ml-2 h-3 w-3 text-gray-500" />
                           </div>
                         }
-                      /> */}
+                      /> *
                     </div>
                   </div>
                 )}
-              />
+              />*/}
 
               {/* Submit */}
               <Button
                 text={
-                  updateInsight.isLoading ? "Submitting..." : "Submit Changes"
+                  updateInsight.isLoading ? "Saving..." : "Save Changes"
                 }
                 type="submit"
                 icon={updateInsight.isLoading ? Loader2Icon : undefined}

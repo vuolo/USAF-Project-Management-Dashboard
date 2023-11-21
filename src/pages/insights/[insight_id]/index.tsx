@@ -24,6 +24,7 @@ import SlideOver from "~/components/ui/modals/slide-over";
 import {
   AlertTriangleIcon,
   Building2Icon,
+  CogIcon,
   DoorOpenIcon,
   FileTextIcon,
   FlagTriangleRightIcon,
@@ -44,7 +45,7 @@ import {
   Controller,
   SubmitHandler,
 } from "react-hook-form";
-import { type IUpdateInsight } from "~/validation/insight";
+import { IUpdateInsightOptions, type IUpdateInsight } from "~/validation/insight";
 import { useSession } from "next-auth/react";
 import Modal from "~/components/ui/modals/modal";
 
@@ -54,6 +55,13 @@ const INITIAL_BREADCRUMB: NavItem = {
   href: "/insights",
   current: false,
 };
+
+const ANALYSIS_TYPE_OPTIONS = {
+  "AT_CAD": {
+    name: "Contract Award Days",
+    description: "This analysis type will...", // TODO: add description
+  }
+}
 
 export default function Insight() {
   const user = useSession().data?.db_user;
@@ -165,6 +173,11 @@ export default function Insight() {
       },
     ]);
   }, [insight]);
+
+  // Insight Options
+  const insightOptionsForm = useForm<IUpdateInsightOptions>();
+  const analysisType = insightOptionsForm.watch('analysis_type');
+  const timelineStatus = insightOptionsForm.watch('timeline_status');
 
   return (
     <SimpleLayout
@@ -288,16 +301,80 @@ export default function Insight() {
           </div>
 
           {/* Insight Options */}
-          <div className="ml-1 mr-3 mt-4 h-full overflow-x-auto pl-3.5 pr-2">
+          <div className="mx-3 mt-4 px-3.5 pt-4 pb-5 bg-gray-100 rounded-sm shadow-sm">
+            {insight ? (
+              <div className="flex flex-col space-y-4">
+                <h1 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                  <CogIcon className="h-5 w-5 inline-block text-gray-500" /> Insight Options
+                </h1>
+
+                {/* Insight Option menus */}
+                <div className="flex space-x-6 px-4 items-end">
+                  {/* Analysis Type */}
+                  <div className="flex flex-col space-y-2">
+                    <label
+                      htmlFor="analysis_type"
+                      className="text-sm font-medium text-gray-800"
+                    >
+                      <span className="text-blue-600 font-bold">1.</span> Select an Analysis Type
+                    </label>
+                    
+                    <select
+                      id="analysis_type"
+                      className={`w-fit h-fit rounded-md bg-gray-100 text-gray-800 ${analysisType ? '' : 'bg-red-100/50 text-[#DC2F0A]'}`}
+                      {...insightOptionsForm.register('analysis_type')}
+                    >
+                      <option value="">Analysis Type...</option>
+                      <option value="AT_CAD">Contract Award Days</option>
+                    </select>
+                  </div>
+
+                  {/* [Contract Award Days]: Timeline Status */}
+                  {
+                    analysisType === "AT_CAD" && (
+                      <div className="flex flex-col space-y-2">
+                        <label
+                          htmlFor="analysis_type"
+                          className="text-sm font-medium text-gray-800"
+                        >
+                          <span className="text-blue-600 font-bold">2.</span> Select a Timeline Status
+                        </label>
+
+                        <select
+                          id="timeline_status"
+                          className={`w-fit h-fit rounded-md bg-gray-100 text-gray-800 ${timelineStatus ? '' : 'bg-red-100/50 text-[#DC2F0A]'}`}
+                          {...insightOptionsForm.register('timeline_status')}
+                        >
+                          <option value="">...</option>
+                          <option value="Requirements Planning">Requirements Planning</option>
+                          <option value="Draft RFP Released">Draft RFP Released</option>
+                          <option value="Approved at ACB">Approved at ACB</option>
+                          <option value="RFP Released">RFP Released</option>
+                          <option value="Tech Eval Complete">Tech Eval Complete</option>
+                          <option value="Negotiations Complete">Negotiations Complete</option>
+                          <option value="Awarded">Awarded</option>
+                        </select>
+                      </div>
+                    )
+                  }
+                </div>
+              </div>
+            ) : (
+              // Loading State
+              <div className="mt-12 flex animate-bounce flex-col items-center justify-center">
+                <Loader2Icon className="h-8 w-8 animate-spin text-gray-500" />
+                <span className="text-md -mr-3 mt-2 whitespace-nowrap font-medium text-gray-500">
+                  Loading...
+                </span>
+              </div>
+            )}
+          </div>
+              
+          {/* TODO: Insight Details */}
+          <div className="mx-3 mt-4 px-3.5 py-4 h-full overflow-x-auto rounded-sm bg-red-200/20">
             {insight ? (
               <div className="flex flex-col space-y-8">
-                {/* Top Details Section */}
-                <div className="flex items-start justify-between">
-                  {/* Insight Attributes (Left) */}
-                  <div className="mt-4 flex flex-wrap items-start">
-                    {/* TODO */}
-                  </div>
-                </div>
+
               </div>
             ) : (
               // Loading State

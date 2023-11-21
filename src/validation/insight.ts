@@ -15,3 +15,10 @@ export const updateInsightSchema = addInsightSchema.extend({
   is_archived: z.boolean().optional(),
 });
 export type IUpdateInsight = z.infer<typeof updateInsightSchema>;
+
+// ~Insight Options
+export const updateInsightOptionsSchema = z.object({
+  analysis_type: z.string().optional(),
+  timeline_status: z.string().optional(),
+});
+export type IUpdateInsightOptions = z.infer<typeof updateInsightOptionsSchema>;
