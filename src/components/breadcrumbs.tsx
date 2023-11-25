@@ -21,7 +21,7 @@ const Breadcrumbs: FC<ButtonProps> = ({
     aria-label="Breadcrumb"
     className={classNames(
       "no-scrollbar fixed -ml-1 flex h-fit max-h-6 overflow-auto rounded-sm bg-transparent py-1 pl-1",
-      customWidth ?? "max-w-[40%] lg:max-w-[50%] xl:max-w-[60%]",
+      customWidth ?? "max-w-[50%] lg:max-w-[50%] xl:max-w-[60%]",
       className ?? "",
       isLoading ? "mt-3" : "mt-2"
     )}

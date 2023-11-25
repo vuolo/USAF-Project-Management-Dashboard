@@ -75,6 +75,22 @@ body {
     "Helvetica Neue", "Helvetica", sans-serif !important;
 }
 
+/* .no-scrollbar class styling */
+@layer utilities {
+  @variants responsive {
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Hide scrollbar for IE, Edge and Firefox */
+    .no-scrollbar {
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+  }
+}
+
 main {
   height: calc(100vh - 70px);
   width: 100vw;

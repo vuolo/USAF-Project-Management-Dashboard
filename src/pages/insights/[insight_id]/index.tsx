@@ -23,6 +23,8 @@ import Breadcrumbs from "~/components/breadcrumbs";
 import SlideOver from "~/components/ui/modals/slide-over";
 import {
   AlertTriangleIcon,
+  ArrowDownIcon,
+  ArrowRightIcon,
   Building2Icon,
   CogIcon,
   DoorOpenIcon,
@@ -51,6 +53,10 @@ import {
 } from "~/validation/insight";
 import { useSession } from "next-auth/react";
 import Modal from "~/components/ui/modals/modal";
+
+// Project filters
+import MultiSelectBox from "~/components/ui/multi-select-box";
+import type { view_project } from "~/types/view_project";
 
 const INITIAL_BREADCRUMB: NavItem = {
   id: "insights",
@@ -174,6 +180,16 @@ export default function Insight() {
   const insightOptionsForm = useForm<IUpdateInsightOptions>();
   const analysisType = insightOptionsForm.watch("analysis_type");
   const timelineStatus = insightOptionsForm.watch("timeline_status");
+  useEffect(() => {
+    if (!analysisType) {
+      void insightOptionsForm.reset();
+      setSelectedProjects([]);
+    }
+  }, [analysisType, insightOptionsForm]);
+
+  // Project Filters
+  const [selectedProjects, setSelectedProjects] = useState<view_project[]>([]);
+  const { data: projects } = api.project.list_view.useQuery();
 
   return (
     <SimpleLayout
@@ -284,7 +300,7 @@ export default function Insight() {
                 // label="Description"
                 variant="large"
                 borderStyle="none"
-                largeSize="min-h-[4rem] bg-transparent"
+                largeSize="min-h-[2rem] rounded-sm bg-transparent"
                 type="text"
                 className="text-slate-100 [text-shadow:_0_2px_0_rgb(0_0_0_/_40%)]"
                 // optional
@@ -297,17 +313,16 @@ export default function Insight() {
           </div>
 
           {/* Insight Options */}
-          <div className="mx-3 mt-4 rounded-xl bg-white pb-4 shadow-md">
+          <div className="mx-3 my-4 rounded-xl bg-white pb-6 shadow-md">
             {insight ? (
               <div className="flex flex-col space-y-4">
                 {/* Insight Options Header */}
-                <div className="flex items-center justify-between rounded-t-lg bg-gradient-to-r from-blue-600 to-indigo-600 p-3 text-white">
+                <div className="flex items-center justify-between rounded-t-lg bg-gradient-to-r from-brand-dark to-blue-800 p-3 text-white">
                   <h1 className="text-lg font-bold">
                     <CogIcon className="mr-2 inline-block h-6 w-6" /> Insight
                     Options
                   </h1>
                 </div>
-
                 {/* Alert message */}
                 {!insight.options && (
                   <div className="mx-4 flex flex-col items-center justify-center space-y-4 rounded-md border-l-4 border-yellow-400 bg-yellow-50 p-4 shadow">
@@ -318,14 +333,13 @@ export default function Insight() {
                       </span>
                     </div>
                     <span className="text-xs font-normal text-gray-600">
-                      Please select an analysis (&quot;insight&quot;) type from
-                      the options below to get started.
+                      Please select an analysis (insight) type below to get
+                      started.
                     </span>
                   </div>
                 )}
-
                 {/* Insight Option menus */}
-                <div className="flex items-end space-x-6 px-4">
+                <div className="mx-auto flex w-1/3 flex-col items-center space-x-6 px-0 py-2 md:mx-0 md:w-full md:flex-row md:items-start md:justify-center md:px-14 lg:px-16">
                   {/* Analysis Type */}
                   <div className="flex flex-col space-y-2">
                     <label
@@ -338,54 +352,123 @@ export default function Insight() {
 
                     <select
                       id="analysis_type"
-                      className={`h-fit w-fit rounded-md bg-gray-100 text-gray-800 ${
-                        analysisType ? "" : "bg-red-100/50 text-[#DC2F0A]"
+                      className={`h-fit w-fit rounded-md bg-blue-50 text-gray-800 sm:text-sm ${
+                        analysisType ? "" : "bg-red-50 text-[#DC2F0A]"
                       }`}
                       {...insightOptionsForm.register("analysis_type")}
                     >
-                      <option value="">Analysis Type...</option>
+                      <option value="">...</option>
                       <option value="AT_CAD">Contract Award Days</option>
                     </select>
                   </div>
+                  <ArrowRightIcon
+                    className={classNames(
+                      "mb-3 mt-auto hidden h-5 w-5 md:block",
+                      analysisType ? "text-slate-600" : "text-slate-300"
+                    )}
+                  />
 
                   {/* [Contract Award Days]: Timeline Status */}
                   {analysisType === "AT_CAD" && (
-                    <div className="flex flex-col space-y-2">
-                      <label
-                        htmlFor="analysis_type"
-                        className="text-sm font-medium text-gray-800"
-                      >
-                        <span className="font-bold text-blue-600">2.</span>{" "}
-                        Select a Timeline Status
-                      </label>
+                    <>
+                      <div className="mt-4 flex flex-col space-y-2 md:mt-0">
+                        <label
+                          htmlFor="analysis_type"
+                          className="text-sm font-medium text-gray-800"
+                        >
+                          <span className="font-bold text-blue-600">2.</span>{" "}
+                          Select a Timeline Status
+                        </label>
 
-                      <select
-                        id="timeline_status"
-                        className={`h-fit w-fit rounded-md bg-gray-100 text-gray-800 ${
-                          timelineStatus ? "" : "bg-red-100/50 text-[#DC2F0A]"
-                        }`}
-                        {...insightOptionsForm.register("timeline_status")}
-                      >
-                        <option value="">...</option>
-                        <option value="Requirements Planning">
-                          Requirements Planning
-                        </option>
-                        <option value="Draft RFP Released">
-                          Draft RFP Released
-                        </option>
-                        <option value="Approved at ACB">Approved at ACB</option>
-                        <option value="RFP Released">RFP Released</option>
-                        <option value="Tech Eval Complete">
-                          Tech Eval Complete
-                        </option>
-                        <option value="Negotiations Complete">
-                          Negotiations Complete
-                        </option>
-                        <option value="Awarded">Awarded</option>
-                      </select>
-                    </div>
+                        <select
+                          id="timeline_status"
+                          className={`h-fit w-fit rounded-md bg-blue-50 text-gray-800 sm:text-sm ${
+                            timelineStatus ? "" : "bg-red-50 text-[#DC2F0A]"
+                          }`}
+                          {...insightOptionsForm.register("timeline_status")}
+                        >
+                          <option value="">...</option>
+                          <option value="Requirements Planning">
+                            Requirements Planning
+                          </option>
+                          <option value="Draft RFP Released">
+                            Draft RFP Released
+                          </option>
+                          <option value="Approved at ACB">
+                            Approved at ACB
+                          </option>
+                          <option value="RFP Released">RFP Released</option>
+                          <option value="Tech Eval Complete">
+                            Tech Eval Complete
+                          </option>
+                          <option value="Negotiations Complete">
+                            Negotiations Complete
+                          </option>
+                          <option value="Awarded">Awarded</option>
+                        </select>
+                      </div>
+
+                      <ArrowRightIcon
+                        className={classNames(
+                          "mb-3 mt-auto hidden h-5 w-5 md:block",
+                          timelineStatus ? "text-slate-600" : "text-slate-300"
+                        )}
+                      />
+
+                      {/* [Contract Award Days]: Select Projects */}
+                      {timelineStatus && projects && (
+                        <>
+                          <div className="mt-4 flex w-full flex-col space-y-2 md:mt-0 md:w-auto">
+                            <label className="text-sm font-medium text-gray-800">
+                              <span className="font-bold text-blue-600">
+                                3.
+                              </span>{" "}
+                              Select Projects
+                            </label>
+
+                            <MultiSelectBox
+                              placeholder="All Projects (default)..."
+                              data={projects}
+                              displayValue={formatProjectName}
+                              displayValues={(selected: view_project[]) =>
+                                selected.map(formatProjectName).join(", ")
+                              }
+                              onSelectedItemsChange={(
+                                selected: view_project[]
+                              ) => {
+                                setSelectedProjects(selected);
+                              }}
+                              inputClassName="border-gray-500 rounded-md bg-blue-50 text-gray-800 placeholder-gray-800 -mt-1"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </>
                   )}
                 </div>
+
+                {/* Configure Parameters */}
+                {timelineStatus && projects && (
+                  <>
+                    <ArrowDownIcon className="mx-auto mb-3 hidden h-5 w-5 text-slate-600 md:block" />
+                    <div className="mx-auto flex flex-col items-center space-y-2">
+                      <label
+                        htmlFor="configure_parameters"
+                        className="text-sm font-medium text-gray-800"
+                      >
+                        <span className="font-bold text-blue-600">4.</span>{" "}
+                        Configure Parameters
+                      </label>
+
+                      <div
+                        id="configure_parameters"
+                        className="h-fit w-fit min-w-[16rem] rounded-md border border-gray-500 bg-blue-50 px-4 py-2 text-gray-800 placeholder-gray-800 sm:text-sm"
+                      >
+                        TODO
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               // Loading State
@@ -399,7 +482,7 @@ export default function Insight() {
           </div>
 
           {/* TODO: Insight Details */}
-          <div className="mx-3 mt-4 h-full overflow-x-auto rounded-sm bg-red-200/20 px-3.5 py-4">
+          <div className="mx-3 mt-4 h-full overflow-x-auto rounded-sm px-3.5 py-4">
             {insight ? (
               <div className="flex flex-col space-y-8"></div>
             ) : (
@@ -418,3 +501,17 @@ export default function Insight() {
     />
   );
 }
+
+// Function to format project name with its status
+const formatProjectName = (project: view_project) => {
+  let statusLabel = "";
+  switch (project.contract_status) {
+    case "Awarded":
+    case "Closed":
+    case "Pre_Award":
+      statusLabel = ` (${project.contract_status})`;
+      break;
+    // Add other cases if needed
+  }
+  return `${project.project_name}${statusLabel}`;
+};

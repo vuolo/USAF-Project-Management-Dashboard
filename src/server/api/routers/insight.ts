@@ -12,9 +12,9 @@ const CONTRACT_AWARD_DAY_FIELDS = [
   "proposal_received",
   "tech_eval_comp",
   "negotiation_comp",
-  "awarded"
+  "awarded",
 ] as const;
-type ContractAwardDayFields = typeof CONTRACT_AWARD_DAY_FIELDS[number];
+type ContractAwardDayFields = (typeof CONTRACT_AWARD_DAY_FIELDS)[number];
 
 export const insightRouter = createTRPCRouter({
   getInsight: protectedProcedure
@@ -128,59 +128,94 @@ export const insightRouter = createTRPCRouter({
         result: insight,
       };
     }),
-  generateInsightContractAwardDays: protectedProcedure.input(z.object({
-    id: z.number(),
-    field: z.enum(CONTRACT_AWARD_DAY_FIELDS),
-    algorithm: z.enum(["average", "todo"]).default("average") // TODO: implement more algorithms
-  })).query(async ({ input, ctx }) => {
-    type ContractAward = {
-      planned?: contract_award_timeline;
-      projected?: contract_award_timeline;
-      actual?: contract_award_timeline;
-    }
-    const contractDict: { [id: number]: ContractAward } = {};
 
-    const rawTimeline = await ctx.prisma.contract_award_timeline.findMany();
-    rawTimeline.forEach((award) => {
-      if (!contractDict[award.contract_award_id]) contractDict[award.contract_award_id] = {};
-      switch (award.timeline_status) {
-        case "Actual":
-          (contractDict[award.contract_award_id] as ContractAward).actual = award;
-          break;
-        case "Planned":
-          (contractDict[award.contract_award_id] as ContractAward).planned = award;
-          break;
-        case "Projected":
-          (contractDict[award.contract_award_id] as ContractAward).projected = award;
-          break;
+  // Generate Insight Results - Contract Award Days (Analysis Type)
+  generateInsightResults_AT_CAD: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        field: z.enum(CONTRACT_AWARD_DAY_FIELDS),
+        algorithm: z.enum(["average", "todo"]).default("average"), // TODO: implement more algorithms
+        project_ids: z.array(z.number()).optional(),
+      })
+    )
+    .query(async ({ input, ctx }) => {
+      type ContractAward = {
+        planned?: contract_award_timeline;
+        projected?: contract_award_timeline;
+        actual?: contract_award_timeline;
+      };
+      const contractDict: { [id: number]: ContractAward } = {};
+
+      const rawTimeline = await ctx.prisma.contract_award_timeline.findMany({
+        where: {
+          // Conditionally apply filter if project_ids are provided
+          ...(input.project_ids && {
+            contract_award: {
+              project_id: {
+                in: input.project_ids,
+              },
+            },
+          }),
+        },
+        include: {
+          contract_award: true,
+        },
+      });
+      rawTimeline.forEach((award) => {
+        if (!contractDict[award.contract_award_id])
+          contractDict[award.contract_award_id] = {};
+        switch (award.timeline_status) {
+          case "Actual":
+            (contractDict[award.contract_award_id] as ContractAward).actual =
+              award;
+            break;
+          case "Planned":
+            (contractDict[award.contract_award_id] as ContractAward).planned =
+              award;
+            break;
+          case "Projected":
+            (contractDict[award.contract_award_id] as ContractAward).projected =
+              award;
+            break;
+        }
+      });
+
+      // This is a copy of the one from utils but without the abs
+      function getDayDifference(d1: Date, d2: Date) {
+        const diffTime = d2.getTime() - d1.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
       }
-    });
 
-    // This is a copy of the one from utils but without the abs
-    function getDayDifference(d1: Date, d2: Date) {
-      const diffTime = d2.getTime() - d1.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return diffDays;
-    }
+      // Calculate day differences for each contract award
+      const dayDifferences = [];
+      for (const contractAward of Object.values(contractDict)) {
+        const actualDate = contractAward.actual?.[input.field];
+        const plannedDate = contractAward.planned?.[input.field];
 
-    // Calculate average duration for each 
-    const averages = [];
-    for (const k in contractDict) {
-      const v = contractDict[k] as ContractAward;
-      if (!v.actual || !v.planned) continue;
-      if (!v.actual[input.field] || !v.planned[input.field]) continue;
-      averages.push(getDayDifference(v.actual[input.field] as Date, v.planned[input.field] as Date));
-    }
+        if (actualDate && plannedDate) {
+          dayDifferences.push(
+            getDayDifference(new Date(actualDate), new Date(plannedDate))
+          );
+        }
+      }
 
-    switch (input.algorithm) {
-      case "average":
-        // Sum of averages divided by amount
-        return averages.reduce((a, b) => a + b, 0) / averages.length;
-      default:
-        throw new TRPCError({
-          code: "NOT_IMPLEMENTED",
-          message: "Algorithm not implemented",
-        });
-    }
-  })
+      switch (input.algorithm) {
+        case "average":
+          // Calculate the average of day differences, return 0 if the array is empty
+          const average =
+            dayDifferences.length > 0
+              ? dayDifferences.reduce((a, b) => a + b, 0) /
+                dayDifferences.length
+              : 0;
+          return average;
+
+        default:
+          throw new TRPCError({
+            code: "NOT_IMPLEMENTED",
+            message: "Algorithm not implemented",
+          });
+      }
+    }),
 });
