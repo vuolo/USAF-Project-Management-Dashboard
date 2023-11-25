@@ -45,7 +45,10 @@ import {
   Controller,
   SubmitHandler,
 } from "react-hook-form";
-import { IUpdateInsightOptions, type IUpdateInsight } from "~/validation/insight";
+import {
+  IUpdateInsightOptions,
+  type IUpdateInsight,
+} from "~/validation/insight";
 import { useSession } from "next-auth/react";
 import Modal from "~/components/ui/modals/modal";
 
@@ -57,29 +60,15 @@ const INITIAL_BREADCRUMB: NavItem = {
 };
 
 const ANALYSIS_TYPE_OPTIONS = {
-  "AT_CAD": {
+  AT_CAD: {
     name: "Contract Award Days",
     description: "This analysis type will...", // TODO: add description
-  }
-}
+  },
+};
 
 export default function Insight() {
   const user = useSession().data?.db_user;
   const router = useRouter();
-
-  // Get Insights (executes on page load)
-  const [insights, setInsights] = useState<insight[]>([]);
-  const getInsights = api.insight.getInsights.useQuery(undefined, {
-    enabled: !!router.query.insight_id,
-    onSuccess: (data) => {
-      const insights = data.result;
-      setInsights(insights);
-    },
-    onError: (error) => {
-      toast.error(toastMessage("Error Loading Insights", error.message));
-      console.error("Mutation Error:", error);
-    },
-  });
 
   // Get Insight (executes on page load)
   const [insight, setInsight] = useState<insight>();
@@ -91,6 +80,14 @@ export default function Insight() {
       enabled: !!router.query.insight_id,
       onSuccess: (data) => {
         const insight = data.result;
+
+        // Check if insight.options is an object and has no keys (empty object)
+        if (
+          typeof insight.options === "object" &&
+          Object.keys(insight.options as object).length === 0
+        )
+          insight.options = null;
+
         setInsight(insight);
 
         insightDetailsForm.reset({
@@ -112,7 +109,6 @@ export default function Insight() {
   const updateInsight = api.insight.updateInsight.useMutation({
     onSuccess: (data) => {
       toast.success(toastMessage("Insight Updated", data.message));
-      void getInsights.refetch();
       void getInsight.refetch();
       setShowEditSlideOver(false);
       setInsightToEdit(undefined);
@@ -176,8 +172,8 @@ export default function Insight() {
 
   // Insight Options
   const insightOptionsForm = useForm<IUpdateInsightOptions>();
-  const analysisType = insightOptionsForm.watch('analysis_type');
-  const timelineStatus = insightOptionsForm.watch('timeline_status');
+  const analysisType = insightOptionsForm.watch("analysis_type");
+  const timelineStatus = insightOptionsForm.watch("timeline_status");
 
   return (
     <SimpleLayout
@@ -217,7 +213,7 @@ export default function Insight() {
               <div className="relative top-2">
                 <Breadcrumbs
                   breadcrumbs={breadcrumbs}
-                  isLoading={getInsights.isLoading}
+                  isLoading={getInsight.isLoading}
                   customWidth="max-w-[calc(100%-2.5rem)]"
                 />
               </div>
@@ -301,28 +297,51 @@ export default function Insight() {
           </div>
 
           {/* Insight Options */}
-          <div className="mx-3 mt-4 px-3.5 pt-4 pb-5 bg-gray-100 rounded-sm shadow-sm">
+          <div className="mx-3 mt-4 rounded-xl bg-white pb-4 shadow-md">
             {insight ? (
               <div className="flex flex-col space-y-4">
-                <h1 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                  <CogIcon className="h-5 w-5 inline-block text-gray-500" /> Insight Options
-                </h1>
+                {/* Insight Options Header */}
+                <div className="flex items-center justify-between rounded-t-lg bg-gradient-to-r from-blue-600 to-indigo-600 p-3 text-white">
+                  <h1 className="text-lg font-bold">
+                    <CogIcon className="mr-2 inline-block h-6 w-6" /> Insight
+                    Options
+                  </h1>
+                </div>
+
+                {/* Alert message */}
+                {!insight.options && (
+                  <div className="mx-4 flex flex-col items-center justify-center space-y-4 rounded-md border-l-4 border-yellow-400 bg-yellow-50 p-4 shadow">
+                    <div className="flex items-center space-x-2">
+                      <AlertTriangleIcon className="h-6 w-6 text-yellow-600" />
+                      <span className="text-sm font-medium text-yellow-700">
+                        This insight does not have any options set up yet.
+                      </span>
+                    </div>
+                    <span className="text-xs font-normal text-gray-600">
+                      Please select an analysis (&quot;insight&quot;) type from
+                      the options below to get started.
+                    </span>
+                  </div>
+                )}
 
                 {/* Insight Option menus */}
-                <div className="flex space-x-6 px-4 items-end">
+                <div className="flex items-end space-x-6 px-4">
                   {/* Analysis Type */}
                   <div className="flex flex-col space-y-2">
                     <label
                       htmlFor="analysis_type"
                       className="text-sm font-medium text-gray-800"
                     >
-                      <span className="text-blue-600 font-bold">1.</span> Select an Analysis Type
+                      <span className="font-bold text-blue-600">1.</span> Select
+                      an Analysis Type
                     </label>
-                    
+
                     <select
                       id="analysis_type"
-                      className={`w-fit h-fit rounded-md bg-gray-100 text-gray-800 ${analysisType ? '' : 'bg-red-100/50 text-[#DC2F0A]'}`}
-                      {...insightOptionsForm.register('analysis_type')}
+                      className={`h-fit w-fit rounded-md bg-gray-100 text-gray-800 ${
+                        analysisType ? "" : "bg-red-100/50 text-[#DC2F0A]"
+                      }`}
+                      {...insightOptionsForm.register("analysis_type")}
                     >
                       <option value="">Analysis Type...</option>
                       <option value="AT_CAD">Contract Award Days</option>
@@ -330,33 +349,42 @@ export default function Insight() {
                   </div>
 
                   {/* [Contract Award Days]: Timeline Status */}
-                  {
-                    analysisType === "AT_CAD" && (
-                      <div className="flex flex-col space-y-2">
-                        <label
-                          htmlFor="analysis_type"
-                          className="text-sm font-medium text-gray-800"
-                        >
-                          <span className="text-blue-600 font-bold">2.</span> Select a Timeline Status
-                        </label>
+                  {analysisType === "AT_CAD" && (
+                    <div className="flex flex-col space-y-2">
+                      <label
+                        htmlFor="analysis_type"
+                        className="text-sm font-medium text-gray-800"
+                      >
+                        <span className="font-bold text-blue-600">2.</span>{" "}
+                        Select a Timeline Status
+                      </label>
 
-                        <select
-                          id="timeline_status"
-                          className={`w-fit h-fit rounded-md bg-gray-100 text-gray-800 ${timelineStatus ? '' : 'bg-red-100/50 text-[#DC2F0A]'}`}
-                          {...insightOptionsForm.register('timeline_status')}
-                        >
-                          <option value="">...</option>
-                          <option value="Requirements Planning">Requirements Planning</option>
-                          <option value="Draft RFP Released">Draft RFP Released</option>
-                          <option value="Approved at ACB">Approved at ACB</option>
-                          <option value="RFP Released">RFP Released</option>
-                          <option value="Tech Eval Complete">Tech Eval Complete</option>
-                          <option value="Negotiations Complete">Negotiations Complete</option>
-                          <option value="Awarded">Awarded</option>
-                        </select>
-                      </div>
-                    )
-                  }
+                      <select
+                        id="timeline_status"
+                        className={`h-fit w-fit rounded-md bg-gray-100 text-gray-800 ${
+                          timelineStatus ? "" : "bg-red-100/50 text-[#DC2F0A]"
+                        }`}
+                        {...insightOptionsForm.register("timeline_status")}
+                      >
+                        <option value="">...</option>
+                        <option value="Requirements Planning">
+                          Requirements Planning
+                        </option>
+                        <option value="Draft RFP Released">
+                          Draft RFP Released
+                        </option>
+                        <option value="Approved at ACB">Approved at ACB</option>
+                        <option value="RFP Released">RFP Released</option>
+                        <option value="Tech Eval Complete">
+                          Tech Eval Complete
+                        </option>
+                        <option value="Negotiations Complete">
+                          Negotiations Complete
+                        </option>
+                        <option value="Awarded">Awarded</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
               </div>
             ) : (
@@ -369,13 +397,11 @@ export default function Insight() {
               </div>
             )}
           </div>
-              
-          {/* TODO: Insight Details */}
-          <div className="mx-3 mt-4 px-3.5 py-4 h-full overflow-x-auto rounded-sm bg-red-200/20">
-            {insight ? (
-              <div className="flex flex-col space-y-8">
 
-              </div>
+          {/* TODO: Insight Details */}
+          <div className="mx-3 mt-4 h-full overflow-x-auto rounded-sm bg-red-200/20 px-3.5 py-4">
+            {insight ? (
+              <div className="flex flex-col space-y-8"></div>
             ) : (
               // Loading State
               <div className="mt-12 flex animate-bounce flex-col items-center justify-center">
