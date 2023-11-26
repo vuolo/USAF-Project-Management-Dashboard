@@ -17,7 +17,7 @@ import Dropdown from "~/components/ui/dropdown";
 import Button from "~/components/ui/button";
 import Input from "~/components/ui/input";
 import { api } from "~/utils/api";
-import type { insight } from "@prisma/client";
+import type { $Enums, insight } from "@prisma/client";
 import TextSkeleton from "~/components/ui/skeletons/text-skeleton";
 import Breadcrumbs from "~/components/breadcrumbs";
 import SlideOver from "~/components/ui/modals/slide-over";
@@ -36,6 +36,7 @@ import {
   MicroscopeIcon,
   PlusIcon,
   RefreshCcwDotIcon,
+  SearchCodeIcon,
   Settings2,
   WrenchIcon,
   XIcon,
@@ -53,6 +54,7 @@ import {
 } from "~/validation/insight";
 import { useSession } from "next-auth/react";
 import Modal from "~/components/ui/modals/modal";
+import DatePicker from "react-datepicker";
 
 // Project filters
 import MultiSelectBox from "~/components/ui/multi-select-box";
@@ -191,6 +193,12 @@ export default function Insight() {
   const [selectedProjects, setSelectedProjects] = useState<view_project[]>([]);
   const { data: projects } = api.project.list_view.useQuery();
 
+  // Submit handler for the form
+  const onSubmitGenerateInsight = (data) => {
+    // TODO: Call API or perform actions with the form data
+    console.log(data);
+  };
+
   return (
     <SimpleLayout
       variant="no-bg"
@@ -313,7 +321,7 @@ export default function Insight() {
           </div>
 
           {/* Insight Options */}
-          <div className="mx-3 my-4 rounded-xl bg-white pb-6 shadow-md">
+          <form className="mx-3 my-4 rounded-xl bg-white pb-6 shadow-md">
             {insight ? (
               <div className="flex flex-col space-y-4">
                 {/* Insight Options Header */}
@@ -438,7 +446,7 @@ export default function Insight() {
                               ) => {
                                 setSelectedProjects(selected);
                               }}
-                              inputClassName="border-gray-500 rounded-md bg-blue-50 text-gray-800 placeholder-gray-800 -mt-1"
+                              inputClassName="border-gray-500 min-w-[20rem] rounded-md bg-blue-50 text-gray-800 placeholder-gray-800 -mt-1"
                             />
                           </div>
                         </>
@@ -462,11 +470,151 @@ export default function Insight() {
 
                       <div
                         id="configure_parameters"
-                        className="h-fit w-fit min-w-[16rem] rounded-md border border-gray-500 bg-blue-50 px-4 py-2 text-gray-800 placeholder-gray-800 sm:text-sm"
+                        className="w-full max-w-4xl rounded-md border border-gray-500 bg-blue-50 p-6 shadow-sm"
                       >
-                        TODO
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          <div>
+                            <label
+                              htmlFor="start_date"
+                              className="mb-2 block text-sm font-medium text-gray-700"
+                            >
+                              Start Date
+                            </label>
+                            <Controller
+                              control={insightOptionsForm.control}
+                              name="options.startDate"
+                              render={({ field }) => (
+                                <DatePicker
+                                  id="start_date"
+                                  selected={field.value}
+                                  onChange={(date) =>
+                                    insightOptionsForm.setValue(
+                                      "options.startDate",
+                                      date
+                                    )
+                                  }
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                  placeholderText="Start Date"
+                                />
+                              )}
+                            />
+                          </div>
+                          <div>
+                            <label
+                              htmlFor="end_date"
+                              className="mb-2 block text-sm font-medium text-gray-700"
+                            >
+                              End Date
+                            </label>
+                            <Controller
+                              control={insightOptionsForm.control}
+                              name="options.endDate"
+                              render={({ field }) => (
+                                <DatePicker
+                                  id="end_date"
+                                  selected={field.value}
+                                  onChange={(date) =>
+                                    insightOptionsForm.setValue(
+                                      "options.endDate",
+                                      date
+                                    )
+                                  }
+                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                  placeholderText="End Date"
+                                />
+                              )}
+                            />
+                          </div>
+                          {projects &&
+                            selectedProjects &&
+                            selectedProjects.length === 0 && (
+                              <div>
+                                <label
+                                  htmlFor="contract_status"
+                                  className="mb-2 block text-sm font-medium text-gray-700"
+                                >
+                                  Contract Status
+                                </label>
+                                <Controller
+                                  control={insightOptionsForm.control}
+                                  name="options.contract_status"
+                                  render={({ field }) => (
+                                    <select
+                                      {...field}
+                                      id="contract_status"
+                                      className="mt-1 block w-full overflow-hidden rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                      multiple
+                                    >
+                                      {["Pre_Award", "Awarded", "Closed"].map(
+                                        (status) => (
+                                          <option key={status} value={status}>
+                                            {status.replace("_", "-")}
+                                          </option>
+                                        )
+                                      )}
+                                    </select>
+                                  )}
+                                />
+                              </div>
+                            )}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label
+                                htmlFor="min_contract_value"
+                                className="mb-2 block text-sm font-medium text-gray-700"
+                              >
+                                Min Contract Value
+                              </label>
+                              <Controller
+                                control={insightOptionsForm.control}
+                                name="options.threshold.minContractValue"
+                                render={({ field }) => (
+                                  <input
+                                    {...field}
+                                    id="min_contract_value"
+                                    type="number"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                    placeholder="Minimum"
+                                  />
+                                )}
+                              />
+                            </div>
+                            <div>
+                              <label
+                                htmlFor="max_days_delayed"
+                                className="mb-2 block text-sm font-medium text-gray-700"
+                              >
+                                Max Days Delayed
+                              </label>
+                              <Controller
+                                control={insightOptionsForm.control}
+                                name="options.threshold.maxDaysDelayed"
+                                render={({ field }) => (
+                                  <input
+                                    {...field}
+                                    id="max_days_delayed"
+                                    type="number"
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                    placeholder="Maximum"
+                                  />
+                                )}
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
+
+                    {/* Submit Button */}
+                    <Button
+                      type="submit"
+                      text="Generate Insight"
+                      icon={SearchCodeIcon}
+                      onClick={() => {
+                        return;
+                      }}
+                      className="mx-auto mb-6 mt-4"
+                    />
                   </>
                 )}
               </div>
@@ -479,7 +627,7 @@ export default function Insight() {
                 </span>
               </div>
             )}
-          </div>
+          </form>
 
           {/* TODO: Insight Details */}
           <div className="mx-3 mt-4 h-full overflow-x-auto rounded-sm px-3.5 py-4">
@@ -505,11 +653,15 @@ export default function Insight() {
 // Function to format project name with its status
 const formatProjectName = (project: view_project) => {
   let statusLabel = "";
-  switch (project.contract_status) {
+  switch (
+    project.contract_status as
+      | $Enums.contract_award_contract_status
+      | "Pre-Award"
+  ) {
     case "Awarded":
     case "Closed":
-    case "Pre_Award":
-      statusLabel = ` (${project.contract_status})`;
+    case "Pre-Award":
+      statusLabel = ` (${project.contract_status.replace("_", "-")})`;
       break;
     // Add other cases if needed
   }

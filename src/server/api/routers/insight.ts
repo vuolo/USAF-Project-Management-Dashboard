@@ -1,4 +1,4 @@
-import { contract_award_timeline } from "@prisma/client";
+import { contract_award_timeline, Prisma } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -136,7 +136,22 @@ export const insightRouter = createTRPCRouter({
         id: z.number(),
         field: z.enum(CONTRACT_AWARD_DAY_FIELDS),
         algorithm: z.enum(["average", "todo"]).default("average"), // TODO: implement more algorithms
-        project_ids: z.array(z.number()).optional(),
+        options: z
+          .object({
+            project_ids: z.array(z.number()).optional(),
+            startDate: z.date().optional(),
+            endDate: z.date().optional(),
+            contract_status: z
+              .array(z.enum(["Pre_Award", "Awarded", "Closed"]))
+              .optional(),
+            threshold: z
+              .object({
+                minContractValue: z.number().optional(),
+                maxDaysDelayed: z.number().optional(),
+              })
+              .optional(),
+          })
+          .optional(),
       })
     )
     .query(async ({ input, ctx }) => {
@@ -147,21 +162,64 @@ export const insightRouter = createTRPCRouter({
       };
       const contractDict: { [id: number]: ContractAward } = {};
 
+      type ContractAwardWhereCondition = {
+        project_id?: { in: number[] };
+        contract_status?: { in: string[] };
+        contract_value?: { gte: number };
+      };
+
+      type WhereCondition = {
+        AND?: Array<{ [key: string]: any }>;
+        contract_award?:
+          | ContractAwardWhereCondition
+          | { AND: ContractAwardWhereCondition[] };
+      };
+
+      const whereCondition: WhereCondition = {};
+
+      // Now you can safely assign to these objects
+      if (input.options?.project_ids) {
+        whereCondition.contract_award = {
+          ...whereCondition.contract_award, // Spread to keep existing properties
+          project_id: { in: input.options.project_ids },
+        };
+      }
+
+      if (input.options?.startDate || input.options?.endDate) {
+        whereCondition.AND = whereCondition.AND || []; // Ensure AND is initialized
+        if (input.options.startDate) {
+          whereCondition.AND.push({
+            someDateField: { gte: input.options.startDate },
+          });
+        }
+        if (input.options.endDate) {
+          whereCondition.AND.push({
+            someDateField: { lte: input.options.endDate },
+          });
+        }
+      }
+
+      if (input.options?.contract_status) {
+        whereCondition.contract_award = {
+          ...whereCondition.contract_award,
+          contract_status: { in: input.options.contract_status },
+        };
+      }
+
+      if (input.options?.threshold?.minContractValue) {
+        whereCondition.contract_award = {
+          ...whereCondition.contract_award,
+          contract_value: { gte: input.options.threshold.minContractValue },
+        };
+      }
+
       const rawTimeline = await ctx.prisma.contract_award_timeline.findMany({
-        where: {
-          // Conditionally apply filter if project_ids are provided
-          ...(input.project_ids && {
-            contract_award: {
-              project_id: {
-                in: input.project_ids,
-              },
-            },
-          }),
-        },
+        where: whereCondition as Prisma.contract_award_timelineWhereInput,
         include: {
           contract_award: true,
         },
       });
+
       rawTimeline.forEach((award) => {
         if (!contractDict[award.contract_award_id])
           contractDict[award.contract_award_id] = {};
