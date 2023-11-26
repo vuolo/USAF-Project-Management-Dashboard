@@ -32,7 +32,7 @@ export type IUpdateInsight = z.infer<typeof updateInsightSchema>;
 // ~Insight Options
 export const updateInsightOptionsSchema = z.object({
   id: z.number(),
-  analysis_type: z.enum(["AT_CAD"]),
+  analysis_type: z.enum(["AT_CAD", ""]),
   timeline_status: z.enum(CONTRACT_AWARD_DAY_TIMELINE_STATUSES),
   algorithm: z.enum(["average", "todo"]).default("average"), // TODO: implement more algorithms
   options: z

@@ -287,7 +287,12 @@ export const insightRouter = createTRPCRouter({
       const updatedInsight = await ctx.prisma.insight.update({
         where: { id: input.id },
         data: {
-          options: { ...input.options },
+          options: {
+            ...input.options,
+            analysis_type: "AT_CAD",
+            timeline_status: input.timeline_status,
+            algorithm: input.algorithm,
+          },
           results: { ...result.result },
           generated_at: new Date(),
         },

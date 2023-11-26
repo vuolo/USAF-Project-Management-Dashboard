@@ -25,6 +25,7 @@ import {
   AlertTriangleIcon,
   ArrowDownIcon,
   ArrowRightIcon,
+  ArrowUpIcon,
   Building2Icon,
   CogIcon,
   DoorOpenIcon,
@@ -51,6 +52,7 @@ import {
 import {
   IUpdateInsightOptions,
   type IUpdateInsight,
+  ContractAwardDayTimelineStatuses,
 } from "~/validation/insight";
 import { useSession } from "next-auth/react";
 import Modal from "~/components/ui/modals/modal";
@@ -77,6 +79,7 @@ const ANALYSIS_TYPE_OPTIONS = {
 export default function Insight() {
   const user = useSession().data?.db_user;
   const router = useRouter();
+  const [isShowingOptions, setIsShowingOptions] = useState(false);
 
   // Get Insight (executes on page load)
   const [insight, setInsight] = useState<insight>();
@@ -87,20 +90,150 @@ export default function Insight() {
     {
       enabled: !!router.query.insight_id,
       onSuccess: (data) => {
-        const insight = data.result;
+        const incomingInsight = data.result;
+
+        // Prevent changes if the incoming insight is different from JSON of current state's insight
+        if (JSON.stringify(incomingInsight) === JSON.stringify(insight)) return;
 
         // Check if insight.options is an object and has no keys (empty object)
         if (
-          typeof insight.options === "object" &&
-          Object.keys(insight.options as object).length === 0
-        )
-          insight.options = null;
+          !incomingInsight.options ||
+          (typeof incomingInsight.options === "object" &&
+            Object.keys(incomingInsight.options as object).length === 0)
+        ) {
+          setIsShowingOptions(true);
+          incomingInsight.options = null;
+        }
 
-        setInsight(insight);
+        if (incomingInsight.options) {
+          setIsShowingOptions(false);
+
+          // Update UI: Analysis Type
+          if (
+            (
+              incomingInsight.options as {
+                analysis_type: string;
+              }
+            ).analysis_type === "AT_CAD"
+          )
+            insightOptionsForm.setValue(
+              "analysis_type",
+              (incomingInsight.options as { analysis_type: "" | "AT_CAD" })
+                .analysis_type
+            );
+
+          // Update UI: Timeline Status
+          if (
+            (
+              incomingInsight.options as {
+                timeline_status: string;
+              }
+            ).timeline_status
+          )
+            insightOptionsForm.setValue(
+              "timeline_status",
+              (
+                incomingInsight.options as {
+                  timeline_status: ContractAwardDayTimelineStatuses;
+                }
+              ).timeline_status
+            );
+
+          // Update UI: Configure Parameters
+          // ~ Start Date
+          if (
+            (
+              incomingInsight.options as {
+                startDate: string;
+              }
+            ).startDate
+          )
+            insightOptionsForm.setValue(
+              "options.startDate",
+              new Date(
+                (incomingInsight.options as { startDate: string }).startDate
+              )
+            );
+          // ~ End Date
+          if (
+            (
+              incomingInsight.options as {
+                endDate: string;
+              }
+            ).endDate
+          )
+            insightOptionsForm.setValue(
+              "options.endDate",
+              new Date((incomingInsight.options as { endDate: string }).endDate)
+            );
+          // ~ Contract Status
+          if (
+            (
+              incomingInsight.options as {
+                contract_status: string[];
+              }
+            ).contract_status
+          )
+            insightOptionsForm.setValue(
+              "options.contract_status",
+              (
+                incomingInsight.options as {
+                  contract_status: $Enums.contract_award_contract_status[];
+                }
+              ).contract_status
+            );
+          // ~ Additional Parameters (Contract Value, Max Days Delayed)
+          if (
+            (
+              incomingInsight.options as {
+                threshold: {
+                  minContractValue: number;
+                  maxDaysDelayed: number;
+                };
+              }
+            ).threshold
+          ) {
+            insightOptionsForm.setValue(
+              "options.threshold.minContractValue",
+              (
+                incomingInsight.options as {
+                  threshold: {
+                    minContractValue: number;
+                    maxDaysDelayed: number;
+                  };
+                }
+              ).threshold.minContractValue
+            );
+            insightOptionsForm.setValue(
+              "options.threshold.maxDaysDelayed",
+              (
+                incomingInsight.options as {
+                  threshold: {
+                    minContractValue: number;
+                    maxDaysDelayed: number;
+                  };
+                }
+              ).threshold.maxDaysDelayed
+            );
+          }
+        }
+
+        setInsight(incomingInsight);
 
         insightDetailsForm.reset({
           // TODO: fix this type casting
-          description: insight.description ?? undefined,
+          description: incomingInsight.description ?? undefined,
+        });
+
+        insightOptionsForm.reset({
+          analysis_type: (incomingInsight.options as { analysis_type: string })
+            ?.analysis_type as "AT_CAD" | "",
+          timeline_status: (
+            incomingInsight.options as { timeline_status: string }
+          )?.timeline_status as ContractAwardDayTimelineStatuses,
+          options: {
+            // TODO: include additional parameters here (to restore them)
+          },
         });
       },
       onError: (error) => {
@@ -342,8 +475,49 @@ export default function Insight() {
           </div>
 
           {/* Insight Options */}
+          {!isShowingOptions && insight && (
+            <>
+              <div className="flex flex-col space-y-4">
+                {/* Insight Options Header */}
+                <div className="mx-3 mt-4 flex items-center justify-between rounded-xl bg-gradient-to-r from-brand-dark to-blue-800 p-3 text-white">
+                  <h1 className="text-lg font-bold">
+                    <CogIcon className="mr-2 inline-block h-6 w-6" /> Insight
+                    Options
+                  </h1>
+
+                  {/* Toggle Show Options */}
+                  {insight.options &&
+                    insight.generated_at &&
+                    (isShowingOptions ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsShowingOptions(false)}
+                        className="flex items-center justify-center rounded-md bg-white bg-opacity-10 p-1.5 text-white"
+                      >
+                        <ArrowUpIcon className="h-5 w-5" />
+                        <span className="sr-only">Hide Options</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsShowingOptions(true)}
+                        className="flex items-center justify-center rounded-md bg-white bg-opacity-10 p-1.5 text-white"
+                      >
+                        <ArrowDownIcon className="h-5 w-5" />
+                        <span className="sr-only">Show Options</span>
+                      </button>
+                    ))}
+                </div>
+              </div>
+            </>
+          )}
           <form
-            className="no-scrollbar mx-3 my-4 h-full overflow-auto rounded-xl bg-white pb-6 shadow-md"
+            className={classNames(
+              "no-scrollbar mx-3 my-4 rounded-xl shadow-md",
+              isShowingOptions
+                ? "block h-full overflow-auto bg-white pb-6"
+                : "hidden"
+            )}
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
             onSubmit={insightOptionsForm.handleSubmit(
               submitGenerateInsight_AT_CAD
@@ -357,303 +531,411 @@ export default function Insight() {
                     <CogIcon className="mr-2 inline-block h-6 w-6" /> Insight
                     Options
                   </h1>
+
+                  {/* Toggle Show Options */}
+                  {insight.options &&
+                    insight.generated_at &&
+                    (isShowingOptions ? (
+                      <button
+                        type="button"
+                        onClick={() => setIsShowingOptions(false)}
+                        className="flex items-center justify-center rounded-md bg-white bg-opacity-10 p-1.5 text-white"
+                      >
+                        <ArrowUpIcon className="h-5 w-5" />
+                        <span className="sr-only">Hide Options</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setIsShowingOptions(true)}
+                        className="flex items-center justify-center rounded-md bg-white bg-opacity-10 p-1.5 text-white"
+                      >
+                        <ArrowDownIcon className="h-5 w-5" />
+                        <span className="sr-only">Show Options</span>
+                      </button>
+                    ))}
                 </div>
-                {/* Alert message */}
-                {!insight.options && (
-                  <div className="mx-4 flex flex-col items-center justify-center space-y-4 rounded-md border-l-4 border-yellow-400 bg-yellow-50 p-4 shadow">
-                    <div className="flex items-center space-x-2">
-                      <AlertTriangleIcon className="h-6 w-6 text-yellow-600" />
-                      <span className="text-sm font-medium text-yellow-700">
-                        This insight does not have any options set up yet.
-                      </span>
-                    </div>
-                    <span className="text-xs font-normal text-gray-600">
-                      Please select an analysis (insight) type below to get
-                      started.
-                    </span>
-                  </div>
-                )}
-                {/* Insight Option menus */}
-                <div className="mx-auto flex w-1/3 flex-col items-center space-x-6 px-0 py-2 md:mx-0 md:w-full md:flex-row md:items-start md:justify-center md:px-14 lg:px-16">
-                  {/* Analysis Type */}
-                  <div className="flex flex-col space-y-2">
-                    <label
-                      htmlFor="analysis_type"
-                      className="text-sm font-medium text-gray-800"
-                    >
-                      <span className="font-bold text-blue-600">1.</span> Select
-                      an Analysis Type
-                    </label>
 
-                    <select
-                      id="analysis_type"
-                      className={`h-fit w-fit rounded-md bg-blue-50 text-gray-800 sm:text-sm ${
-                        analysisType ? "" : "bg-red-50 text-[#DC2F0A]"
-                      }`}
-                      {...insightOptionsForm.register("analysis_type")}
-                    >
-                      <option value="">...</option>
-                      <option value="AT_CAD">Contract Award Days</option>
-                    </select>
-                  </div>
-                  <ArrowRightIcon
-                    className={classNames(
-                      "mb-3 mt-auto hidden h-5 w-5 md:block",
-                      analysisType ? "text-slate-600" : "text-slate-300"
+                {isShowingOptions && (
+                  <>
+                    {/* Alert message */}
+                    {!insight.options && !insight.generated_at && (
+                      <div className="mx-4 flex flex-col items-center justify-center space-y-4 rounded-md border-l-4 border-yellow-400 bg-yellow-50 p-4 shadow">
+                        <div className="flex items-center space-x-2">
+                          <AlertTriangleIcon className="h-6 w-6 text-yellow-600" />
+                          <span className="text-sm font-medium text-yellow-700">
+                            This insight does not have any options set up yet.
+                          </span>
+                        </div>
+                        <span className="text-xs font-normal text-gray-600">
+                          Please select an analysis (insight) type below to get
+                          started.
+                        </span>
+                      </div>
                     )}
-                  />
 
-                  {/* [Contract Award Days]: Timeline Status */}
-                  {analysisType === "AT_CAD" && (
-                    <>
-                      <div className="mt-4 flex flex-col space-y-2 md:mt-0">
+                    {/* Insight Option menus */}
+                    <div className="mx-auto flex w-1/3 flex-col items-center space-x-6 px-0 py-2 md:mx-0 md:w-full md:flex-row md:items-start md:justify-center md:px-14 lg:px-16">
+                      {/* Analysis Type */}
+                      <div className="flex flex-col space-y-2">
                         <label
                           htmlFor="analysis_type"
                           className="text-sm font-medium text-gray-800"
                         >
-                          <span className="font-bold text-blue-600">2.</span>{" "}
-                          Select a Timeline Status
+                          {!insight.options && !insight.generated_at && (
+                            <>
+                              <span className="font-bold text-blue-600">
+                                1.
+                              </span>{" "}
+                              Select an{" "}
+                            </>
+                          )}{" "}
+                          Analysis Type
                         </label>
 
                         <select
-                          id="timeline_status"
+                          id="analysis_type"
                           className={`h-fit w-fit rounded-md bg-blue-50 text-gray-800 sm:text-sm ${
-                            timelineStatus ? "" : "bg-red-50 text-[#DC2F0A]"
+                            analysisType ? "" : "bg-red-50 text-[#DC2F0A]"
                           }`}
-                          {...insightOptionsForm.register("timeline_status")}
+                          {...insightOptionsForm.register("analysis_type")}
+                          disabled={
+                            insight.options || insight.generated_at
+                              ? true
+                              : false
+                          }
                         >
                           <option value="">...</option>
-                          <option value="requirement_plan">
-                            Requirements Planning
-                          </option>
-                          <option value="draft_rfp_released">
-                            Draft RFP Released
-                          </option>
-                          <option value="approved_by_acb">
-                            Approved at ACB
-                          </option>
-                          <option value="rfp_released">RFP Released</option>
-                          <option value="proposal_received">
-                            Proposal Received
-                          </option>
-                          <option value="tech_eval_comp">
-                            Tech Eval Complete
-                          </option>
-                          <option value="negotiation_comp">
-                            Negotiations Complete
-                          </option>
-                          <option value="awarded">Awarded</option>
+                          <option value="AT_CAD">Contract Award Days</option>
                         </select>
                       </div>
-
                       <ArrowRightIcon
                         className={classNames(
                           "mb-3 mt-auto hidden h-5 w-5 md:block",
-                          timelineStatus ? "text-slate-600" : "text-slate-300"
+                          analysisType ? "text-slate-600" : "text-slate-300"
                         )}
                       />
 
-                      {/* [Contract Award Days]: Select Projects */}
-                      {timelineStatus && projects && (
+                      {/* [Contract Award Days]: Timeline Status */}
+                      {analysisType === "AT_CAD" && (
                         <>
-                          <div className="mt-4 flex w-full flex-col space-y-2 md:mt-0 md:w-auto">
-                            <label className="text-sm font-medium text-gray-800">
-                              <span className="font-bold text-blue-600">
-                                3.
-                              </span>{" "}
-                              Select Projects
+                          <div className="mt-4 flex flex-col space-y-2 md:mt-0">
+                            <label
+                              htmlFor="analysis_type"
+                              className="text-sm font-medium text-gray-800"
+                            >
+                              {!insight.options && !insight.generated_at && (
+                                <>
+                                  <span className="font-bold text-blue-600">
+                                    2.
+                                  </span>{" "}
+                                  Select a{" "}
+                                </>
+                              )}
+                              Timeline Status
                             </label>
 
-                            <MultiSelectBox
-                              placeholder="All Projects (default)..."
-                              data={projects}
-                              displayValue={formatProjectName}
-                              displayValues={(selected: view_project[]) =>
-                                selected.map(formatProjectName).join(", ")
+                            <select
+                              id="timeline_status"
+                              className={`h-fit w-fit rounded-md bg-blue-50 text-gray-800 sm:text-sm ${
+                                timelineStatus ? "" : "bg-red-50 text-[#DC2F0A]"
+                              }`}
+                              {...insightOptionsForm.register(
+                                "timeline_status"
+                              )}
+                              disabled={
+                                insight.options || insight.generated_at
+                                  ? true
+                                  : false
                               }
-                              onSelectedItemsChange={(
-                                selected: view_project[]
-                              ) => {
-                                setSelectedProjects(selected);
-                              }}
-                              inputClassName="border-gray-500 min-w-[20rem] rounded-md bg-blue-50 text-gray-800 placeholder-gray-800 -mt-1"
-                            />
+                            >
+                              <option value="">...</option>
+                              <option value="requirement_plan">
+                                Requirements Planning
+                              </option>
+                              <option value="draft_rfp_released">
+                                Draft RFP Released
+                              </option>
+                              <option value="approved_by_acb">
+                                Approved at ACB
+                              </option>
+                              <option value="rfp_released">RFP Released</option>
+                              <option value="proposal_received">
+                                Proposal Received
+                              </option>
+                              <option value="tech_eval_comp">
+                                Tech Eval Complete
+                              </option>
+                              <option value="negotiation_comp">
+                                Negotiations Complete
+                              </option>
+                              <option value="awarded">Awarded</option>
+                            </select>
                           </div>
+
+                          <ArrowRightIcon
+                            className={classNames(
+                              "mb-3 mt-auto hidden h-5 w-5 md:block",
+                              timelineStatus
+                                ? "text-slate-600"
+                                : "text-slate-300"
+                            )}
+                          />
+
+                          {/* [Contract Award Days]: Select Projects */}
+                          {timelineStatus && projects && (
+                            <>
+                              <div className="mt-4 flex w-full flex-col space-y-2 md:mt-0 md:w-auto">
+                                <label className="text-sm font-medium text-gray-800">
+                                  {!insight.options &&
+                                    !insight.generated_at && (
+                                      <>
+                                        <span className="font-bold text-blue-600">
+                                          3.
+                                        </span>{" "}
+                                        Select{" "}
+                                      </>
+                                    )}{" "}
+                                  Projects
+                                </label>
+
+                                <MultiSelectBox
+                                  placeholder="All Projects (default)..."
+                                  data={projects}
+                                  displayValue={formatProjectName}
+                                  displayValues={(selected: view_project[]) =>
+                                    selected.map(formatProjectName).join(", ")
+                                  }
+                                  onSelectedItemsChange={(
+                                    selected: view_project[]
+                                  ) => {
+                                    setSelectedProjects(selected);
+                                  }}
+                                  inputClassName="border-gray-500 min-w-[20rem] rounded-md bg-blue-50 text-gray-800 placeholder-gray-800 -mt-1"
+                                  disabled={
+                                    insight.options || insight.generated_at
+                                      ? true
+                                      : false
+                                  }
+                                />
+                              </div>
+                            </>
+                          )}
                         </>
                       )}
-                    </>
-                  )}
-                </div>
+                    </div>
 
-                {/* Configure Parameters */}
-                {timelineStatus && projects && (
-                  <>
-                    <ArrowDownIcon className="mx-auto mb-3 hidden h-5 w-5 text-slate-600 md:block" />
-                    <div className="mx-auto flex flex-col items-center space-y-2">
-                      <label
-                        htmlFor="configure_parameters"
-                        className="text-sm font-medium text-gray-800"
-                      >
-                        <span className="font-bold text-blue-600">4.</span>{" "}
-                        Configure Parameters
-                      </label>
+                    {/* Configure Parameters */}
+                    {timelineStatus && projects && (
+                      <>
+                        <ArrowDownIcon className="mx-auto mb-3 hidden h-5 w-5 text-slate-600 md:block" />
+                        <div className="mx-auto flex flex-col items-center space-y-2">
+                          <label
+                            htmlFor="configure_parameters"
+                            className="text-sm font-medium text-gray-800"
+                          >
+                            {!insight.options && !insight.generated_at && (
+                              <>
+                                <span className="font-bold text-blue-600">
+                                  4.
+                                </span>{" "}
+                                Configure{" "}
+                              </>
+                            )}
+                            Parameters
+                          </label>
 
-                      <div
-                        id="configure_parameters"
-                        className="w-full max-w-4xl rounded-md border border-gray-500 bg-blue-50 p-6 shadow-sm"
-                      >
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                          {/* Start Date */}
-                          <div>
-                            <label
-                              htmlFor="start_date"
-                              className="mb-2 block text-sm font-medium text-gray-700"
-                            >
-                              Start Date
-                            </label>
-                            <Controller
-                              control={insightOptionsForm.control}
-                              name="options.startDate"
-                              render={({ field }) => (
-                                <DatePicker
-                                  id="start_date"
-                                  selected={field.value}
-                                  onChange={(date) =>
-                                    insightOptionsForm.setValue(
-                                      "options.startDate",
-                                      date ?? undefined
-                                    )
-                                  }
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                  placeholderText="Start Date"
-                                />
-                              )}
-                            />
-                          </div>
-
-                          {/* End Date */}
-                          <div>
-                            <label
-                              htmlFor="end_date"
-                              className="mb-2 block text-sm font-medium text-gray-700"
-                            >
-                              End Date
-                            </label>
-                            <Controller
-                              control={insightOptionsForm.control}
-                              name="options.endDate"
-                              render={({ field }) => (
-                                <DatePicker
-                                  id="end_date"
-                                  selected={field.value}
-                                  onChange={(date) =>
-                                    insightOptionsForm.setValue(
-                                      "options.endDate",
-                                      date ?? undefined
-                                    )
-                                  }
-                                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                  placeholderText="End Date"
-                                />
-                              )}
-                            />
-                          </div>
-
-                          {/* Contract Status */}
-                          {projects &&
-                            selectedProjects &&
-                            selectedProjects.length === 0 && (
+                          <div
+                            id="configure_parameters"
+                            className="w-full max-w-4xl rounded-md border border-gray-500 bg-blue-50 p-6 shadow-sm"
+                          >
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                              {/* Start Date */}
                               <div>
                                 <label
-                                  htmlFor="contract_status"
+                                  htmlFor="start_date"
                                   className="mb-2 block text-sm font-medium text-gray-700"
                                 >
-                                  Contract Status
+                                  Start Date
                                 </label>
                                 <Controller
                                   control={insightOptionsForm.control}
-                                  name="options.contract_status"
+                                  name="options.startDate"
                                   render={({ field }) => (
-                                    <select
-                                      {...field}
-                                      id="contract_status"
-                                      className="mt-1 block w-full overflow-hidden rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                      multiple
-                                    >
-                                      {["Pre_Award", "Awarded", "Closed"].map(
-                                        (status) => (
-                                          <option key={status} value={status}>
-                                            {status.replace("_", "-")}
-                                          </option>
+                                    <DatePicker
+                                      id="start_date"
+                                      selected={field.value}
+                                      onChange={(date) =>
+                                        insightOptionsForm.setValue(
+                                          "options.startDate",
+                                          date ?? undefined
                                         )
-                                      )}
-                                    </select>
+                                      }
+                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                      placeholderText="Start Date"
+                                      disabled={
+                                        insight.options || insight.generated_at
+                                          ? true
+                                          : false
+                                      }
+                                    />
                                   )}
                                 />
                               </div>
-                            )}
 
-                          <div className="grid grid-cols-2 gap-4">
-                            {/* Contract Value */}
-                            <div>
-                              <label
-                                htmlFor="min_contract_value"
-                                className="mb-2 block text-sm font-medium text-gray-700"
-                              >
-                                Min Contract Value
-                              </label>
-                              <Controller
-                                control={insightOptionsForm.control}
-                                name="options.threshold.minContractValue"
-                                render={({ field }) => (
-                                  <input
-                                    {...field}
-                                    id="min_contract_value"
-                                    type="number"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                    placeholder="Minimum"
-                                  />
-                                )}
-                              />
-                            </div>
+                              {/* End Date */}
+                              <div>
+                                <label
+                                  htmlFor="end_date"
+                                  className="mb-2 block text-sm font-medium text-gray-700"
+                                >
+                                  End Date
+                                </label>
+                                <Controller
+                                  control={insightOptionsForm.control}
+                                  name="options.endDate"
+                                  render={({ field }) => (
+                                    <DatePicker
+                                      id="end_date"
+                                      selected={field.value}
+                                      onChange={(date) =>
+                                        insightOptionsForm.setValue(
+                                          "options.endDate",
+                                          date ?? undefined
+                                        )
+                                      }
+                                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                      placeholderText="End Date"
+                                      disabled={
+                                        insight.options || insight.generated_at
+                                          ? true
+                                          : false
+                                      }
+                                    />
+                                  )}
+                                />
+                              </div>
 
-                            {/* Max Days Delayed */}
-                            <div>
-                              <label
-                                htmlFor="max_days_delayed"
-                                className="mb-2 block text-sm font-medium text-gray-700"
-                              >
-                                Max Days Delayed
-                              </label>
-                              <Controller
-                                control={insightOptionsForm.control}
-                                name="options.threshold.maxDaysDelayed"
-                                render={({ field }) => (
-                                  <input
-                                    {...field}
-                                    id="max_days_delayed"
-                                    type="number"
-                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                                    placeholder="Maximum"
-                                  />
+                              {/* Contract Status */}
+                              {projects &&
+                                selectedProjects &&
+                                selectedProjects.length === 0 && (
+                                  <div>
+                                    <label
+                                      htmlFor="contract_status"
+                                      className="mb-2 block text-sm font-medium text-gray-700"
+                                    >
+                                      Contract Status
+                                    </label>
+                                    <Controller
+                                      control={insightOptionsForm.control}
+                                      name="options.contract_status"
+                                      render={({ field }) => (
+                                        <select
+                                          {...field}
+                                          id="contract_status"
+                                          className="mt-1 block w-full overflow-hidden rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                          multiple
+                                          disabled={
+                                            insight.options ||
+                                            insight.generated_at
+                                              ? true
+                                              : false
+                                          }
+                                        >
+                                          {[
+                                            "Pre_Award",
+                                            "Awarded",
+                                            "Closed",
+                                          ].map((status) => (
+                                            <option key={status} value={status}>
+                                              {status.replace("_", "-")}
+                                            </option>
+                                          ))}
+                                        </select>
+                                      )}
+                                    />
+                                  </div>
                                 )}
-                              />
+
+                              {/* Additional Parameters */}
+                              <div className="grid grid-cols-2 gap-4">
+                                {/* Contract Value */}
+                                <div>
+                                  <label
+                                    htmlFor="min_contract_value"
+                                    className="mb-2 block text-sm font-medium text-gray-700"
+                                  >
+                                    Min Contract Value
+                                  </label>
+                                  <Controller
+                                    control={insightOptionsForm.control}
+                                    name="options.threshold.minContractValue"
+                                    render={({ field }) => (
+                                      <input
+                                        {...field}
+                                        id="min_contract_value"
+                                        type="number"
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                        placeholder="Minimum"
+                                        disabled={
+                                          insight.options ||
+                                          insight.generated_at
+                                            ? true
+                                            : false
+                                        }
+                                      />
+                                    )}
+                                  />
+                                </div>
+
+                                {/* Max Days Delayed */}
+                                <div>
+                                  <label
+                                    htmlFor="max_days_delayed"
+                                    className="mb-2 block text-sm font-medium text-gray-700"
+                                  >
+                                    Max Days Delayed
+                                  </label>
+                                  <Controller
+                                    control={insightOptionsForm.control}
+                                    name="options.threshold.maxDaysDelayed"
+                                    render={({ field }) => (
+                                      <input
+                                        {...field}
+                                        id="max_days_delayed"
+                                        type="number"
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                        placeholder="Maximum"
+                                        disabled={
+                                          insight.options ||
+                                          insight.generated_at
+                                            ? true
+                                            : false
+                                        }
+                                      />
+                                    )}
+                                  />
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
 
-                    {/* Submit Button */}
-                    <Button
-                      type="submit"
-                      text="Generate Insight"
-                      icon={SearchCodeIcon}
-                      onClick={() => {
-                        return;
-                      }}
-                      className="mx-auto mb-6 mt-4"
-                    />
+                        {/* Submit Button */}
+                        {!insight.options && !insight.generated_at && (
+                          <Button
+                            type="submit"
+                            text="Generate Insight"
+                            icon={SearchCodeIcon}
+                            onClick={() => {
+                              return;
+                            }}
+                            className="mx-auto mb-6 mt-4"
+                          />
+                        )}
+                      </>
+                    )}
                   </>
                 )}
               </div>
@@ -668,8 +950,13 @@ export default function Insight() {
             )}
           </form>
 
-          {/* TODO: Insight Details */}
-          {/* <div className="mx-3 mt-4 h-full overflow-x-auto rounded-sm px-3.5 py-4">
+          {/* Insight Details */}
+          <div
+            className={classNames(
+              "mx-3 mt-4 overflow-x-auto rounded-t-md bg-red-300 px-3.5 py-4 shadow-md",
+              !isShowingOptions ? "h-full" : ""
+            )}
+          >
             {insight ? (
               <div className="flex flex-col space-y-8"></div>
             ) : (
@@ -681,7 +968,7 @@ export default function Insight() {
                 </span>
               </div>
             )}
-          </div> */}
+          </div>
         </>
       }
       modals={<></>}

@@ -16,6 +16,7 @@ import "~/styles/globals.css";
 import "react-tooltip/dist/react-tooltip.css";
 import "rc-slider/assets/index.css";
 import "@hassanmojab/react-modern-calendar-datepicker/lib/DatePicker.css";
+import "react-datepicker/dist/react-datepicker.css";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,

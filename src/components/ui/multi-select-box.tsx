@@ -12,6 +12,7 @@ interface MultiSelectBoxProps<T> {
   label?: string;
   inputClassName?: string;
   optionsClassName?: string;
+  disabled?: boolean;
 }
 
 export default function MultiSelectBox<T extends { id: number }>({
@@ -23,6 +24,7 @@ export default function MultiSelectBox<T extends { id: number }>({
   label,
   inputClassName,
   optionsClassName,
+  disabled,
 }: MultiSelectBoxProps<T>) {
   const [query, setQuery] = useState("");
   const [selectedItems, setSelectedItems] = useState<T[]>([]);
@@ -53,6 +55,8 @@ export default function MultiSelectBox<T extends { id: number }>({
         onSelectedItemsChange(items);
       }}
       multiple
+      disabled={disabled}
+      className={classNames(disabled ? "cursor-not-allowed opacity-[60%]" : "")}
     >
       {label && (
         <Combobox.Label className="block text-sm font-medium text-gray-700">
