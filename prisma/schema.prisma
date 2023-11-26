@@ -438,10 +438,12 @@ model project_history {
 }
 
 model insight {
-    id          Int     @id @default(autoincrement())
-    name        String
-    description String?
-    options     Json?
+    id           Int       @id @default(autoincrement())
+    name         String
+    description  String?
+    options      Json?
+    generated_at DateTime?
+    results      Json?
 
     is_archived        Boolean @default(false)
     created_by_user_id Int

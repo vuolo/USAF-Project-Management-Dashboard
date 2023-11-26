@@ -193,11 +193,32 @@ export default function Insight() {
   const [selectedProjects, setSelectedProjects] = useState<view_project[]>([]);
   const { data: projects } = api.project.list_view.useQuery();
 
-  // Submit handler for the form
-  const onSubmitGenerateInsight = (data) => {
-    // TODO: Call API or perform actions with the form data
-    console.log(data);
-  };
+  // Generate Insight
+  const generateInsightResults_AT_CAD =
+    api.insight.generateInsightResults_AT_CAD.useMutation({
+      onSuccess: (data) => {
+        toast.success(toastMessage("Insight Generated", data.message));
+        void getInsight.refetch();
+      },
+      onError: (error) => {
+        toast.error(toastMessage("Error Generating Insight", error.message));
+        console.error("Mutation Error:", error);
+      },
+    });
+  const submitGenerateInsight_AT_CAD = useCallback<
+    SubmitHandler<IUpdateInsightOptions>
+  >(
+    async (input) => {
+      if (!insight?.id) return;
+
+      await generateInsightResults_AT_CAD.mutateAsync({
+        id: insight.id,
+        timeline_status: timelineStatus,
+        // TODO: add other parameters here
+      });
+    },
+    [generateInsightResults_AT_CAD, insight, timelineStatus]
+  );
 
   return (
     <SimpleLayout
@@ -321,7 +342,13 @@ export default function Insight() {
           </div>
 
           {/* Insight Options */}
-          <form className="mx-3 my-4 rounded-xl bg-white pb-6 shadow-md">
+          <form
+            className="no-scrollbar mx-3 my-4 h-full overflow-auto rounded-xl bg-white pb-6 shadow-md"
+            // eslint-disable-next-line @typescript-eslint/no-misused-promises
+            onSubmit={insightOptionsForm.handleSubmit(
+              submitGenerateInsight_AT_CAD
+            )}
+          >
             {insight ? (
               <div className="flex flex-col space-y-4">
                 {/* Insight Options Header */}
@@ -396,23 +423,26 @@ export default function Insight() {
                           {...insightOptionsForm.register("timeline_status")}
                         >
                           <option value="">...</option>
-                          <option value="Requirements Planning">
+                          <option value="requirement_plan">
                             Requirements Planning
                           </option>
-                          <option value="Draft RFP Released">
+                          <option value="draft_rfp_released">
                             Draft RFP Released
                           </option>
-                          <option value="Approved at ACB">
+                          <option value="approved_by_acb">
                             Approved at ACB
                           </option>
-                          <option value="RFP Released">RFP Released</option>
-                          <option value="Tech Eval Complete">
+                          <option value="rfp_released">RFP Released</option>
+                          <option value="proposal_received">
+                            Proposal Received
+                          </option>
+                          <option value="tech_eval_comp">
                             Tech Eval Complete
                           </option>
-                          <option value="Negotiations Complete">
+                          <option value="negotiation_comp">
                             Negotiations Complete
                           </option>
-                          <option value="Awarded">Awarded</option>
+                          <option value="awarded">Awarded</option>
                         </select>
                       </div>
 
@@ -473,6 +503,7 @@ export default function Insight() {
                         className="w-full max-w-4xl rounded-md border border-gray-500 bg-blue-50 p-6 shadow-sm"
                       >
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                          {/* Start Date */}
                           <div>
                             <label
                               htmlFor="start_date"
@@ -490,7 +521,7 @@ export default function Insight() {
                                   onChange={(date) =>
                                     insightOptionsForm.setValue(
                                       "options.startDate",
-                                      date
+                                      date ?? undefined
                                     )
                                   }
                                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
@@ -499,6 +530,8 @@ export default function Insight() {
                               )}
                             />
                           </div>
+
+                          {/* End Date */}
                           <div>
                             <label
                               htmlFor="end_date"
@@ -516,7 +549,7 @@ export default function Insight() {
                                   onChange={(date) =>
                                     insightOptionsForm.setValue(
                                       "options.endDate",
-                                      date
+                                      date ?? undefined
                                     )
                                   }
                                   className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
@@ -525,6 +558,8 @@ export default function Insight() {
                               )}
                             />
                           </div>
+
+                          {/* Contract Status */}
                           {projects &&
                             selectedProjects &&
                             selectedProjects.length === 0 && (
@@ -557,7 +592,9 @@ export default function Insight() {
                                 />
                               </div>
                             )}
+
                           <div className="grid grid-cols-2 gap-4">
+                            {/* Contract Value */}
                             <div>
                               <label
                                 htmlFor="min_contract_value"
@@ -579,6 +616,8 @@ export default function Insight() {
                                 )}
                               />
                             </div>
+
+                            {/* Max Days Delayed */}
                             <div>
                               <label
                                 htmlFor="max_days_delayed"
@@ -630,7 +669,7 @@ export default function Insight() {
           </form>
 
           {/* TODO: Insight Details */}
-          <div className="mx-3 mt-4 h-full overflow-x-auto rounded-sm px-3.5 py-4">
+          {/* <div className="mx-3 mt-4 h-full overflow-x-auto rounded-sm px-3.5 py-4">
             {insight ? (
               <div className="flex flex-col space-y-8"></div>
             ) : (
@@ -642,7 +681,7 @@ export default function Insight() {
                 </span>
               </div>
             )}
-          </div>
+          </div> */}
         </>
       }
       modals={<></>}
