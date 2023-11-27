@@ -17,7 +17,6 @@ export type ContractAwardDayTimelineStatuses =
 export const addInsightSchema = z.object({
   name: z.string(),
   description: z.string().optional(),
-  options: z.object({}).optional(), // TODO: Add options schema
 });
 export type IAddInsight = z.infer<typeof addInsightSchema>;
 
