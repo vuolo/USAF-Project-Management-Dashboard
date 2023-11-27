@@ -56,10 +56,46 @@ const Home: NextPage = () => {
     })();
   }, [router.query, document]);
 
+  // [Scroll into view based onto the URL]
+  useEffect(() => {
+    // This effect runs when the component mounts and whenever the router.query changes.
+    const scrollToComponent = () => {
+      // Get the query parameter
+      const section = router.query.section as string;
+
+      // Determine the selector based on the section to scroll to
+      const selector = section === "projects" ? "#projects-section" : "";
+
+      // Select the component and scroll into view
+      try {
+        const componentToScrollTo = document.querySelector(selector);
+        componentToScrollTo?.scrollIntoView({ behavior: "smooth" });
+
+        // Clear the section query parameter after scrolling
+        const { section, ...restQuery } = router.query;
+        void router.replace(
+          {
+            pathname: router.pathname,
+            query: restQuery,
+          },
+          undefined,
+          { shallow: true }
+        );
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    // Execute the scroll if the query parameter is present
+    if (router.query.section) {
+      scrollToComponent();
+    }
+  }, [router.query]);
+
   return (
     <main>
       {/* Top Section */}
-      <div className="flex flex-col gap-6 px-2 pt-2 pb-2 sm:justify-around sm:pt-6 lg:flex-row">
+      <div className="flex flex-col gap-6 px-2 pb-2 pt-2 sm:justify-around sm:pt-6 lg:flex-row">
         {/* Left */}
         <div className="flex flex-col gap-6">
           <UpcomingEvents />
@@ -80,7 +116,7 @@ const Home: NextPage = () => {
       </div>
 
       {/* Underneath Top Section */}
-      <div className="px-4 pt-2 pb-2 sm:px-6 sm:pt-6">
+      <div id="projects-section" className="px-4 pb-2 pt-2 sm:px-6 sm:pt-6">
         <ProjectsOverview />
       </div>
     </main>

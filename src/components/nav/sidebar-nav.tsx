@@ -124,19 +124,38 @@ function SidebarNav() {
                       <h1 className="opacity-60">•</h1>
                     </div>
                   ) : (
-                    <h1>Project</h1>
+                    <h1>Projects</h1>
                   )}
                 </div>
-                {/* Disabled Icons, NO USE OF THEM YET */}
-                <MenuItem disabled icon={<FoldersIcon />}>
-                  All Projects
-                </MenuItem>
-                <MenuItem disabled icon={<FolderHeartIcon />}>
-                  Favorites
-                </MenuItem>
-                <MenuItem disabled icon={<FolderClockIcon />}>
-                  Recently Visited
-                </MenuItem>
+
+                <Link
+                  href={
+                    route !== "/" ? "/?section=projects" : "?section=projects"
+                  }
+                >
+                  <MenuItem icon={<FoldersIcon />}>All Projects</MenuItem>
+                </Link>
+
+                <Link
+                  href={
+                    route !== "/" ? "/?section=favorites" : "?section=favorites"
+                  }
+                >
+                  <MenuItem icon={<FolderHeartIcon />}>Favorites</MenuItem>
+                </Link>
+
+                <Link
+                  href={
+                    route !== "/"
+                      ? "/?section=most-visited"
+                      : "?section=most-visited"
+                  }
+                >
+                  <MenuItem icon={<FolderClockIcon />}>
+                    Recently Visited
+                  </MenuItem>
+                </Link>
+
                 <Link href={"/add-project"}>
                   <MenuItem
                     id={route == "/add-project" ? "selected-menu-item" : ""}

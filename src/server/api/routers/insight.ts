@@ -236,18 +236,6 @@ export const insightRouter = createTRPCRouter({
         }
       });
 
-      console.log(contractDict);
-      // stats of contractDict:
-      console.log(
-        Object.keys(contractDict).length,
-        Object.keys(contractDict).filter(
-          (key) =>
-            contractDict[key]?.actual &&
-            (contractDict[key]?.projected || contractDict[key]?.planned)
-        ).length
-      );
-      console.log("...");
-
       // Calculate day differences for each contract award
       // Note: This is a copy of the one from utils but without the abs
       function getDayDifference(d1: Date, d2: Date) {

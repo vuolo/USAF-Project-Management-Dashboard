@@ -533,7 +533,7 @@ export default function Insight() {
             className={classNames(
               "no-scrollbar mx-3 my-4 rounded-xl shadow-md",
               isShowingOptions
-                ? "block h-fit overflow-auto bg-white pb-6"
+                ? "block h-full overflow-auto bg-white pb-6"
                 : "hidden"
             )}
             // eslint-disable-next-line @typescript-eslint/no-misused-promises

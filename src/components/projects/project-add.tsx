@@ -290,7 +290,7 @@ function ProjectAdd() {
         </div>
 
         {/* Contract Details */}
-        <div className="flex flex-col gap-4 px-4 pt-4 md:px-6 lg:flex-row lg:justify-center lg:gap-8">
+        <div className="itesm flex flex-col gap-4 px-4 pt-4 md:px-6 lg:flex-row lg:justify-center lg:gap-8">
           {/* Contract Status */}
           <div className="flex flex-col gap-2 md:flex-row md:items-center lg:w-1/2">
             <label htmlFor="contract-status" className="md:w-1/3 lg:text-left">
@@ -331,12 +331,14 @@ function ProjectAdd() {
           </div>
         </div>
 
-        <button
-          onClick={submitAddProject}
-          className="mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
-        >
-          Add New Project
-        </button>
+        <div className="flex w-full items-center justify-center pt-4">
+          <button
+            onClick={submitAddProject}
+            className="mx-auto mt-4 inline-flex items-center justify-center rounded-md border border-brand-dark bg-white px-4 py-2 text-sm font-medium text-brand-dark shadow-sm hover:bg-brand-dark hover:text-white focus:outline-none focus:ring-2 focus:ring-brand-dark focus:ring-offset-2 sm:w-auto"
+          >
+            Add New Project
+          </button>
+        </div>
       </div>
     </div>
   );
