@@ -127,7 +127,7 @@ const loggerMiddleware = t.middleware(
     });
 
     // Check if its a mutation and filter out adding project history
-    if (type == "mutation" && !(path in pathExclusions)) {
+    if (type == "mutation" && (pathExclusions.indexOf(path) > -1)) {
       const inputdata = {
         user: ctx.session?.db_user?.user_email
           ? ctx.session.db_user.user_email
