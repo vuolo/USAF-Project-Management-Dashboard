@@ -236,6 +236,18 @@ export const insightRouter = createTRPCRouter({
         }
       });
 
+      console.log(contractDict);
+      // stats of contractDict:
+      console.log(
+        Object.keys(contractDict).length,
+        Object.keys(contractDict).filter(
+          (key) =>
+            contractDict[key]?.actual &&
+            (contractDict[key]?.projected || contractDict[key]?.planned)
+        ).length
+      );
+      console.log("...");
+
       // Calculate day differences for each contract award
       // Note: This is a copy of the one from utils but without the abs
       function getDayDifference(d1: Date, d2: Date) {
@@ -246,23 +258,25 @@ export const insightRouter = createTRPCRouter({
       const dayDifferences = [];
       for (const contractAward of Object.values(contractDict)) {
         const actualDate = contractAward.actual?.[input.timeline_status];
+        const projectedDate = contractAward.projected?.[input.timeline_status];
         const plannedDate = contractAward.planned?.[input.timeline_status];
 
-        if (actualDate && plannedDate) {
+        console.log(actualDate, projectedDate || plannedDate);
+
+        if (actualDate && (projectedDate || plannedDate)) {
           dayDifferences.push(
-            getDayDifference(new Date(actualDate), new Date(plannedDate))
+            getDayDifference(
+              new Date(actualDate),
+              new Date(projectedDate || (plannedDate as Date))
+            )
           );
         }
       }
 
       // Create the result object
-      const result = {
-        status: 200,
-        message: "Insight results generated successfully",
-        result: {
-          average: 0,
-          dayDifferences,
-        },
+      const results = {
+        average: 0,
+        dayDifferences,
       };
 
       // Calculate the average based on the algorithm
@@ -274,7 +288,7 @@ export const insightRouter = createTRPCRouter({
               ? dayDifferences.reduce((a, b) => a + b, 0) /
                 dayDifferences.length
               : 0;
-          result.result.average = average;
+          results.average = average;
           break;
         default:
           throw new TRPCError({
@@ -293,7 +307,7 @@ export const insightRouter = createTRPCRouter({
             timeline_status: input.timeline_status,
             algorithm: input.algorithm,
           },
-          results: { ...result.result },
+          results: { ...results },
           generated_at: new Date(),
         },
       });

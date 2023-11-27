@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import { classNames } from "~/utils/misc";
@@ -93,7 +93,7 @@ export default function Insight() {
         const incomingInsight = data.result;
 
         // Prevent changes if the incoming insight is different from JSON of current state's insight
-        if (JSON.stringify(incomingInsight) === JSON.stringify(insight)) return;
+        if (JSON.stringify(incomingInsight) == JSON.stringify(insight)) return;
 
         // Check if insight.options is an object and has no keys (empty object)
         if (
@@ -353,6 +353,24 @@ export default function Insight() {
     [generateInsightResults_AT_CAD, insight, timelineStatus]
   );
 
+  // Insight Results
+  // ~ Memoize the chart data computation
+  const chartData = useMemo(() => {
+    return (
+      (
+        insight?.results as {
+          dayDifferences: number[];
+        }
+      )?.dayDifferences?.map((difference, index) => ({
+        name: `Contract ${index + 1}`,
+        Actual: difference,
+        // Include Planned and Projected if available
+        // Planned: dataFromAPI,
+        // Projected: dataFromAPI
+      })) || []
+    );
+  }, [insight?.results]);
+
   return (
     <SimpleLayout
       variant="no-bg"
@@ -515,7 +533,7 @@ export default function Insight() {
             className={classNames(
               "no-scrollbar mx-3 my-4 rounded-xl shadow-md",
               isShowingOptions
-                ? "block h-full overflow-auto bg-white pb-6"
+                ? "block h-fit overflow-auto bg-white pb-6"
                 : "hidden"
             )}
             // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -728,7 +746,7 @@ export default function Insight() {
                     {/* Configure Parameters */}
                     {timelineStatus && projects && (
                       <>
-                        <ArrowDownIcon className="mx-auto mb-3 hidden h-5 w-5 text-slate-600 md:block" />
+                        {/* <ArrowDownIcon className="mx-auto mb-3 hidden h-5 w-5 text-slate-600 md:block" />
                         <div className="mx-auto flex flex-col items-center space-y-2">
                           <label
                             htmlFor="configure_parameters"
@@ -750,7 +768,7 @@ export default function Insight() {
                             className="w-full max-w-4xl rounded-md border border-gray-500 bg-blue-50 p-6 shadow-sm"
                           >
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                              {/* Start Date */}
+                              {/* Start Date *
                               <div>
                                 <label
                                   htmlFor="start_date"
@@ -783,7 +801,7 @@ export default function Insight() {
                                 />
                               </div>
 
-                              {/* End Date */}
+                              {/* End Date *
                               <div>
                                 <label
                                   htmlFor="end_date"
@@ -816,7 +834,7 @@ export default function Insight() {
                                 />
                               </div>
 
-                              {/* Contract Status */}
+                              {/* Contract Status *
                               {projects &&
                                 selectedProjects &&
                                 selectedProjects.length === 0 && (
@@ -858,9 +876,9 @@ export default function Insight() {
                                   </div>
                                 )}
 
-                              {/* Additional Parameters */}
+                              {/* Additional Parameters *
                               <div className="grid grid-cols-2 gap-4">
-                                {/* Contract Value */}
+                                {/* Contract Value *
                                 <div>
                                   <label
                                     htmlFor="min_contract_value"
@@ -889,7 +907,7 @@ export default function Insight() {
                                   />
                                 </div>
 
-                                {/* Max Days Delayed */}
+                                {/* Max Days Delayed *
                                 <div>
                                   <label
                                     htmlFor="max_days_delayed"
@@ -920,10 +938,11 @@ export default function Insight() {
                               </div>
                             </div>
                           </div>
-                        </div>
+                        </div> */}
 
                         {/* Submit Button */}
-                        {!insight.options && !insight.generated_at && (
+                        {((!insight.options && !insight.generated_at) ||
+                          false) && (
                           <Button
                             type="submit"
                             text="Generate Insight"
@@ -953,12 +972,87 @@ export default function Insight() {
           {/* Insight Details */}
           <div
             className={classNames(
-              "mx-3 mt-4 overflow-x-auto rounded-t-md bg-red-300 px-3.5 py-4 shadow-md",
-              !isShowingOptions ? "h-full" : ""
+              "mx-3 mt-4 overflow-x-auto rounded-t-md bg-slate-50 px-3.5 py-4 shadow-md",
+              !isShowingOptions ? "h-full" : "overflow-hidden"
             )}
           >
             {insight ? (
-              <div className="flex flex-col space-y-8"></div>
+              <div className="flex w-full flex-col items-center justify-center space-y-4">
+                {/* Header */}
+                <div className="-mb-3 flex w-full items-center justify-between">
+                  <h1 className="text-lg font-medium">Insight Results</h1>
+                  <p className="scale-[95%]">
+                    {/* Analysis Type: */}
+                    {(
+                      insight.options as {
+                        analysis_type: string;
+                      }
+                    )?.analysis_type === "AT_CAD"
+                      ? "Contract Award Days"
+                      : ""}
+                    , {/* , Timeline Status:{" "} */}
+                    {(
+                      insight.options as {
+                        timeline_status: string;
+                      }
+                    )?.timeline_status
+                      ? (
+                          insight.options as {
+                            timeline_status: string;
+                          }
+                        )?.timeline_status
+                          .replace("requirement_plan", "Requirements Planning")
+                          .replace("draft_rfp_released", "Draft RFP Released")
+                          .replace("approved_by_acb", "Approved at ACB")
+                          .replace("rfp_released", "RFP Released")
+                          .replace("proposal_received", "Proposal Received")
+                          .replace("tech_eval_comp", "Tech Eval Complete")
+                          .replace("negotiation_comp", "Negotiations Complete")
+                          .replace("awarded", "Awarded")
+                      : ""}
+                  </p>
+                </div>
+                {insight.results ? (
+                  <>
+                    <p className="text-md -ml-5 mr-auto scale-[85%] text-left italic">
+                      Generated at{" "}
+                      {insight.generated_at
+                        ? new Date(insight.generated_at).toLocaleString()
+                        : "N/A"}
+                    </p>
+
+                    <p className="text-lg font-medium">
+                      Contract Award Days by Contract ({}
+                      {(
+                        insight?.results as {
+                          dayDifferences: number[];
+                        }
+                      )?.dayDifferences?.length || 0}{" "}
+                      days compared)
+                    </p>
+                    <InsightBoxChart data={chartData} />
+
+                    <p className="pt-2 text-lg">
+                      <span className="underline">Average Days Delayed:</span>{" "}
+                      <span className="font-medium">
+                        {(
+                          insight?.results as {
+                            average: number;
+                          }
+                        )?.average || 0}
+                      </span>
+                    </p>
+                  </>
+                ) : (
+                  // let the user know that the insight has not been generated yet
+                  <div className="flex items-center space-x-2 pb-8">
+                    <ExclamationCircleIcon className="h-6 w-6 text-yellow-600" />
+                    <span className="text-sm font-medium text-yellow-700">
+                      This insight has not been generated yet.
+                    </span>
+                  </div>
+                )}
+              </div>
             ) : (
               // Loading State
               <div className="mt-12 flex animate-bounce flex-col items-center justify-center">
@@ -992,4 +1086,42 @@ const formatProjectName = (project: view_project) => {
     // Add other cases if needed
   }
   return `${project.project_name}${statusLabel}`;
+};
+
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip as ReTooltip,
+  Legend,
+} from "recharts";
+
+// Define the type for a single entry in the chart data
+type ChartDataEntry = {
+  name: string;
+  Actual: number;
+  // Include types for Planned and Projected if they are part of the data
+  // Planned?: number;
+  // Projected?: number;
+};
+
+// Define the type for the props expected by the InsightBoxChart component
+type InsightBoxChartProps = {
+  data: ChartDataEntry[];
+};
+
+const InsightBoxChart: React.FC<InsightBoxChartProps> = ({ data }) => {
+  return (
+    <BarChart width={600} height={300} data={data}>
+      <XAxis dataKey="name" />
+      <YAxis />
+      <ReTooltip />
+      <Legend />
+      <Bar dataKey="Actual" fill="#8884d8" />
+      {/* Include bars for Planned and Projected (if necessary) */}
+      {/* <Bar dataKey="Planned" fill="#82ca9d" />
+      <Bar dataKey="Projected" fill="#ffc658" /> */}
+    </BarChart>
+  );
 };
