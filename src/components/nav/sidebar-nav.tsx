@@ -17,7 +17,7 @@ import { useSession } from "next-auth/react";
 function SidebarNav() {
   const { collapsed, collapseSidebar } = useProSidebar();
   const user = useSession().data?.db_user;
-  const route = usePathname();
+  const route = usePathname() || "/";
 
   return (
     <>

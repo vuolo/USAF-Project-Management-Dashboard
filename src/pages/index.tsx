@@ -73,6 +73,7 @@ const Home: NextPage = () => {
 
         // Clear the section query parameter after scrolling
         const { section, ...restQuery } = router.query;
+        if (!section) return;
         void router.replace(
           {
             pathname: router.pathname,
