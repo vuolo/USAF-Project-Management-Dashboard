@@ -79,13 +79,13 @@ export const user_preferences_ext = {
     });
 
     const group = await prisma.project_history.groupBy({
-      by: ['projectId'],
+      by: ["projectId"],
       where: {
-        userId: user.id
+        userId: user.id,
       },
       _count: {
-        projectId: true
-      }
+        projectId: true,
+      },
     });
 
     const groupIds = group.map((x) => x.projectId);
@@ -93,21 +93,27 @@ export const user_preferences_ext = {
     const projects = await prisma.project.findMany({
       where: {
         id: {
-          in: groupIds
-        }
+          in: groupIds,
+        },
       },
       select: {
         id: true,
-        project_name: true
-      }
-    })
-
-    return projects.map((x) => {
-      return {
-        ...x,
-        count: group.find((y) => y.projectId == x.id)?._count.projectId ?? 0
-      }
+        project_name: true,
+      },
     });
+
+    return (
+      projects
+        .map((x) => {
+          return {
+            ...x,
+            count:
+              group.find((y) => y.projectId == x.id)?._count.projectId ?? 0,
+          };
+        })
+        // filter out projects with counts < 3
+        .filter((x) => x.count >= 3)
+    );
   }),
   addProjectHistory: protectedProcedure
     .input(
@@ -124,9 +130,9 @@ export const user_preferences_ext = {
         data: {
           userId: user.id,
           projectId: input.id,
-          time: new Date()
-        }
-      })
+          time: new Date(),
+        },
+      });
 
       // calculate the date 7 days ago
       const sevenDaysAgo = new Date();
